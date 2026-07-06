@@ -1,0 +1,12 @@
+<link rel="stylesheet" href="ports/tool.css">
+<p>Filter by port number, service name, or anything in the notes — entirely offline.</p>
+<input id="pt-input" type="search" placeholder="443, rdp, database…" autocomplete="off"
+  autocapitalize="off" spellcheck="false">
+<p id="pt-count" class="pt-count"></p>
+<div class="pt-table-wrap">
+<table id="pt-table">
+<thead><tr><th>port</th><th>proto</th><th>service</th><th>category</th><th>notes</th></tr></thead>
+<tbody id="pt-body"></tbody>
+</table>
+</div>
+<script defer src="ports/tool.js"></script>

@@ -1,0 +1,82 @@
+<link rel="stylesheet" href="curl-builder/tool.css">
+<p>Fill in the request — the <code>curl</code> command assembles live below with every
+flag explained. Arguments are single-quoted for POSIX shells (bash, zsh).</p>
+
+<div class="cb-form">
+  <div class="cb-row">
+    <label class="manifest-label" for="cb-method">method</label>
+    <select id="cb-method">
+      <option>GET</option><option>POST</option><option>PUT</option>
+      <option>PATCH</option><option>DELETE</option><option>HEAD</option><option>OPTIONS</option>
+    </select>
+  </div>
+  <div class="cb-row">
+    <label class="manifest-label" for="cb-url">URL</label>
+    <input id="cb-url" type="text" value="https://api.example.com/v1/users"
+      autocomplete="off" spellcheck="false">
+  </div>
+  <div class="cb-row">
+    <label class="manifest-label" for="cb-headers">headers</label>
+    <textarea id="cb-headers" rows="2" spellcheck="false"
+      placeholder="Accept: application/json&#10;X-Api-Key: secret123"></textarea>
+  </div>
+  <div class="cb-row">
+    <label class="manifest-label" for="cb-auth">auth</label>
+    <span class="cb-inline">
+      <select id="cb-auth">
+        <option value="">none</option>
+        <option value="basic">basic (-u)</option>
+        <option value="bearer">bearer token</option>
+      </select>
+      <input id="cb-auth-user" type="text" placeholder="user:password" autocomplete="off"
+        spellcheck="false" hidden>
+      <input id="cb-auth-token" type="text" placeholder="token" autocomplete="off"
+        spellcheck="false" hidden>
+    </span>
+  </div>
+  <div class="cb-row" id="cb-row-ctype">
+    <label class="manifest-label" for="cb-ctype">body type</label>
+    <select id="cb-ctype">
+      <option value="">none</option>
+      <option value="json">JSON (application/json)</option>
+      <option value="form">form (x-www-form-urlencoded)</option>
+      <option value="text">text/plain</option>
+      <option value="raw">raw (no Content-Type)</option>
+    </select>
+  </div>
+  <div class="cb-row" id="cb-row-body">
+    <label class="manifest-label" for="cb-body">body</label>
+    <textarea id="cb-body" rows="3" spellcheck="false" placeholder='{"name": "Ada"}'></textarea>
+  </div>
+  <div class="cb-row">
+    <label class="manifest-label">options</label>
+    <div class="cb-checks">
+      <label class="cb-check"><input id="cb-L" type="checkbox"> follow redirects (<code>-L</code>)</label>
+      <label class="cb-check"><input id="cb-k" type="checkbox"> insecure (<code>-k</code>)</label>
+      <label class="cb-check"><input id="cb-s" type="checkbox"> silent (<code>-s</code>)</label>
+      <label class="cb-check"><input id="cb-i" type="checkbox"> include headers (<code>-i</code>)</label>
+      <label class="cb-check"><input id="cb-v" type="checkbox"> verbose (<code>-v</code>)</label>
+      <label class="cb-check"><input id="cb-compressed" type="checkbox"> compressed (<code>--compressed</code>)</label>
+    </div>
+  </div>
+  <div class="cb-row">
+    <label class="manifest-label" for="cb-out">save to file</label>
+    <input id="cb-out" type="text" placeholder="(optional) response.json — adds -o"
+      autocomplete="off" spellcheck="false">
+  </div>
+</div>
+
+<div id="cb-errors" class="cb-error" hidden></div>
+<div id="cb-summary" class="cb-summary" hidden></div>
+
+<figure class="code-block">
+<figcaption class="code-lang manifest-label">curl</figcaption>
+<pre class="code-body"><code id="cb-output"></code></pre>
+</figure>
+
+<p class="cb-note">Single quotes protect the shell on bash and zsh. In Windows
+<code>cmd.exe</code> swap them for double quotes; PowerShell needs the
+<code>--%</code> stop-parsing token (or backtick escaping) for bodies with special
+characters.</p>
+
+<script defer src="curl-builder/tool.js"></script>

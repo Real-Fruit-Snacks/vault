@@ -1,0 +1,6 @@
+{
+  "title": "Cron Parser",
+  "description": "Parse a Unix cron expression \u2014 validate it, see what each field means, and preview the next run times.",
+  "learn_title": "how cron works",
+  "icon": "repeat"
+}

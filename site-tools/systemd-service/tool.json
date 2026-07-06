@@ -1,0 +1,6 @@
+{
+  "title": "systemd Service Generator",
+  "description": "Fill in the fields and get a complete systemd .service unit — [Unit]/[Service]/[Install] sections, restart policy, and the install commands.",
+  "learn_title": "systemd units 101",
+  "icon": "cog"
+}

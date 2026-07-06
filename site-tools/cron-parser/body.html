@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="cron-parser/tool.css">
+<p>Type a five-field Unix cron expression — parsing runs live. Names
+(<code>JAN</code>, <code>MON</code>), ranges, lists, steps, and
+<code>@shortcuts</code> all work.</p>
+<input id="cp-input" type="text" placeholder="*/15 9-17 * * 1-5" autocomplete="off"
+  autocapitalize="off" spellcheck="false">
+<div class="cp-examples">
+  <button type="button" class="cp-example" data-cron="*/15 * * * *">*/15 * * * *</button>
+  <button type="button" class="cp-example" data-cron="0 9 * * 1-5">0 9 * * 1-5</button>
+  <button type="button" class="cp-example" data-cron="30 3 1,15 * *">30 3 1,15 * *</button>
+  <button type="button" class="cp-example" data-cron="0 0 1 */3 *">0 0 1 */3 *</button>
+  <button type="button" class="cp-example" data-cron="@daily">@daily</button>
+</div>
+<div id="cp-error" class="cp-error" hidden></div>
+<div id="cp-expanded" class="cp-note" hidden></div>
+<div id="cp-boxes" class="cp-boxes" hidden></div>
+<div id="cp-reboot" class="cp-note" hidden><code>@reboot</code> runs once at system
+startup — there is no schedule to preview.</div>
+<div id="cp-table-wrap" class="cp-table-wrap" hidden>
+<table>
+<thead><tr><th>field</th><th>value</th><th>meaning</th></tr></thead>
+<tbody id="cp-body"></tbody>
+</table>
+</div>
+<div id="cp-runs-block" hidden>
+<div class="manifest-label cp-runs-caption">next runs</div>
+<ul id="cp-runs" class="cp-runs"></ul>
+<p class="cp-note">Times are shown in your browser's local timezone; a cron daemon
+uses the server's timezone.</p>
+</div>
+<script defer src="cron-parser/tool.js"></script>

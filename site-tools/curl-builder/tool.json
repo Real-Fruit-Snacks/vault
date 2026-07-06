@@ -1,0 +1,6 @@
+{
+  "title": "curl Request Builder",
+  "description": "Build a curl command from method, headers, auth, body, and options — assembled live with correct POSIX quoting and a copy button.",
+  "learn_title": "curl 101",
+  "icon": "terminal"
+}

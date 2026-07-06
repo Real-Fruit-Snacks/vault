@@ -1,0 +1,6 @@
+{
+  "title": "Character Analyzer",
+  "description": "Paste text and see every character classified \u2014 case, digits, symbols, whitespace \u2014 with Unicode code points.",
+  "learn_title": "characters & unicode 101",
+  "icon": "type"
+}

@@ -1,0 +1,6 @@
+{
+  "title": "Windows Task Builder",
+  "description": "Fill in the blanks and get a complete schtasks /create command \u2014 schedule dropdowns, correct quoting, and a copy button. Plus a searchable Last Run Result code reference for tasks that fail.",
+  "learn_title": "task scheduler 101",
+  "icon": "calendar"
+}

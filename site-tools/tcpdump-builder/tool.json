@@ -1,0 +1,6 @@
+{
+  "title": "tcpdump Filter Builder",
+  "description": "Assemble a tcpdump capture command and its BPF filter from protocol, host, port, and direction — with a flag reference and copy button.",
+  "learn_title": "tcpdump & BPF 101",
+  "icon": "filter"
+}

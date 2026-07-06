@@ -1,0 +1,6 @@
+{
+  "title": "Timestamp Converter",
+  "description": "Convert between Unix epoch time and human dates \u2014 seconds or milliseconds auto-detected, UTC and local side by side.",
+  "learn_title": "unix time 101",
+  "icon": "clock"
+}

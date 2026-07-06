@@ -1,0 +1,44 @@
+<h3>What Unix time is</h3>
+<p>Unix time counts the seconds since <strong>1970-01-01 00:00:00 UTC</strong> — "the
+epoch." It's a single ever-increasing number with no timezone, no daylight-saving, no
+calendar quirks, which is exactly why systems use it internally and convert to human
+dates only at the edges. Epoch <code>0</code> is the moment itself; negative numbers
+reach back before 1970.</p>
+
+<h3>Seconds, milliseconds, and friends</h3>
+<p>The same instant appears at different magnitudes depending on the ecosystem, and
+mixing them up produces dates in 1970 or the year 55978:</p>
+<table>
+<thead><tr><th>unit</th><th>digits today</th><th>where you'll see it</th></tr></thead>
+<tbody>
+<tr><td>seconds</td><td>10</td><td>Unix tools, Python <code>time.time()</code> (as a float), C <code>time_t</code>, JWT <code>exp</code></td></tr>
+<tr><td>milliseconds</td><td>13</td><td>JavaScript <code>Date.now()</code>, Java, many APIs and log formats</td></tr>
+<tr><td>microseconds</td><td>16</td><td>databases (PostgreSQL internals), some tracing systems</td></tr>
+<tr><td>nanoseconds</td><td>19</td><td>Go <code>UnixNano()</code>, Prometheus, kernel timestamps</td></tr>
+</tbody>
+</table>
+<p>This tool auto-detects seconds vs milliseconds by digit count (12+ digits ⇒
+milliseconds). For micro/nano, divide by 1,000 or 1,000,000 first.</p>
+
+<h3>The year 2038 problem</h3>
+<p>A signed 32-bit <code>time_t</code> overflows at
+<code>2,147,483,647</code> — <strong>2038-01-19 03:14:07 UTC</strong> — wrapping to
+1901. Modern 64-bit systems are fine for 292 billion years, but embedded devices,
+old file formats, and legacy databases still carry the fuse. Paste
+<code>2147483647</code> above to meet the moment.</p>
+
+<h3>Quirks worth knowing</h3>
+<ul>
+<li><strong>No leap seconds</strong> — Unix time pretends every day is exactly 86,400
+seconds. When a leap second happens, clocks smear or repeat; epoch arithmetic stays
+simple and slightly a lie.</li>
+<li><strong>Timezones are a display problem</strong> — an epoch value is absolute.
+"The same timestamp shows different clock times in different places" is correct
+behavior, not a bug. Store epochs (or ISO 8601 with offset); format late.</li>
+<li><strong>Bare dates are ambiguous</strong> — <code>2026-12-25</code> parses as
+midnight <em>UTC</em> per the ISO standard, but <code>December 25, 2026</code> parses
+as midnight <em>local</em> in most libraries. When it matters, write the offset.</li>
+<li><strong>Handy commands</strong> — Linux: <code>date -d @1234567890</code> and
+<code>date +%s</code>. PowerShell: <code>Get-Date -UnixTimeSeconds 1234567890</code>
+and <code>[DateTimeOffset]::Now.ToUnixTimeSeconds()</code>.</li>
+</ul>

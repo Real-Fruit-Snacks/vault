@@ -1,0 +1,68 @@
+<h3>Task Scheduler and schtasks</h3>
+<p>Windows Task Scheduler is the service behind every scheduled job on Windows —
+what cron is to Unix. <code>schtasks.exe</code> is its command-line face; the GUI
+(<code>taskschd.msc</code>) and PowerShell's
+<code>Register-ScheduledTask</code> manage the same task store. Tasks live in a
+folder tree — name a task <code>\MyFolder\MyTask</code> to keep things organized.</p>
+
+<h3>The verbs</h3>
+<table>
+<thead><tr><th>command</th><th>what it does</th></tr></thead>
+<tbody>
+<tr><td><code>schtasks /create …</code></td><td>create a task (what this tool builds)</td></tr>
+<tr><td><code>schtasks /query /tn "Name" /v /fo LIST</code></td><td>inspect a task — status, last/next run, last result</td></tr>
+<tr><td><code>schtasks /run /tn "Name"</code></td><td>run it right now (great for testing)</td></tr>
+<tr><td><code>schtasks /end /tn "Name"</code></td><td>stop a running instance</td></tr>
+<tr><td><code>schtasks /change /tn "Name" …</code></td><td>modify an existing task</td></tr>
+<tr><td><code>schtasks /delete /tn "Name" /f</code></td><td>remove it</td></tr>
+</tbody>
+</table>
+
+<h3>The flags this tool generates</h3>
+<table>
+<thead><tr><th>flag</th><th>meaning</th></tr></thead>
+<tbody>
+<tr><td><code>/tn</code></td><td>task name (quote it if it has spaces)</td></tr>
+<tr><td><code>/tr</code></td><td>the program to run, with its arguments</td></tr>
+<tr><td><code>/sc</code></td><td>schedule type: MINUTE, HOURLY, DAILY, WEEKLY, MONTHLY, ONCE, ONSTART, ONLOGON, ONIDLE</td></tr>
+<tr><td><code>/mo</code></td><td>modifier — "every N" for time schedules, or FIRST/SECOND/THIRD/FOURTH/LAST/LASTDAY for monthly patterns</td></tr>
+<tr><td><code>/d</code> / <code>/m</code></td><td>days (MON-SUN or 1-31) and months (JAN-DEC)</td></tr>
+<tr><td><code>/st</code> / <code>/sd</code> / <code>/ed</code></td><td>start time (24h HH:MM), start date, end date</td></tr>
+<tr><td><code>/ru</code> / <code>/rp</code></td><td>the account the task runs as, and its password (SYSTEM needs none)</td></tr>
+<tr><td><code>/rl HIGHEST</code></td><td>run elevated ("highest privileges" — the checkbox in the GUI)</td></tr>
+<tr><td><code>/f</code></td><td>overwrite an existing task with the same name</td></tr>
+<tr><td><code>/i</code></td><td>idle minutes to wait (ONIDLE only)</td></tr>
+</tbody>
+</table>
+
+<h3>Quoting — the part everyone gets wrong</h3>
+<p>The whole <code>/tr</code> value needs outer double quotes, and if the program
+path itself contains spaces it needs its own <em>escaped</em> quotes inside:</p>
+<pre><code>/tr "\"C:\Program Files\App\run.exe\" --flag value"</code></pre>
+<p>Get this wrong and Windows tries to run <code>C:\Program</code> with
+<code>Files\App\run.exe</code> as an argument. Two reliable escapes: the nested-quote
+form above (this tool generates it for you), or dodge the problem entirely with an
+<strong>8.3 short name</strong> like <code>C:\PROGRA~1\App\run.exe</code> — spaceless,
+so no inner quotes needed. Short names are assigned by the filesystem, so confirm the
+real one with <code>for %I in ("C:\path with spaces\x.exe") do @echo %~sI</code>
+(they can also be disabled system-wide).</p>
+
+<h3>Gotchas worth knowing</h3>
+<ul>
+<li><strong>Elevation</strong> — creating tasks that run as SYSTEM, as another user,
+or with <code>/rl HIGHEST</code> requires an elevated (Administrator) prompt.</li>
+<li><strong>Date format</strong> — <code>/sd</code> and <code>/ed</code> follow the
+machine's regional settings: MM/DD/YYYY on US systems, DD/MM/YYYY elsewhere. A
+"working" command can break on a differently-configured server.</li>
+<li><strong>Last Run Result</strong> — <code>0x0</code> means success;
+<code>0x1</code> usually means the program wasn't found or returned 1 (often a
+quoting problem); <code>0x41303</code> means "has not yet run". The searchable
+<strong>Last Run Result codes</strong> table below the builder decodes these and
+the rest, with a fix for each.</li>
+<li><strong>Password changes</strong> — a task registered with <code>/ru user</code>
+stores credentials; when that password changes, the task quietly stops running
+until it's re-registered.</li>
+<li><strong>Working directory</strong> — schtasks gives you no flag for it; tasks
+start in <code>System32</code>. Use absolute paths inside your scripts, or
+<code>cd /d</code> first in a wrapper <code>.cmd</code>.</li>
+</ul>

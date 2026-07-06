@@ -1,0 +1,6 @@
+{
+  "title": "Nmap Command Builder",
+  "description": "Toggle scan type, ports, detection, timing, and output — the nmap command assembles live, every flag explained, with privilege notes and a copy button.",
+  "learn_title": "nmap 101",
+  "icon": "radar"
+}

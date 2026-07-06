@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="timestamp/tool.css">
+<div class="ts-now-row">
+  <span class="manifest-label">current epoch</span>
+  <code id="ts-now-s"></code>
+  <span class="ts-dim">seconds</span>
+  <code id="ts-now-ms"></code>
+  <span class="ts-dim">milliseconds</span>
+  <button type="button" id="ts-use-now" class="ts-example">use now</button>
+</div>
+<p>Type an epoch timestamp (seconds or milliseconds — detected automatically) or a
+date like <code>2026-12-25 09:00</code>.</p>
+<input id="ts-input" type="text" placeholder="1234567890" autocomplete="off"
+  autocapitalize="off" spellcheck="false">
+<div class="ts-examples">
+  <button type="button" class="ts-example" data-ts="0">0</button>
+  <button type="button" class="ts-example" data-ts="1234567890">1234567890</button>
+  <button type="button" class="ts-example" data-ts="1234567890123">1234567890123</button>
+  <button type="button" class="ts-example" data-ts="2026-12-25">2026-12-25</button>
+  <button type="button" class="ts-example" data-ts="2026-07-05T09:00:00Z">2026-07-05T09:00:00Z</button>
+</div>
+<div id="ts-error" class="ts-error" hidden></div>
+<p id="ts-note" class="ts-note" hidden></p>
+<div id="ts-table-wrap" class="ts-table-wrap" hidden>
+<table><tbody id="ts-body"></tbody></table>
+</div>
+<script defer src="timestamp/tool.js"></script>

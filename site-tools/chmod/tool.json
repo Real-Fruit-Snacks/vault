@@ -1,0 +1,6 @@
+{
+  "title": "Chmod Calculator",
+  "description": "Unix permissions three ways \u2014 checkboxes, octal, and symbolic \u2014 kept in sync live, special bits included.",
+  "learn_title": "unix permissions 101",
+  "icon": "key"
+}

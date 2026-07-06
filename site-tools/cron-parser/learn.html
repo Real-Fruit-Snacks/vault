@@ -1,0 +1,55 @@
+<h3>What cron is</h3>
+<p><strong>cron</strong> is the scheduler daemon on Unix-like systems. It wakes once a
+minute, checks every installed <strong>crontab</strong> (cron table), and runs whatever
+matches the current time. Edit your own table with <code>crontab -e</code>, list it
+with <code>crontab -l</code>. System-wide jobs live in <code>/etc/crontab</code> and
+<code>/etc/cron.d/</code> (those files have an extra <em>user</em> column between the
+schedule and the command).</p>
+
+<h3>The five fields</h3>
+<pre><code>┌──────── minute        (0-59)
+│ ┌────── hour          (0-23)
+│ │ ┌──── day of month  (1-31)
+│ │ │ ┌── month         (1-12 or JAN-DEC)
+│ │ │ │ ┌ weekday       (0-7 or SUN-SAT; 0 and 7 are both Sunday)
+│ │ │ │ │
+* * * * *  command</code></pre>
+
+<h3>Syntax</h3>
+<table>
+<thead><tr><th>form</th><th>example</th><th>meaning</th></tr></thead>
+<tbody>
+<tr><td><code>*</code></td><td><code>* * * * *</code></td><td>every value — runs every minute</td></tr>
+<tr><td>value</td><td><code>30 3 * * *</code></td><td>exactly that value — 03:30 daily</td></tr>
+<tr><td>list</td><td><code>0 8,12,17 * * *</code></td><td>any of the listed values</td></tr>
+<tr><td>range</td><td><code>0 9-17 * * *</code></td><td>every value in the range, inclusive</td></tr>
+<tr><td>step</td><td><code>*/15 * * * *</code></td><td>every Nth value — here, every 15 minutes</td></tr>
+<tr><td>combined</td><td><code>0-30/10 9 * * 1-5</code></td><td>steps over ranges, lists of anything</td></tr>
+</tbody>
+</table>
+<p>Shortcuts: <code>@hourly</code>, <code>@daily</code>/<code>@midnight</code>,
+<code>@weekly</code>, <code>@monthly</code>, <code>@yearly</code>/<code>@annually</code>
+expand to plain five-field schedules; <code>@reboot</code> runs once at startup.</p>
+
+<h3>The day-of-month / weekday quirk</h3>
+<p>When <em>both</em> day-of-month and weekday are restricted, cron runs when
+<strong>either</strong> matches — not both. <code>0 0 13 * 5</code> fires every
+Friday <em>and</em> every 13th, not just Friday the 13th. This surprises almost
+everyone; there is no standard way to get the AND behavior without a shell test in
+the command itself.</p>
+
+<h3>Gotchas worth knowing</h3>
+<ul>
+<li><strong>Timezone</strong> — cron uses the <em>server's</em> local time. A 09:00
+job on a UTC server is not 09:00 your time.</li>
+<li><strong>Environment</strong> — cron jobs get a minimal environment: no login
+shell, a bare <code>PATH</code>. Use absolute paths for commands and files, or the
+job that "works when I run it manually" will fail silently at 3 a.m.</li>
+<li><strong>Output</strong> — stdout/stderr get mailed to the local user (usually
+nowhere useful). Redirect it: <code>&gt;&gt; /var/log/myjob.log 2&gt;&amp;1</code>.</li>
+<li><strong>Missed runs</strong> — plain cron skips runs while the machine is off.
+If a job must catch up, look at <code>anacron</code> or systemd timers with
+<code>Persistent=true</code>.</li>
+<li><strong>The % sign</strong> — in a crontab command, <code>%</code> means newline;
+escape it as <code>\%</code> (a classic <code>date +\%F</code> trap).</li>
+</ul>

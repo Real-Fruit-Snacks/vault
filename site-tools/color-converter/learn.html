@@ -1,0 +1,33 @@
+<h3>The three formats</h3>
+<table>
+<thead><tr><th>format</th><th>looks like</th><th>good for</th></tr></thead>
+<tbody>
+<tr><td><strong>hex</strong></td><td><code>#ff6e7a</code></td><td>the web default — two hex digits each for red, green, blue. A fourth pair adds alpha (<code>#ff6e7a80</code>); the 3- and 4-digit shorthands double each digit (<code>#f7a</code> = <code>#ff77aa</code>).</td></tr>
+<tr><td><strong>rgb</strong></td><td><code>rgb(255, 110, 122)</code></td><td>each channel 0–255. <code>rgba(…, 0.5)</code> adds alpha as 0–1.</td></tr>
+<tr><td><strong>hsl</strong></td><td><code>hsl(354, 100%, 72%)</code></td><td>hue (0–360°), saturation, lightness. Intuitive for tweaking — nudge the hue to shift color, lightness to lighten.</td></tr>
+</tbody>
+</table>
+<p>They're interchangeable ways of naming the same sRGB color; the converter parses any and
+shows the rest.</p>
+
+<h3>Contrast and WCAG</h3>
+<p>The Web Content Accessibility Guidelines define a <strong>contrast ratio</strong> between a
+foreground and background color, from 1:1 (identical) to 21:1 (black on white). It's computed
+from each color's <em>relative luminance</em> — a gamma-corrected, perceptually weighted
+brightness — as <code>(L<sub>lighter</sub> + 0.05) / (L<sub>darker</sub> + 0.05)</code>.</p>
+<table>
+<thead><tr><th>level</th><th>normal text</th><th>large text</th></tr></thead>
+<tbody>
+<tr><td>AA</td><td>4.5 : 1</td><td>3 : 1</td></tr>
+<tr><td>AAA</td><td>7 : 1</td><td>4.5 : 1</td></tr>
+</tbody>
+</table>
+<p>"Large" means ≥ 24px, or ≥ 18.66px (14pt) bold. The tool checks this color against pure
+black and pure white so you can see, at a glance, which one it's readable on. Alpha is ignored
+for the calculation — contrast is only meaningful once a color is composited to opaque.</p>
+
+<h3>Why luminance isn't just the average</h3>
+<p>The eye is far more sensitive to green than to blue, so luminance weights them
+<code>0.2126·R + 0.7152·G + 0.0722·B</code> (after undoing sRGB gamma). That's why a saturated
+yellow reads as "light" and a saturated blue as "dark" even at the same RGB magnitude — and
+why eyeballing contrast from the hex digits alone is unreliable.</p>

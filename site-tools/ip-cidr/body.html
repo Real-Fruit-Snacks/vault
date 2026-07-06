@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="ip-cidr/tool.css">
+<p>Type an IPv4 address in any common form — <code>192.168.1.0/24</code>,
+<code>172.16.10.5 255.255.240.0</code>, or a bare IP — and the math runs live.</p>
+<input id="ip-input" type="text" placeholder="192.168.1.0/24" autocomplete="off"
+  autocapitalize="off" spellcheck="false">
+<div class="ip-examples">
+  <button type="button" class="ip-example" data-ip="192.168.1.0/24">192.168.1.0/24</button>
+  <button type="button" class="ip-example" data-ip="10.0.0.0/8">10.0.0.0/8</button>
+  <button type="button" class="ip-example" data-ip="172.16.10.5 255.255.240.0">172.16.10.5 255.255.240.0</button>
+  <button type="button" class="ip-example" data-ip="100.64.1.1/10">100.64.1.1/10</button>
+  <button type="button" class="ip-example" data-ip="8.8.8.8">8.8.8.8</button>
+</div>
+<div id="ip-error" class="ip-error" hidden></div>
+<p id="ip-note" class="ip-note" hidden>No prefix given — treating it as a
+<code>/32</code> host. Add <code>/24</code> (or any prefix) to see a network.</p>
+<div id="ip-class-row" class="ip-class-row" hidden>
+  <span class="manifest-label">address type</span>
+  <span id="ip-class" class="ip-badge"></span>
+</div>
+<div id="ip-binary-block" hidden>
+  <div class="manifest-label ip-caption">binary — <span class="ip-legend-net">network bits</span> /
+    <span class="ip-legend-host">host bits</span></div>
+  <div id="ip-binary" class="ip-binary"></div>
+</div>
+<div id="ip-table-wrap" class="ip-table-wrap" hidden>
+<table>
+<tbody id="ip-body"></tbody>
+</table>
+</div>
+<script defer src="ip-cidr/tool.js"></script>

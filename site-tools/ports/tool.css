@@ -1,0 +1,44 @@
+#pt-input {
+  width: 100%;
+  background: var(--twb-bg-1); color: var(--twb-text-normal);
+  border: 1px solid var(--twb-border); border-radius: 6px;
+  font-family: var(--twb-font-mono); font-size: 15px;
+  padding: 10px 12px;
+}
+#pt-input:focus {
+  outline: none; border-color: var(--twb-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--twb-accent) 25%, transparent);
+}
+.pt-count { color: var(--twb-text-muted); font-size: 12.5px; margin: 8px 0; }
+
+.pt-table-wrap {
+  max-height: 560px; overflow-y: auto;
+  border: 1px solid var(--twb-border); border-radius: 6px;
+}
+/* border-collapse: collapse breaks position: sticky (the collapsed borders
+   don't travel with the stuck header, so rows bleed through the seam);
+   separate borders stick with the cell. Top borders dropped so row lines
+   don't double up. */
+#pt-table { margin: 0; width: 100%; border: none; border-collapse: separate; border-spacing: 0; }
+#pt-table th { position: sticky; top: 0; z-index: 1; }
+#pt-table th, #pt-table td { border-left: none; border-right: none; border-top: none; }
+#pt-table td:first-child, #pt-table td:nth-child(2) {
+  font-family: var(--twb-font-mono); font-size: 13px; white-space: nowrap;
+}
+#pt-table td:first-child { color: var(--twb-accent); }
+
+.pt-badge {
+  font-family: var(--twb-font-mono); font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  border: 1px solid currentColor; border-radius: 4px; padding: 0 6px;
+  white-space: nowrap;
+}
+.pt-web { color: var(--twb-accent); }
+.pt-remote { color: var(--twb-accent-alt); }
+.pt-mail { color: var(--twb-violet); }
+.pt-file { color: var(--twb-warm); }
+.pt-db { color: var(--twb-orange); }
+.pt-auth { color: var(--twb-accent-alt); }
+.pt-infra { color: var(--twb-text-soft); }
+.pt-monitor { color: var(--twb-accent); }
+.pt-legacy { color: var(--twb-red); }

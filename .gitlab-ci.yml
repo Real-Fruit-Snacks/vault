@@ -1,0 +1,26 @@
+# BUILD_IMAGE can be overridden as a CI/CD variable on self-hosted/airgapped
+# GitLab instances to point at any Python 3.9+ image in the internal registry.
+# The image must include a git binary so note last-updated dates can be
+# computed; the build still succeeds without git, but dates are omitted.
+image: $BUILD_IMAGE
+
+variables:
+  BUILD_IMAGE: "python:3.12"
+  GIT_DEPTH: "0"
+
+stages: [test, deploy]
+
+run-tests:
+  stage: test
+  script:
+    - python3 -m unittest discover -s tests -t . -v
+
+pages:
+  stage: deploy
+  script:
+    - python3 tools/build.py
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'

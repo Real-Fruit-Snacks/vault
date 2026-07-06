@@ -1,0 +1,61 @@
+<h3>The permission model</h3>
+<p>Every file has one <strong>owner</strong>, one <strong>group</strong>, and everyone
+else (<strong>others</strong>). Each of the three gets its own read / write / execute
+flags — nine bits total. <code>ls -l</code> prints them as three
+<code>rwx</code> triads after the type character:
+<code>-rwxr-xr--</code> means a regular file (<code>-</code>), owner
+<code>rwx</code>, group <code>r-x</code>, others <code>r--</code>. The rule that
+applies to you is the <em>first</em> one that matches — if you're the owner, only
+the owner triad counts, even if it's more restrictive than the others.</p>
+
+<h3>Octal is just addition</h3>
+<p>Each triad is one octal digit: <strong>read = 4, write = 2, execute = 1</strong>.
+Add what you want: <code>rwx</code> = 7, <code>r-x</code> = 5, <code>r--</code> = 4 —
+hence <code>754</code>. Three digits, owner-group-others, always in that order.</p>
+
+<h3>Files vs directories — the x surprise</h3>
+<p>The bits mean different things on directories:</p>
+<table>
+<thead><tr><th>bit</th><th>on a file</th><th>on a directory</th></tr></thead>
+<tbody>
+<tr><td><code>r</code></td><td>read the contents</td><td>list the filenames</td></tr>
+<tr><td><code>w</code></td><td>modify the contents</td><td>create, delete, rename entries — <em>even files you don't own</em></td></tr>
+<tr><td><code>x</code></td><td>run it as a program</td><td>traverse into it (cd, open files inside)</td></tr>
+</tbody>
+</table>
+<p>A directory with <code>r</code> but not <code>x</code> lets you see names but touch
+nothing; <code>x</code> without <code>r</code> lets you open files inside if you
+already know their names. Directories almost always want <code>r-x</code> together.</p>
+
+<h3>The special bits (the 4th octal digit)</h3>
+<ul>
+<li><strong>setuid (4000)</strong> — an executable runs with its <em>owner's</em>
+identity instead of yours. It's how <code>passwd</code> edits a root-owned file.
+Shown as <code>s</code> in the owner's x slot (<code>S</code> if x is off — almost
+always a mistake). On modern systems setuid on shell scripts is ignored.</li>
+<li><strong>setgid (2000)</strong> — on executables, same idea with the group. On
+<em>directories</em> it's genuinely useful: new files inherit the directory's group —
+the standard trick for shared project folders.</li>
+<li><strong>sticky (1000)</strong> — on a world-writable directory, only a file's
+owner can delete it. That's why <code>/tmp</code> is <code>1777</code>
+(<code>drwxrwxrwt</code>).</li>
+</ul>
+
+<h3>Common recipes</h3>
+<table>
+<thead><tr><th>mode</th><th>use</th></tr></thead>
+<tbody>
+<tr><td><code>755</code></td><td>directories and executables — owner full, everyone else read/traverse</td></tr>
+<tr><td><code>644</code></td><td>ordinary files — owner writes, everyone reads</td></tr>
+<tr><td><code>600</code></td><td>private files — SSH keys, credentials (ssh refuses keys looser than this)</td></tr>
+<tr><td><code>700</code></td><td>private directories — <code>~/.ssh</code></td></tr>
+<tr><td><code>2775</code></td><td>shared group directory with setgid inheritance</td></tr>
+<tr><td><code>1777</code></td><td>world-writable drop box with sticky protection — /tmp</td></tr>
+</tbody>
+</table>
+
+<h3>umask — why new files aren't 777</h3>
+<p>The <strong>umask</strong> subtracts bits from what programs request. With the
+usual <code>022</code>, a program creating a file as 666 gets 644, a directory
+requested as 777 gets 755. Check yours with <code>umask</code>; a stricter
+<code>077</code> makes everything private by default.</p>

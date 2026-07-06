@@ -1,0 +1,104 @@
+<link rel="stylesheet" href="tcpdump-builder/tool.css">
+<p>Choose what to capture — the <code>tcpdump</code> command and its BPF filter assemble
+live below. That filter is standard BPF, so it also works as a Wireshark <em>capture</em>
+filter.</p>
+
+<div class="td-form">
+  <div class="td-row">
+    <label class="manifest-label" for="td-iface">interface</label>
+    <input id="td-iface" type="text" value="any" autocomplete="off" spellcheck="false"
+      placeholder="eth0, en0, any">
+  </div>
+  <div class="td-row">
+    <label class="manifest-label" for="td-proto">protocol</label>
+    <select id="td-proto">
+      <option value="">any</option>
+      <option value="tcp">tcp</option>
+      <option value="udp">udp</option>
+      <option value="icmp">icmp</option>
+      <option value="icmp6">icmp6</option>
+      <option value="arp">arp</option>
+    </select>
+  </div>
+  <div class="td-row">
+    <label class="manifest-label" for="td-host">host</label>
+    <span class="td-inline">
+      <select id="td-hostdir" class="td-dir">
+        <option value="host">any direction</option>
+        <option value="src host">source</option>
+        <option value="dst host">destination</option>
+      </select>
+      <input id="td-host" type="text" placeholder="10.0.0.5 or example.com"
+        autocomplete="off" spellcheck="false">
+    </span>
+  </div>
+  <div class="td-row">
+    <label class="manifest-label" for="td-port">port</label>
+    <span class="td-inline">
+      <select id="td-portdir" class="td-dir">
+        <option value="port">any direction</option>
+        <option value="src port">source</option>
+        <option value="dst port">destination</option>
+      </select>
+      <input id="td-port" type="text" placeholder="443 or 8000-8100"
+        autocomplete="off" spellcheck="false">
+    </span>
+  </div>
+  <div class="td-row">
+    <label class="manifest-label" for="td-net">network</label>
+    <input id="td-net" type="text" placeholder="192.168.1.0/24 (net)"
+      autocomplete="off" spellcheck="false">
+  </div>
+  <div class="td-row">
+    <label class="manifest-label" for="td-extra">extra filter</label>
+    <input id="td-extra" type="text" placeholder="tcp[tcpflags] &amp; tcp-syn != 0"
+      autocomplete="off" spellcheck="false">
+  </div>
+  <div class="td-row">
+    <label class="manifest-label" for="td-verbose">verbosity</label>
+    <select id="td-verbose">
+      <option value="">default</option>
+      <option value="-v">-v</option>
+      <option value="-vv">-vv</option>
+      <option value="-vvv">-vvv</option>
+    </select>
+  </div>
+  <div class="td-row">
+    <label class="manifest-label">flags</label>
+    <div class="td-checks">
+      <label class="td-check"><input id="td-nn" type="checkbox" checked> numeric — no name/port lookups (<code>-nn</code>)</label>
+      <label class="td-check"><input id="td-A" type="checkbox"> ASCII payload (<code>-A</code>)</label>
+      <label class="td-check"><input id="td-X" type="checkbox"> hex + ASCII (<code>-X</code>)</label>
+      <label class="td-check"><input id="td-e" type="checkbox"> link-layer header (<code>-e</code>)</label>
+      <label class="td-check"><input id="td-p" type="checkbox"> no promiscuous mode (<code>-p</code>)</label>
+    </div>
+  </div>
+  <div class="td-row">
+    <label class="manifest-label">capture</label>
+    <span class="td-inline">
+      <input id="td-count" type="number" min="1" placeholder="-c count" class="td-num">
+      <input id="td-snap" type="number" min="0" placeholder="-s snaplen (0 = full)" class="td-num">
+      <input id="td-write" type="text" placeholder="-w capture.pcap"
+        autocomplete="off" spellcheck="false">
+    </span>
+  </div>
+</div>
+
+<div id="td-errors" class="td-error" hidden></div>
+<div id="td-notes" class="td-notes" hidden></div>
+
+<figure class="code-block">
+<figcaption class="code-lang manifest-label">tcpdump</figcaption>
+<pre class="code-body"><code id="td-output"></code></pre>
+</figure>
+
+<div class="td-filter-wrap">
+  <span class="manifest-label">BPF filter</span>
+  <code id="td-filter" class="td-filter"></code>
+</div>
+
+<p class="td-note">Capturing normally needs root (<code>sudo tcpdump …</code>). Writing to a
+<code>.pcap</code> with <code>-w</code> stores raw packets to open later in Wireshark; the
+BPF filter above is a Wireshark <em>capture</em> filter (its display-filter syntax differs).</p>
+
+<script defer src="tcpdump-builder/tool.js"></script>

@@ -1,0 +1,125 @@
+<link rel="stylesheet" href="systemd-service/tool.css">
+<p>Fill in the fields — a complete <code>systemd</code> unit assembles live below, and empty
+fields are left out. Save it to <code>/etc/systemd/system/&lt;name&gt;.service</code> and run
+the install commands.</p>
+
+<div class="sd-form">
+  <div class="sd-section manifest-label">unit</div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-name">service name</label>
+    <span class="sd-inline"><input id="sd-name" type="text" value="myapp" autocomplete="off"
+      spellcheck="false"><span class="sd-suffix">.service</span></span>
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-desc">Description</label>
+    <input id="sd-desc" type="text" value="My application" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-docs">Documentation</label>
+    <input id="sd-docs" type="text" placeholder="(optional) https://example.com/docs"
+      autocomplete="off" spellcheck="false">
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-after">After</label>
+    <input id="sd-after" type="text" value="network-online.target" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-wants">Wants</label>
+    <input id="sd-wants" type="text" placeholder="(optional) network-online.target"
+      autocomplete="off" spellcheck="false">
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-requires">Requires</label>
+    <input id="sd-requires" type="text" placeholder="(optional) postgresql.service"
+      autocomplete="off" spellcheck="false">
+  </div>
+
+  <div class="sd-section manifest-label">service</div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-type">Type</label>
+    <select id="sd-type">
+      <option value="simple" selected>simple</option>
+      <option value="exec">exec</option>
+      <option value="forking">forking</option>
+      <option value="oneshot">oneshot</option>
+      <option value="notify">notify</option>
+      <option value="dbus">dbus</option>
+    </select>
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-exec">ExecStart</label>
+    <input id="sd-exec" type="text" value="/usr/bin/myapp --serve"
+      placeholder="required — absolute path" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-execpre">ExecStartPre</label>
+    <input id="sd-execpre" type="text" placeholder="(optional)" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-execstop">ExecStop</label>
+    <input id="sd-execstop" type="text" placeholder="(optional)" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-workdir">WorkingDirectory</label>
+    <input id="sd-workdir" type="text" placeholder="(optional) /opt/myapp"
+      autocomplete="off" spellcheck="false">
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-user">User / Group</label>
+    <span class="sd-inline">
+      <input id="sd-user" type="text" placeholder="user" autocomplete="off" spellcheck="false">
+      <input id="sd-group" type="text" placeholder="group" autocomplete="off" spellcheck="false">
+    </span>
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-env">Environment</label>
+    <textarea id="sd-env" rows="2" spellcheck="false" placeholder="KEY=value&#10;PORT=8080"></textarea>
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-envfile">EnvironmentFile</label>
+    <input id="sd-envfile" type="text" placeholder="(optional) /etc/myapp/env"
+      autocomplete="off" spellcheck="false">
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-restart">Restart</label>
+    <span class="sd-inline">
+      <select id="sd-restart">
+        <option value="no">no</option>
+        <option value="on-failure" selected>on-failure</option>
+        <option value="always">always</option>
+        <option value="on-abnormal">on-abnormal</option>
+      </select>
+      <input id="sd-restartsec" type="number" min="0" placeholder="RestartSec" class="sd-num">
+    </span>
+  </div>
+  <div class="sd-row">
+    <label class="manifest-label">RemainAfterExit</label>
+    <label class="sd-check"><input id="sd-remain" type="checkbox"> stay "active" after the
+      process exits (typical for <code>oneshot</code>)</label>
+  </div>
+
+  <div class="sd-section manifest-label">install</div>
+  <div class="sd-row">
+    <label class="manifest-label" for="sd-wantedby">WantedBy</label>
+    <input id="sd-wantedby" type="text" value="multi-user.target" autocomplete="off" spellcheck="false">
+  </div>
+</div>
+
+<div id="sd-errors" class="sd-error" hidden></div>
+
+<figure class="code-block">
+<figcaption class="code-lang manifest-label"><span id="sd-filename">myapp.service</span></figcaption>
+<pre class="code-body"><code id="sd-output"></code></pre>
+</figure>
+
+<figure class="code-block">
+<figcaption class="code-lang manifest-label">install</figcaption>
+<pre class="code-body"><code id="sd-install"></code></pre>
+</figure>
+
+<p class="sd-note"><code>WantedBy=multi-user.target</code> starts the service at boot in the
+normal multi-user state. Use <code>Type=notify</code> only if your program calls
+<code>sd_notify()</code>; <code>forking</code> only if it double-forks into the background.
+For anything modern, <code>simple</code> (or <code>exec</code>) is right.</p>
+
+<script defer src="systemd-service/tool.js"></script>

@@ -1,0 +1,54 @@
+<link rel="stylesheet" href="chmod/tool.css">
+<p>Change any representation — the others follow live.</p>
+<div class="ch-io-row">
+  <div class="ch-io">
+    <label class="manifest-label" for="ch-octal">octal</label>
+    <input id="ch-octal" type="text" value="754" maxlength="4" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="ch-io">
+    <label class="manifest-label" for="ch-symbolic">symbolic</label>
+    <input id="ch-symbolic" type="text" value="rwxr-xr--" maxlength="9" autocomplete="off" spellcheck="false">
+  </div>
+</div>
+<div class="ch-examples">
+  <button type="button" class="ch-example" data-octal="755">755</button>
+  <button type="button" class="ch-example" data-octal="644">644</button>
+  <button type="button" class="ch-example" data-octal="600">600</button>
+  <button type="button" class="ch-example" data-octal="777">777</button>
+  <button type="button" class="ch-example" data-octal="1777">1777</button>
+  <button type="button" class="ch-example" data-octal="4755">4755</button>
+</div>
+<div id="ch-error" class="ch-error" hidden></div>
+<table class="ch-grid" id="ch-grid">
+<thead><tr><th></th><th>read (4)</th><th>write (2)</th><th>execute (1)</th></tr></thead>
+<tbody>
+<tr><td>owner</td>
+  <td><input type="checkbox" data-bit="256"></td>
+  <td><input type="checkbox" data-bit="128"></td>
+  <td><input type="checkbox" data-bit="64"></td></tr>
+<tr><td>group</td>
+  <td><input type="checkbox" data-bit="32"></td>
+  <td><input type="checkbox" data-bit="16"></td>
+  <td><input type="checkbox" data-bit="8"></td></tr>
+<tr><td>others</td>
+  <td><input type="checkbox" data-bit="4"></td>
+  <td><input type="checkbox" data-bit="2"></td>
+  <td><input type="checkbox" data-bit="1"></td></tr>
+</tbody>
+</table>
+<div class="ch-special">
+  <span class="manifest-label">special bits</span>
+  <label class="ch-check"><input type="checkbox" id="ch-setuid"> setuid (4000)</label>
+  <label class="ch-check"><input type="checkbox" id="ch-setgid"> setgid (2000)</label>
+  <label class="ch-check"><input type="checkbox" id="ch-sticky"> sticky (1000)</label>
+</div>
+<div id="ch-warn" class="ch-warn" hidden></div>
+<figure class="code-block">
+<figcaption class="code-lang manifest-label">chmod</figcaption>
+<pre class="code-body"><code id="ch-output"></code></pre>
+</figure>
+<div class="ch-ls-row">
+  <span class="manifest-label">ls -l shows</span>
+  <code id="ch-ls"></code>
+</div>
+<script defer src="chmod/tool.js"></script>

@@ -1,0 +1,61 @@
+<h3>tcpdump and BPF</h3>
+<p><a href="https://www.tcpdump.org/">tcpdump</a> captures packets off a network interface
+and prints or saves them. What to capture is described by a <strong>BPF</strong> (Berkeley
+Packet Filter) expression — the same filter language Wireshark uses for its <em>capture</em>
+filters. The builder assembles both the command and the bare filter.</p>
+
+<h3>Filter primitives</h3>
+<p>A BPF expression is primitives joined by <code>and</code>, <code>or</code>, and
+<code>not</code>:</p>
+<table>
+<thead><tr><th>primitive</th><th>matches</th></tr></thead>
+<tbody>
+<tr><td><code>tcp</code> / <code>udp</code> / <code>icmp</code> / <code>arp</code></td><td>a protocol</td></tr>
+<tr><td><code>host 10.0.0.5</code></td><td>traffic to or from an address</td></tr>
+<tr><td><code>src host X</code> / <code>dst host X</code></td><td>one direction only</td></tr>
+<tr><td><code>port 443</code></td><td>a port in either direction (<code>src port</code> / <code>dst port</code> to pin it)</td></tr>
+<tr><td><code>portrange 8000-8100</code></td><td>a range of ports</td></tr>
+<tr><td><code>net 192.168.1.0/24</code></td><td>a subnet</td></tr>
+</tbody>
+</table>
+<p>So <code>tcp and dst port 443 and host 10.0.0.5</code> captures HTTPS traffic to that
+host. The whole expression is a single shell argument, which is why the builder wraps it in
+quotes.</p>
+
+<h3>The flags this tool sets</h3>
+<table>
+<thead><tr><th>flag</th><th>meaning</th></tr></thead>
+<tbody>
+<tr><td><code>-i eth0</code></td><td>the interface to listen on (<code>any</code> captures on all of them)</td></tr>
+<tr><td><code>-n</code> / <code>-nn</code></td><td>don't resolve hostnames (<code>-n</code>), and don't translate port numbers to service names (<code>-nn</code>) — faster and clearer</td></tr>
+<tr><td><code>-v</code> / <code>-vv</code> / <code>-vvv</code></td><td>increasingly verbose per-packet detail</td></tr>
+<tr><td><code>-c 100</code></td><td>stop after N packets</td></tr>
+<tr><td><code>-s 0</code></td><td>snaplen — bytes captured per packet; <code>0</code> means the whole packet</td></tr>
+<tr><td><code>-A</code> / <code>-X</code></td><td>print the payload as ASCII, or as hex + ASCII</td></tr>
+<tr><td><code>-e</code></td><td>include the link-layer (Ethernet/MAC) header</td></tr>
+<tr><td><code>-p</code></td><td>don't put the interface into promiscuous mode — see below</td></tr>
+<tr><td><code>-w file.pcap</code></td><td>write raw packets to a file instead of printing (read back with <code>-r</code>)</td></tr>
+</tbody>
+</table>
+
+<h3>Promiscuous mode</h3>
+<p>By default tcpdump switches the interface into <strong>promiscuous mode</strong>, telling
+the NIC to hand up every frame it sees — not just those addressed to this host. On a hub, a
+mirror/SPAN port, or a tap that's what lets you watch <em>other</em> hosts' traffic. On an
+ordinary switched network you'll mostly see your own traffic plus broadcasts either way,
+because the switch only forwards frames to the ports that need them.</p>
+<p>Pass <code>-p</code> to leave the interface alone. Reach for it when enabling promiscuous
+mode would be disruptive or noticeable, when a policy or driver forbids it, or when you only
+care about this host's own traffic. (Promiscuous mode is not the same as Wi-Fi
+<strong>monitor mode</strong>, <code>-I</code>, which captures 802.11 management frames.)</p>
+
+<h3>Advanced: byte matching</h3>
+<p>The <strong>extra filter</strong> field takes any BPF, including byte offsets. A classic is
+matching TCP SYN packets (new connection attempts):</p>
+<pre><code>tcp[tcpflags] &amp; tcp-syn != 0</code></pre>
+<p>This reads the flags byte of the TCP header and keeps packets whose SYN bit is set.</p>
+
+<h3>Permissions</h3>
+<p>Reading raw packets requires elevated privileges, so real captures run under
+<code>sudo</code> (or with the <code>CAP_NET_RAW</code> capability). Only capture on networks
+you're authorized to monitor.</p>

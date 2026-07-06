@@ -1,0 +1,15 @@
+filters: file.hasTag("book")
+properties:
+  status:
+    displayName: Status
+views:
+  - type: table
+    name: All books
+    order: [file.name, status, rating]
+    sort:
+      - property: rating
+        direction: DESC
+  - type: cards
+    name: Covers
+    image: cover
+    order: [file.name, rating]

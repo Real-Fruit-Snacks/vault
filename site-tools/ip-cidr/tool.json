@@ -1,0 +1,6 @@
+{
+  "title": "IP / CIDR Calculator",
+  "description": "Enter an IPv4 address, CIDR block, or IP + netmask \u2014 get the network, broadcast, host range, wildcard mask, and a colored binary breakdown.",
+  "learn_title": "subnetting & cidr 101",
+  "icon": "globe"
+}

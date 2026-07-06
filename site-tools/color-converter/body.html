@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="color-converter/tool.css">
+<p>Type a color in any format — <code>#hex</code>, <code>rgb()</code>, or <code>hsl()</code>
+(with optional alpha) — and get the others, a live swatch, and WCAG contrast ratios.
+Everything updates as you type.</p>
+
+<div class="cc-top">
+  <input id="cc-picker" type="color" value="#ff6e7a" aria-label="Color picker">
+  <input id="cc-input" type="text" value="#ff6e7a" autocomplete="off" spellcheck="false"
+    placeholder="#ff6e7a, rgb(255,110,122), hsl(354,100%,72%)">
+</div>
+
+<p id="cc-error" class="cc-error" hidden></p>
+
+<div id="cc-results" class="cc-results">
+  <div class="cc-swatch-block"><div id="cc-swatch" class="cc-swatch"></div></div>
+  <table class="cc-table"><tbody>
+    <tr><td class="cc-fmt manifest-label">hex</td><td><code id="cc-hex" class="cc-val"></code></td></tr>
+    <tr><td class="cc-fmt manifest-label">rgb</td><td><code id="cc-rgb" class="cc-val"></code></td></tr>
+    <tr><td class="cc-fmt manifest-label">hsl</td><td><code id="cc-hsl" class="cc-val"></code></td></tr>
+  </tbody></table>
+</div>
+
+<h2>Contrast (WCAG 2.1)</h2>
+<p class="cc-note">Relative-luminance contrast of this color against black and white (alpha
+ignored). AA needs 4.5:1 for normal text and 3:1 for large (≥24px, or ≥18.66px bold); AAA
+needs 7:1 and 4.5:1.</p>
+<div id="cc-contrast" class="cc-contrast"></div>
+
+<script defer src="color-converter/tool.js"></script>

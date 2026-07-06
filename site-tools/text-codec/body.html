@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="text-codec/tool.css">
+<p>Type in either box — the other updates live. Everything runs in your browser;
+nothing is sent anywhere, which is rather the point of having this on an internal
+network.</p>
+<div class="tc-mode-row">
+  <label class="manifest-label" for="tc-mode">encoding</label>
+  <select id="tc-mode">
+    <option value="base64" selected>Base64</option>
+    <option value="base64url">Base64 (URL-safe)</option>
+    <option value="url">URL percent-encoding</option>
+    <option value="hex">Hex</option>
+  </select>
+</div>
+<div class="tc-pane">
+  <div class="tc-pane-head">
+    <span class="manifest-label">plain text</span>
+    <button type="button" class="tc-copy" data-copy="tc-plain">copy</button>
+  </div>
+  <textarea id="tc-plain" rows="4" placeholder="Hello, World!" autocomplete="off"
+    autocapitalize="off" spellcheck="false"></textarea>
+</div>
+<div class="tc-pane">
+  <div class="tc-pane-head">
+    <span class="manifest-label">encoded</span>
+    <button type="button" class="tc-copy" data-copy="tc-encoded">copy</button>
+  </div>
+  <textarea id="tc-encoded" rows="4" placeholder="SGVsbG8sIFdvcmxkIQ==" autocomplete="off"
+    autocapitalize="off" spellcheck="false"></textarea>
+</div>
+<div id="tc-error" class="tc-error" hidden></div>
+<script defer src="text-codec/tool.js"></script>

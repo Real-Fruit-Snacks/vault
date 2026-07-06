@@ -1,0 +1,63 @@
+<h3>How an IP network works</h3>
+<p>An IPv4 address is just a 32-bit number, written as four decimal octets. A network
+splits those 32 bits in two: the left part identifies the <em>network</em>, the right
+part identifies the <em>host</em> inside it. The <strong>prefix length</strong>
+(<code>/24</code>) says how many bits belong to the network — that's exactly what the
+green/cyan split in the binary view shows.</p>
+<p>The <strong>netmask</strong> is the same idea as a bitmask: <code>/24</code> is
+<code>255.255.255.0</code> — twenty-four 1-bits. AND the mask with any address in the
+block and you get the <strong>network address</strong>; OR the inverted mask and you
+get the <strong>broadcast address</strong>. Everything between them is usable host
+space.</p>
+
+<h3>CIDR replaced classes</h3>
+<p>Before 1993, networks came in three rigid sizes: class A (<code>/8</code>),
+B (<code>/16</code>), and C (<code>/24</code>) — determined by the address's leading
+bits. That wasted enormous space (a company needing 300 hosts got a /16 with 65,534).
+<strong>CIDR</strong> (Classless Inter-Domain Routing) made the boundary movable:
+any prefix from <code>/0</code> to <code>/32</code>. If someone says "class C" today,
+they almost always just mean a /24.</p>
+
+<h3>Prefix cheat sheet</h3>
+<table>
+<thead><tr><th>prefix</th><th>netmask</th><th>addresses</th><th>usable hosts</th></tr></thead>
+<tbody>
+<tr><td><code>/8</code></td><td><code>255.0.0.0</code></td><td>16,777,216</td><td>16,777,214</td></tr>
+<tr><td><code>/16</code></td><td><code>255.255.0.0</code></td><td>65,536</td><td>65,534</td></tr>
+<tr><td><code>/24</code></td><td><code>255.255.255.0</code></td><td>256</td><td>254</td></tr>
+<tr><td><code>/26</code></td><td><code>255.255.255.192</code></td><td>64</td><td>62</td></tr>
+<tr><td><code>/30</code></td><td><code>255.255.255.252</code></td><td>4</td><td>2</td></tr>
+<tr><td><code>/31</code></td><td><code>255.255.255.254</code></td><td>2</td><td>2 — point-to-point links (RFC 3021)</td></tr>
+<tr><td><code>/32</code></td><td><code>255.255.255.255</code></td><td>1</td><td>1 — a single host route</td></tr>
+</tbody>
+</table>
+<p>Usable hosts are normally <em>total − 2</em> because the network and broadcast
+addresses are reserved. The exceptions: <code>/31</code> links deliberately skip the
+broadcast so both addresses are usable, and a <code>/32</code> names exactly one host.</p>
+
+<h3>Addresses that never route on the internet</h3>
+<table>
+<thead><tr><th>range</th><th>purpose</th></tr></thead>
+<tbody>
+<tr><td><code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code></td><td>private networks (RFC 1918) — what your LAN uses behind NAT</td></tr>
+<tr><td><code>127.0.0.0/8</code></td><td>loopback — the machine talking to itself</td></tr>
+<tr><td><code>169.254.0.0/16</code></td><td>link-local / APIPA — self-assigned when DHCP fails (seeing one is a diagnosis)</td></tr>
+<tr><td><code>100.64.0.0/10</code></td><td>carrier-grade NAT — your ISP's middle layer</td></tr>
+<tr><td><code>224.0.0.0/4</code></td><td>multicast groups</td></tr>
+<tr><td><code>192.0.2.0/24</code>, <code>198.51.100.0/24</code>, <code>203.0.113.0/24</code></td><td>documentation — safe to use in examples, guaranteed to route nowhere</td></tr>
+<tr><td><code>240.0.0.0/4</code></td><td>reserved since 1989 and still unused</td></tr>
+</tbody>
+</table>
+
+<h3>Wildcard masks</h3>
+<p>Router ACLs (Cisco especially) use the netmask's inverse: <code>/24</code> →
+wildcard <code>0.0.0.255</code>, meaning "the last octet can be anything." A wildcard
+bit of 1 means <em>don't care</em>. This tool shows it for every network because
+typing the inversion by hand is where ACL typos come from.</p>
+
+<h3>Reading the binary view</h3>
+<p>Pick <code>172.16.10.5 255.255.240.0</code> and look at the third octet: the
+boundary cuts <em>inside</em> it — four network bits, four host bits. That's why the
+network is <code>172.16.0.0</code> and not <code>172.16.10.0</code>: the
+<code>10</code> in the third octet is partly host space. Mid-octet boundaries are
+where all subnetting mistakes live; the binary view makes them visible.</p>

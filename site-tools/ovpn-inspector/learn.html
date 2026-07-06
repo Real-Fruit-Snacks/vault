@@ -1,0 +1,71 @@
+<h3>How an OpenVPN identity fits together</h3>
+<p>OpenVPN authenticates with a small <strong>public-key infrastructure (PKI)</strong>.
+An <code>.ovpn</code> file usually bundles four things, either inline (in
+<code>&lt;ca&gt;</code>, <code>&lt;cert&gt;</code>, <code>&lt;key&gt;</code>,
+<code>&lt;tls-auth&gt;</code> tags) or as external file references:</p>
+<table>
+<thead><tr><th>piece</th><th>role</th></tr></thead>
+<tbody>
+<tr><td><strong>CA certificate</strong> (<code>ca</code>)</td><td>the trust anchor — both sides verify the other's cert was signed by this CA</td></tr>
+<tr><td><strong>client certificate</strong> (<code>cert</code>)</td><td>this client's public identity, signed by the CA, carrying <code>clientAuth</code></td></tr>
+<tr><td><strong>private key</strong> (<code>key</code>)</td><td>the secret that proves ownership of the certificate — <em>never share it</em></td></tr>
+<tr><td><strong>tls-auth / tls-crypt key</strong> (<code>ta.key</code>)</td><td>a shared static key that HMAC-signs (or encrypts) the control channel, so unauthenticated packets are dropped before any TLS work</td></tr>
+</tbody>
+</table>
+<p>The server has its own certificate carrying <code>serverAuth</code>, signed by the
+same CA. <code>remote-cert-tls server</code> makes the client insist the server's cert
+actually has that server role — without it, one client's cert could impersonate the
+server.</p>
+
+<h3>What's inside a certificate</h3>
+<p>An X.509 certificate is a DER-encoded (ASN.1 binary) structure, Base64-wrapped
+between <code>-----BEGIN CERTIFICATE-----</code> markers. The fields this tool
+decodes:</p>
+<ul>
+<li><strong>Validity</strong> — <code>notBefore</code> and <code>notAfter</code>. This
+is the field that silently breaks VPNs (see below).</li>
+<li><strong>Subject / Issuer</strong> — distinguished names (CN, O, C…). The issuer of
+a client cert equals the subject of the CA that signed it.</li>
+<li><strong>Public key</strong> — RSA (2048-bit is the common floor) or EC (P-256 is
+smaller and faster for the same security).</li>
+<li><strong>Extensions</strong> — Basic Constraints (is this a CA?), Key Usage,
+Extended Key Usage (<code>clientAuth</code> vs <code>serverAuth</code>), and Subject
+Alternative Names.</li>
+<li><strong>Fingerprint</strong> — the SHA-256 hash of the whole cert, for pinning or
+comparing "is this the same cert?"</li>
+</ul>
+
+<h3>Why expiry is the silent killer</h3>
+<p>Certificates expire. When a client or — worse — a server certificate passes its
+<code>notAfter</code> date, the TLS handshake fails and every VPN connection drops,
+usually with an opaque <code>certificate has expired</code> in the logs and a 3 a.m.
+phone call. CA certificates are the sneakiest: they're often issued for 10 years and
+then forgotten, taking down the entire deployment at once. This tool flags anything
+under 90 days (amber) and under 30 days or already expired (red) so you can renew on
+your schedule instead of the certificate's.</p>
+
+<h3>Checking dates from a shell</h3>
+<pre><code># show a certificate's validity window
+openssl x509 -in client.crt -noout -dates
+
+# is it expired, or will it be within 30 days? (exit code answers)
+openssl x509 -in client.crt -noout -checkend 2592000
+
+# pull the cert straight off a running server
+echo | openssl s_client -connect vpn.example.com:1194 2&gt;/dev/null \
+  | openssl x509 -noout -dates -subject</code></pre>
+
+<h3>Security directives worth auditing</h3>
+<ul>
+<li><strong>comp-lzo / compress</strong> — compression before encryption enables the
+<em>VORACLE</em> attack; modern OpenVPN turns it off by default. Remove it.</li>
+<li><strong>cipher</strong> — <code>BF-CBC</code> (Blowfish) is the old default and is
+vulnerable to <em>SWEET32</em>; <code>DES</code> is broken. Use
+<code>AES-256-GCM</code>.</li>
+<li><strong>auth</strong> — the control-channel HMAC. <code>MD5</code> and
+<code>SHA1</code> are weak; prefer <code>SHA256</code>.</li>
+<li><strong>tls-version-min 1.2</strong> — pin it so the tunnel refuses ancient TLS.</li>
+<li><strong>Key handling</strong> — the private key inside an <code>.ovpn</code> is a
+credential. That's exactly why a tool like this should run offline, in your browser,
+and never upload the file — which is how this one works.</li>
+</ul>

@@ -1,0 +1,22 @@
+{
+  "nodes": [
+    {"id": "t1", "type": "text", "x": 0, "y": 0, "width": 260, "height": 120,
+     "text": "Fixture board — see [[Site Plan]]", "color": "4"},
+    {"id": "n1", "type": "file", "x": 360, "y": 0, "width": 320, "height": 240,
+     "file": "Projects/Site Plan.md"},
+    {"id": "h1", "type": "file", "x": 360, "y": 300, "width": 320, "height": 180,
+     "file": "Projects/Site Plan.md", "subpath": "#Overview"},
+    {"id": "img1", "type": "file", "x": 760, "y": 0, "width": 220, "height": 160,
+     "file": "Attachments/diagram.png"},
+    {"id": "secret", "type": "file", "x": 760, "y": 220, "width": 220, "height": 100,
+     "file": "Drafts/Secret.md"},
+    {"id": "web", "type": "link", "x": 0, "y": 200, "width": 260, "height": 80,
+     "url": "https://example.com"},
+    {"id": "grp", "type": "group", "x": -40, "y": -60, "width": 1080, "height": 600,
+     "label": "fixture cluster", "color": "6"}
+  ],
+  "edges": [
+    {"id": "e1", "fromNode": "t1", "toNode": "n1", "fromSide": "right",
+     "toSide": "left", "label": "expands", "color": "5"}
+  ]
+}

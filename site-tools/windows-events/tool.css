@@ -1,0 +1,106 @@
+.we-controls {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch;
+}
+#we-input {
+  flex: 1 1 260px; min-width: 0;
+  background: var(--twb-bg-1); color: var(--twb-text-normal);
+  border: 1px solid var(--twb-border); border-radius: 6px;
+  font-family: var(--twb-font-mono); font-size: 15px; padding: 10px 12px;
+}
+#we-input:focus {
+  outline: none; border-color: var(--twb-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--twb-accent) 25%, transparent);
+}
+.we-controls select {
+  background: var(--twb-bg-1); color: var(--twb-text-normal);
+  border: 1px solid var(--twb-border); border-radius: 6px;
+  font-family: var(--twb-font-mono); font-size: 13px; padding: 0 10px; cursor: pointer;
+}
+.we-controls select:focus { outline: none; border-color: var(--twb-accent); }
+
+.we-count { color: var(--twb-text-muted); font-size: 12.5px; margin: 10px 0 6px; }
+.we-empty { color: var(--twb-text-muted); font-style: italic; padding: 12px 0; }
+
+.we-table-wrap {
+  max-height: 620px; overflow-y: auto;
+  border: 1px solid var(--twb-border); border-radius: 6px;
+}
+/* border-collapse: collapse breaks position: sticky (the collapsed borders
+   don't travel with the stuck header, so rows bleed through the seam);
+   separate borders stick with the cell. Top borders dropped so row lines
+   don't double up. */
+#we-table { margin: 0; width: 100%; border: none; border-collapse: separate; border-spacing: 0; }
+#we-table th { position: sticky; top: 0; z-index: 1; }
+#we-table th, #we-table td { border-left: none; border-right: none; border-top: none; }
+.we-id-col, .we-crit-col { width: 1%; white-space: nowrap; }
+/* channel, category, and criticality center; id and title stay left */
+.we-row > td:nth-child(2), #we-table thead th:nth-child(2),
+.we-row > td:nth-child(3), #we-table thead th:nth-child(3),
+.we-row > td:nth-child(5), #we-table thead th:nth-child(5) { text-align: center; }
+
+.we-row { cursor: pointer; }
+.we-row:hover { background: var(--twb-bg-1); }
+.we-row:focus { outline: none; background: var(--twb-bg-1); }
+.we-row.we-open { background: var(--twb-bg-2); }
+.we-id {
+  font-family: var(--twb-font-mono); font-size: 13.5px;
+  color: var(--twb-accent); white-space: nowrap;
+}
+.we-chan {
+  font-family: var(--twb-font-mono); font-size: 12px;
+  color: var(--twb-text-muted); white-space: nowrap;
+}
+
+.we-cat, .we-crit {
+  font-family: var(--twb-font-mono); font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  border: 1px solid currentColor; border-radius: 4px; padding: 0 6px;
+  white-space: nowrap;
+}
+/* category tints, reusing the theme accent family */
+.we-cat-logon, .we-cat-kerberos { color: var(--twb-accent-alt); }
+.we-cat-account { color: var(--twb-orange); }
+.we-cat-process, .we-cat-sysmon { color: var(--twb-accent); }
+.we-cat-object, .we-cat-share { color: var(--twb-warm); }
+.we-cat-policy, .we-cat-defender { color: var(--twb-violet); }
+.we-cat-task, .we-cat-service, .we-cat-system { color: var(--twb-text-soft); }
+.we-cat-powershell { color: var(--twb-accent); }
+.we-cat-rdp, .we-cat-applocker, .we-cat-firewall, .we-cat-wmi { color: var(--twb-text-soft); }
+
+.we-crit-high { color: var(--twb-red); }
+.we-crit-medium { color: var(--twb-orange); }
+.we-crit-low { color: var(--twb-accent-alt); }
+.we-crit-info { color: var(--twb-text-muted); }
+
+.we-detail > td { background: var(--twb-bg-1); padding: 0; }
+.we-detail-body { padding: 14px 18px; max-width: 720px; }
+.we-detail-body p { margin: 0 0 10px; }
+.we-detail-body p:last-child { margin-bottom: 0; }
+.we-sec { color: var(--twb-text-soft); }
+.we-sec .manifest-label, .we-full-channel .manifest-label { margin-right: 6px; }
+.we-full-channel { font-family: var(--twb-font-mono); font-size: 12px; color: var(--twb-text-muted); }
+
+.we-sub { margin: 12px 0; }
+.we-sub-label { margin-bottom: 6px; }
+.we-subtable { width: auto; min-width: 60%; margin: 0; }
+.we-subtable th, .we-subtable td {
+  font-size: 12.5px; padding: 4px 10px;
+}
+.we-subtable td:first-child {
+  font-family: var(--twb-font-mono); color: var(--twb-accent); white-space: nowrap;
+}
+
+.we-query {
+  display: flex; align-items: center; gap: 8px;
+  margin: 12px 0; flex-wrap: wrap;
+}
+.we-query code {
+  flex: 1 1 auto; min-width: 0;
+  background: var(--twb-bg-0); border: 1px solid var(--twb-border);
+  border-radius: 4px; padding: 6px 10px; font-size: 12.5px;
+  overflow-x: auto; white-space: pre; word-break: normal;
+}
+.we-copy {
+  flex: none; font-family: var(--twb-font-mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 10px;
+}

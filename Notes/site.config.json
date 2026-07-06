@@ -1,0 +1,11 @@
+{
+  "title": "Real-Fruit-Snacks",
+  "site_url": "https://real-fruit-snacks.github.io/vault/",
+  "description": "A personal Obsidian vault published as a fast, offline, static website.",
+  "homepage": "Home.md",
+  "banner_enabled": false,
+  "banner_text": "",
+  "banner_style": "info",
+  "pet_enabled": true,
+  "_banner_style_options": "info = accent strip, warn = amber strip"
+}

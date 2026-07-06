@@ -1,0 +1,35 @@
+<h3>Encoding is not encryption</h3>
+<p>Everything on this page is <em>reversible by anyone</em> — these formats exist to
+move bytes safely through channels that only tolerate certain characters, not to hide
+them. If you can paste it here and read it, so can everybody else. Secrets need
+actual cryptography.</p>
+
+<h3>Base64</h3>
+<p>Base64 maps every 3 bytes onto 4 characters from a 64-character alphabet
+(<code>A-Z a-z 0-9 + /</code>), padding the tail with <code>=</code>. That's why
+encoded output is ~33% bigger, why its length is always a multiple of 4, and why it
+survives email, JSON, and XML unharmed. The <strong>URL-safe</strong> variant swaps
+<code>+ /</code> for <code>- _</code> and usually drops the padding — that's the
+flavor in JWTs and URL parameters. Same data, different last two alphabet letters.</p>
+
+<h3>Percent-encoding</h3>
+<p>URLs reserve characters like <code>? &amp; = / #</code> for their own structure, so
+anything else rides as <code>%</code> plus two hex digits of its UTF-8 bytes:
+a space is <code>%20</code>, <code>é</code> is <code>%C3%A9</code>. One legacy wrinkle:
+inside query strings, an old form-encoding rule also lets <code>+</code> mean a space —
+this tool accepts that on decode. Encode with <code>encodeURIComponent</code>-style
+strictness, decode generously.</p>
+
+<h3>Hex</h3>
+<p>Hex (base16) spells each byte as exactly two digits — twice the size of the
+original, but perfectly human-readable and byte-aligned, which is why hashes, MAC
+addresses, and packet dumps use it. This tool's decoder ignores whitespace,
+colons, and dashes, so <code>48:65:6C:6C:6F</code> pastes straight from Wireshark.</p>
+
+<h3>Where UTF-8 fits</h3>
+<p>All three formats operate on <em>bytes</em>, but you type <em>text</em> — so text
+becomes bytes first, via UTF-8. ASCII characters are one byte each;
+<code>é</code> is two, <code>漢</code> is three, <code>😀</code> is four. That's why
+one emoji becomes eight hex digits, and why decoding random bytes as text can fail:
+not every byte sequence is valid UTF-8 (this tool tells you rather than producing
+mojibake).</p>

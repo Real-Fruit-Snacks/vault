@@ -1,0 +1,52 @@
+<h3>What is a character, really?</h3>
+<p>Computers don't store letters — they store numbers. <strong>Unicode</strong> is the
+agreement about which number means which character: every character gets a
+<strong>code point</strong>, written <code>U+</code> plus its hex value. <code>A</code>
+is <code>U+0041</code> (decimal 65), <code>€</code> is <code>U+20AC</code>, and
+<code>😀</code> is <code>U+1F600</code>. Unicode has room for over a million code
+points, of which about 150,000 are assigned so far — covering every living script,
+historic writing systems, symbols, and emoji.</p>
+
+<h3>Categories</h3>
+<p>Every code point carries a <em>general category</em> — that's what the colored
+badges in this tool show:</p>
+<table>
+<thead><tr><th>category</th><th>examples</th><th>unicode classes</th></tr></thead>
+<tbody>
+<tr><td>uppercase letter</td><td><code>A Ç Ω</code></td><td>Lu</td></tr>
+<tr><td>lowercase letter</td><td><code>a ç ω</code></td><td>Ll</td></tr>
+<tr><td>letter (other)</td><td><code>漢 ا अ</code> — scripts without case</td><td>Lo, Lt, Lm</td></tr>
+<tr><td>digit</td><td><code>0-9 ٣ ７</code></td><td>Nd</td></tr>
+<tr><td>punctuation</td><td><code>. , ! — « »</code></td><td>P*</td></tr>
+<tr><td>symbol</td><td><code>+ € ✓ 😀</code> (yes, emoji are symbols)</td><td>S*</td></tr>
+<tr><td>whitespace</td><td>space, tab, newline, no-break space</td><td>Z*, tab/CR/LF</td></tr>
+<tr><td>control</td><td>bell, null, escape — invisible machine codes</td><td>Cc, Cf</td></tr>
+</tbody>
+</table>
+
+<h3>Code points vs. bytes vs. what you see</h3>
+<p>Three layers are easy to confuse:</p>
+<ul>
+<li><strong>Bytes</strong> depend on the encoding. In UTF-8, <code>A</code> is 1 byte,
+<code>€</code> is 3, and <code>😀</code> is 4. In JavaScript's UTF-16 strings,
+<code>😀</code> takes two 16-bit units (a "surrogate pair") — which is why naive
+<code>length</code> counts call it 2. This tool counts real code points, so it's 1.</li>
+<li><strong>Code points</strong> are what this tool shows — the Unicode numbers.</li>
+<li><strong>What you see</strong> (a <em>grapheme</em>) can be several code points:
+<code>é</code> can be one code point (<code>U+00E9</code>) or two
+(<code>e</code> + combining accent <code>U+0301</code>), and family emoji like
+👨‍👩‍👧 are multiple emoji glued with invisible zero-width joiners. Paste one in and
+watch it decompose.</li>
+</ul>
+
+<h3>Why this matters</h3>
+<ul>
+<li><strong>Invisible characters</strong> — no-break spaces (<code>U+00A0</code>),
+zero-width spaces, and BOMs break parsers, diffs, and copy-pasted commands. If a
+config file "looks right" but won't parse, paste it here.</li>
+<li><strong>Homoglyphs</strong> — Cyrillic <code>а</code> (<code>U+0430</code>) looks
+identical to Latin <code>a</code> (<code>U+0061</code>). Phishing domains and
+sneaky identifiers exploit this; the code points never lie.</li>
+<li><strong>Data cleaning</strong> — smart quotes vs straight quotes, en-dash vs
+hyphen, full-width digits from CJK input: all visible instantly here.</li>
+</ul>

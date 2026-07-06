@@ -1,0 +1,75 @@
+<h3>What nmap does</h3>
+<p><a href="https://nmap.org/">Nmap</a> ("Network Mapper") discovers hosts and the
+services they expose. A run has up to three phases: <strong>host discovery</strong> (which
+targets are alive), <strong>port scanning</strong> (which ports are open, closed, or
+filtered), and optional <strong>detection</strong> (service versions, OS, and NSE scripts).
+The flags below map one-to-one onto the controls in the builder.</p>
+
+<h3>Specifying targets</h3>
+<p>Targets go last on the command line and are split on spaces, so you can mix forms:</p>
+<table>
+<thead><tr><th>form</th><th>example</th></tr></thead>
+<tbody>
+<tr><td>single host</td><td><code>scanme.nmap.org</code> or <code>10.0.0.5</code></td></tr>
+<tr><td>CIDR range</td><td><code>192.168.1.0/24</code> (256 addresses)</td></tr>
+<tr><td>octet range</td><td><code>10.0.0.1-50</code>, <code>10.0.0-2.*</code></td></tr>
+<tr><td>from a file</td><td><code>-iL targets.txt</code></td></tr>
+</tbody>
+</table>
+
+<h3>Scan types</h3>
+<table>
+<thead><tr><th>flag</th><th>scan</th><th>notes</th></tr></thead>
+<tbody>
+<tr><td><code>-sS</code></td><td>TCP SYN ("half-open")</td><td>the default when run as root — fast and relatively quiet; never completes the handshake</td></tr>
+<tr><td><code>-sT</code></td><td>TCP connect</td><td>the fallback without root — uses the OS to complete each connection, so it's slower and more logged</td></tr>
+<tr><td><code>-sU</code></td><td>UDP</td><td>finds DNS, SNMP, DHCP and the like; slow, because closed UDP ports are rate-limited</td></tr>
+<tr><td><code>-sA</code></td><td>TCP ACK</td><td>maps firewall rules (filtered vs unfiltered) rather than open ports</td></tr>
+<tr><td><code>-sF</code> / <code>-sX</code> / <code>-sN</code></td><td>FIN / Xmas / Null</td><td>stealthy probes that can slip past simple filters on some stacks</td></tr>
+<tr><td><code>-sn</code></td><td>ping sweep</td><td>host discovery only — no port scan. Great for "what's alive on this subnet?"</td></tr>
+<tr><td><code>-sL</code></td><td>list scan</td><td>just lists (and reverse-resolves) the targets without sending probes</td></tr>
+</tbody>
+</table>
+<p>The raw-packet scans (<code>-sS</code>, <code>-sU</code>, <code>-sA</code>, and the
+FIN/Xmas/Null trio) need root. Without it nmap silently uses <code>-sT</code>.</p>
+
+<h3>Choosing ports</h3>
+<p>By default nmap scans the 1,000 most common ports. Narrow or widen with:</p>
+<table>
+<thead><tr><th>flag</th><th>meaning</th></tr></thead>
+<tbody>
+<tr><td><code>-F</code></td><td>fast — the top 100 ports only</td></tr>
+<tr><td><code>--top-ports N</code></td><td>the N most common ports</td></tr>
+<tr><td><code>-p 22,80,443</code></td><td>an explicit list or range (<code>-p 1-1024</code>, <code>-p U:53,T:80</code>)</td></tr>
+<tr><td><code>-p-</code></td><td>all 65,535 ports — thorough but slow</td></tr>
+</tbody>
+</table>
+
+<h3>Detection</h3>
+<ul>
+<li><strong><code>-sV</code></strong> — probe open ports to identify the service and version.</li>
+<li><strong><code>-O</code></strong> — guess the operating system from TCP/IP behaviour (needs root).</li>
+<li><strong><code>-sC</code></strong> — run the <em>default</em> set of NSE scripts (equivalent to <code>--script=default</code>).</li>
+<li><strong><code>--script</code></strong> — run named NSE scripts or categories, e.g. <code>--script vuln</code>, <code>--script http-title</code>, <code>--script "smb-*"</code>.</li>
+<li><strong><code>-A</code></strong> — "aggressive": turns on <code>-sV -O -sC</code> and <code>--traceroute</code> at once. Thorough, but noisy and root-only.</li>
+</ul>
+
+<h3>Timing (<code>-T0</code>–<code>-T5</code>)</h3>
+<p>Templates trade speed for stealth and reliability. <code>-T0</code> (paranoid) and
+<code>-T1</code> (sneaky) space probes out to evade IDS; <code>-T3</code> (normal) is the
+default; <code>-T4</code> (aggressive) is the usual choice on a fast, reliable network;
+<code>-T5</code> (insane) sacrifices accuracy for raw speed and can overwhelm hosts.</p>
+
+<h3>Reading and saving results</h3>
+<p>Each port is reported as <strong>open</strong>, <strong>closed</strong> (reachable but
+nothing listening), or <strong>filtered</strong> (a firewall dropped the probe).
+<code>--open</code> hides all but open ports; <code>--reason</code> shows why nmap reached
+each verdict; <code>-v</code> adds progress detail. To keep the results, use
+<code>-oN file</code> (human-readable), <code>-oX file</code> (XML),
+<code>-oG file</code> (grepable), or <code>-oA basename</code> to write all three at once.</p>
+
+<h3>A word on authorization</h3>
+<p>Scanning hosts you don't own or have written permission to test can be illegal and will
+often trip intrusion detection. Practise against
+<a href="https://scanme.nmap.org/">scanme.nmap.org</a> (which Nmap provides for exactly
+this) or your own lab.</p>

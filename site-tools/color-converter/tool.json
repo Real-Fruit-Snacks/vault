@@ -1,0 +1,6 @@
+{
+  "title": "Color Format Converter",
+  "description": "Convert a color between hex, RGB, and HSL with a live swatch, and check WCAG 2.1 contrast against black and white.",
+  "learn_title": "color formats 101",
+  "icon": "droplet"
+}

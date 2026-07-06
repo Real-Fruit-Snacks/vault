@@ -1,0 +1,51 @@
+.ts-now-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  border: 1px solid var(--twb-border); border-radius: 6px;
+  background: var(--twb-bg-1);
+  padding: 8px 14px; margin-bottom: 16px;
+}
+.ts-now-row code { color: var(--twb-accent); font-size: 14px; }
+.ts-dim { color: var(--twb-text-muted); font-size: 12px; }
+
+#ts-input {
+  width: 100%;
+  background: var(--twb-bg-1); color: var(--twb-text-normal);
+  border: 1px solid var(--twb-border); border-radius: 6px;
+  font-family: var(--twb-font-mono); font-size: 15px;
+  padding: 10px 12px;
+}
+#ts-input:focus {
+  outline: none; border-color: var(--twb-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--twb-accent) 25%, transparent);
+}
+
+.ts-examples { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 16px; }
+.ts-example {
+  font-family: var(--twb-font-mono); font-size: 12px;
+  background: color-mix(in srgb, var(--twb-accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--twb-accent) 30%, var(--twb-border));
+  border-radius: 4px; color: var(--twb-accent);
+  padding: 2px 8px; cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.ts-example:hover { background: var(--twb-accent); color: var(--twb-text-on-accent); }
+
+.ts-error {
+  margin: 14px 0; padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--twb-red) 34%, var(--twb-border));
+  border-left: 3px solid var(--twb-red);
+  background: color-mix(in srgb, var(--twb-red) 9%, var(--twb-bg-0));
+  border-radius: 6px;
+  font-family: var(--twb-font-mono); font-size: 13px;
+}
+.ts-note { color: var(--twb-text-muted); font-size: 12.5px; }
+
+.ts-table-wrap { border: 1px solid var(--twb-border); border-radius: 6px; margin: 16px 0; }
+.ts-table-wrap table { margin: 0; width: 100%; border: none; }
+.ts-table-wrap td { border-left: none; border-right: none; }
+.ts-table-wrap td:first-child {
+  font-family: var(--twb-font-mono); font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--twb-text-muted); width: 11em;
+}
+.ts-mono { font-family: var(--twb-font-mono); font-size: 13.5px; }

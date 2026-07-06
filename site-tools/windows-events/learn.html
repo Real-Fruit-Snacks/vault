@@ -1,0 +1,57 @@
+<h3>Where the events live</h3>
+<p>Windows scatters its logs across many <em>channels</em>. The ones that matter
+most for security work:</p>
+<ul>
+<li><strong>Security</strong> — logon, account management, Kerberos, process
+creation, object access, audit-policy changes. Most of this only appears if the
+matching <em>Advanced Audit Policy</em> subcategory is enabled.</li>
+<li><strong>System</strong> — service installs (7045), service state, clean and
+dirty shutdowns.</li>
+<li><strong>Windows PowerShell</strong> (classic) and
+<strong>Microsoft-Windows-PowerShell/Operational</strong> — engine starts and,
+crucially, <em>script block logging</em> (4104), which captures the actual code
+run even when it never touches disk.</li>
+<li><strong>Microsoft-Windows-Sysmon/Operational</strong> — if you deploy
+<a href="https://learn.microsoft.com/sysinternals/downloads/sysmon">Sysmon</a>,
+by far the richest process, network, and injection telemetry Windows can give
+you.</li>
+<li>Operational channels for <strong>Defender</strong>,
+<strong>Task Scheduler</strong>, <strong>Terminal Services</strong> (RDP),
+<strong>AppLocker</strong>, and the <strong>Firewall</strong>.</li>
+</ul>
+
+<h3>Turn the auditing on first</h3>
+<p>Most Security-log events are silent until you enable them. Configure
+<em>Computer Configuration → Windows Settings → Security Settings → Advanced
+Audit Policy Configuration</em> (via GPO for a domain). The high-value switches:
+<strong>Audit Process Creation</strong> (4688) — and separately enable
+<em>"Include command line in process creation events"</em> — plus
+<strong>Logon</strong>, <strong>Account Management</strong>, and
+<strong>Kerberos</strong> auditing. For PowerShell, enable <em>Module Logging</em>
+and <em>Script Block Logging</em> under Administrative Templates.</p>
+
+<h3>Reading a logon (4624 / 4625)</h3>
+<p>The <strong>Logon Type</strong> is the first thing to check: type 2 is at the
+keyboard, type 3 is from the network, type 10 is RDP, and type 9 is
+<code>runas /netonly</code> — a favourite for using stolen credentials without a
+full logon. On a failure (4625), the <strong>Status / Sub Status</strong> code
+says exactly why: a wrong password (<code>0xC000006A</code>) reads very
+differently from a username that does not exist (<code>0xC0000064</code>), and a
+flood of the latter is user enumeration.</p>
+
+<h3>Querying from PowerShell</h3>
+<p>Every entry here carries a ready <code>Get-WinEvent</code> query. The general
+shape:</p>
+<pre class="code-body"><code>Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4625; StartTime=(Get-Date).AddHours(-24)}</code></pre>
+<p>Add <code>| Select-Object TimeCreated, Id, Message</code> to skim results, or
+<code>.Properties</code> to pull individual data fields. <code>-FilterHashtable</code>
+filters inside the log engine, so it stays fast even on busy Security logs where
+<code>Where-Object</code> would crawl.</p>
+
+<h3>Accuracy &amp; scope</h3>
+<p>These entries are curated against Microsoft's auditing documentation, the
+Sysmon schema, and the PowerShell/Defender operational channels. IDs are unique
+<em>per channel</em> — the same number (for example 25) means different things in
+Sysmon versus Terminal Services, so always read the channel alongside the ID.
+This is a focused reference for the events defenders and admins actually hunt in,
+not an exhaustive catalogue of every ID Windows can emit.</p>

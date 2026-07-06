@@ -1,0 +1,6 @@
+{
+  "title": "OpenVPN Inspector",
+  "description": "Paste or open an .ovpn file (or a .crt/.pem) and see every certificate's expiry, details, and config security flags \u2014 entirely in your browser.",
+  "learn_title": "openvpn pki & x.509 101",
+  "icon": "lock"
+}

@@ -1,0 +1,38 @@
+<h3>What curl does</h3>
+<p><a href="https://curl.se/">curl</a> transfers data to or from a server from the command
+line. For HTTP it's the quickest way to reproduce an API call, debug a header, or script a
+request. The builder above maps each control onto a flag; this is what they mean.</p>
+
+<h3>The core flags</h3>
+<table>
+<thead><tr><th>flag</th><th>meaning</th></tr></thead>
+<tbody>
+<tr><td><code>-X METHOD</code></td><td>set the HTTP method. GET is the default, so it's omitted; <code>-I</code> is the shortcut for a HEAD request.</td></tr>
+<tr><td><code>-H 'Name: value'</code></td><td>add a request header. Repeat it for as many as you need.</td></tr>
+<tr><td><code>--data-raw '…'</code></td><td>send a request body verbatim (and imply POST). Plain <code>-d</code> treats a leading <code>@</code> as "read a file", which <code>--data-raw</code> avoids.</td></tr>
+<tr><td><code>-u user:pass</code></td><td>HTTP basic auth. For bearer tokens use <code>-H 'Authorization: Bearer …'</code> instead.</td></tr>
+</tbody>
+</table>
+
+<h3>Handy options</h3>
+<ul>
+<li><strong><code>-L</code></strong> — follow <code>3xx</code> redirects to the final URL.</li>
+<li><strong><code>-i</code></strong> — include the response headers in the output;
+<strong><code>-v</code></strong> shows the full request/response conversation (great for debugging);
+<strong><code>-s</code></strong> silences the progress meter.</li>
+<li><strong><code>--compressed</code></strong> — request gzip/deflate and decode it for you.</li>
+<li><strong><code>-k</code></strong> — skip TLS certificate verification. Handy against a lab box with a self-signed cert; never use it against anything you actually trust.</li>
+<li><strong><code>-o file</code></strong> — write the body to a file instead of the terminal (<code>-O</code> reuses the remote filename).</li>
+</ul>
+
+<h3>Quoting</h3>
+<p>The builder single-quotes every argument, which is correct for bash and zsh: single
+quotes are literal, so JSON, spaces, and <code>&amp;</code> are all safe. On Windows
+<code>cmd.exe</code> use double quotes instead; PowerShell parses <code>-d</code>/<code>&amp;</code>
+specially, so prefix the arguments with the <code>--%</code> stop-parsing token for complex
+bodies.</p>
+
+<h3>A quick debugging recipe</h3>
+<pre><code>curl -sv -H 'Accept: application/json' https://api.example.com/health</code></pre>
+<p><code>-s</code> hides noise, <code>-v</code> shows the negotiated TLS, request headers, and
+response status — usually enough to see why a call misbehaves.</p>

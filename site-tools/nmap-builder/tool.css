@@ -1,0 +1,64 @@
+.nm-form {
+  display: flex; flex-direction: column; gap: 10px;
+  border: 1px solid var(--twb-border); border-radius: 6px;
+  background: var(--twb-bg-1);
+  padding: 16px;
+  margin: 14px 0;
+}
+.nm-row { display: flex; align-items: center; gap: 12px; }
+.nm-row > label:first-child { flex: 0 0 110px; }
+.nm-inline { display: flex; align-items: center; gap: 8px; flex: 1; flex-wrap: wrap; }
+
+.nm-form input[type="text"],
+.nm-form input[type="number"],
+.nm-form select {
+  background: var(--twb-bg-0); color: var(--twb-text-normal);
+  border: 1px solid var(--twb-border); border-radius: 6px;
+  font-family: var(--twb-font-mono); font-size: 13px;
+  padding: 5px 10px;
+}
+.nm-form input[type="text"] { flex: 1; min-width: 0; }
+.nm-form input[type="number"] { width: 100px; }
+.nm-form input:focus, .nm-form select:focus {
+  outline: none; border-color: var(--twb-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--twb-accent) 25%, transparent);
+}
+
+.nm-checks { display: flex; flex-wrap: wrap; gap: 6px 16px; flex: 1; }
+.nm-check { display: flex; align-items: center; gap: 6px; font-size: 13.5px; }
+.nm-check input { accent-color: var(--twb-accent); }
+.nm-check input:disabled { opacity: 0.4; }
+.nm-check code { font-size: 12px; color: var(--twb-text-soft); }
+
+.nm-error {
+  margin: 14px 0; padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--twb-red) 34%, var(--twb-border));
+  border-left: 3px solid var(--twb-red);
+  background: color-mix(in srgb, var(--twb-red) 9%, var(--twb-bg-0));
+  border-radius: 6px;
+  font-family: var(--twb-font-mono); font-size: 13px;
+}
+.nm-error div { padding: 1px 0; }
+
+.nm-summary {
+  margin: 14px 0; padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--twb-accent) 34%, var(--twb-border));
+  border-left: 3px solid var(--twb-accent);
+  background: color-mix(in srgb, var(--twb-accent) 9%, var(--twb-bg-0));
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.nm-notes {
+  margin: 14px 0; padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--twb-warm) 34%, var(--twb-border));
+  border-left: 3px solid var(--twb-warm);
+  background: color-mix(in srgb, var(--twb-warm) 9%, var(--twb-bg-0));
+  border-radius: 6px;
+  font-size: 13px;
+}
+.nm-notes div { padding: 2px 0; }
+.nm-notes code { color: var(--twb-warm); }
+
+#nm-output-cmd { white-space: pre-wrap; word-break: break-all; }
+.nm-note { color: var(--twb-text-muted); font-size: 12.5px; }

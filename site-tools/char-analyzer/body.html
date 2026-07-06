@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="char-analyzer/tool.css">
+<p>Paste or type below — analysis runs live. The summary counts everything; the
+table details the first 5,000 characters.</p>
+<textarea id="ca-input" rows="6" placeholder="paste text here…" autocomplete="off"
+  autocapitalize="off" spellcheck="false"></textarea>
+<div class="ca-examples">
+  <button type="button" class="ca-example" data-text="Hello, World! 42">Hello, World! 42</button>
+  <button type="button" class="ca-example" data-text="Ünïcödé — çafé ✓">Ünïcödé — çafé ✓</button>
+  <button type="button" class="ca-example" data-text="tabs&#9;and&#10;newlines">tabs &amp; newlines</button>
+  <button type="button" class="ca-example" data-text="漢字 + emoji 😀🎉">漢字 + emoji 😀🎉</button>
+</div>
+<div id="ca-md5-block" hidden>
+  <div class="manifest-label ca-md5-caption">md5</div>
+  <table class="ca-md5"><tbody>
+    <tr><td>as written</td><td class="ca-md5-hash" id="ca-md5-raw"></td></tr>
+    <tr><td>with <code>\n</code> <span class="ca-md5-dim">linux — what
+      <code>echo text | md5sum</code> hashes</span></td>
+      <td class="ca-md5-hash" id="ca-md5-lf"></td></tr>
+    <tr><td>with <code>\r\n</code> <span class="ca-md5-dim">windows line
+      ending</span></td>
+      <td class="ca-md5-hash" id="ca-md5-crlf"></td></tr>
+  </tbody></table>
+</div>
+<div id="ca-view-caption" class="manifest-label ca-view-caption" hidden>colored view</div>
+<div id="ca-view" class="ca-view" hidden></div>
+<p id="ca-view-truncated" class="ca-note" hidden>Colored view truncated to the first 10,000 characters.</p>
+<div id="ca-summary" class="ca-summary" hidden></div>
+<p id="ca-truncated" class="ca-note" hidden>Table truncated to the first 5,000 characters.</p>
+<div id="ca-table-wrap" class="ca-table-wrap" hidden>
+<table id="ca-table">
+<thead><tr><th>#</th><th>char</th><th>category</th><th>code point</th><th>dec</th></tr></thead>
+<tbody id="ca-body"></tbody>
+</table>
+</div>
+<script defer src="char-analyzer/md5.js"></script>
+<script defer src="char-analyzer/tool.js"></script>

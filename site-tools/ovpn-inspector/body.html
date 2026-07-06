@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="ovpn-inspector/tool.css">
+<div class="ov-privacy manifest-label">🔒 Everything is parsed in your browser — nothing,
+including private keys, is ever sent anywhere.</div>
+<p>Paste an <code>.ovpn</code> config below, or open a file. Bare
+<code>.crt</code>/<code>.pem</code> certificates work too.</p>
+<div class="ov-controls">
+  <label class="ov-file-btn">open file…
+    <input type="file" id="ov-file" accept=".ovpn,.crt,.pem,.cer,.conf,.txt" hidden>
+  </label>
+  <span id="ov-filename" class="ov-dim"></span>
+</div>
+<textarea id="ov-input" rows="7" placeholder="client&#10;dev tun&#10;remote vpn.example.com 1194&#10;&lt;ca&gt;&#10;-----BEGIN CERTIFICATE-----&#10;…&#10;-----END CERTIFICATE-----&#10;&lt;/ca&gt;" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+<div class="ov-examples">
+  <span class="ov-dim">try:</span>
+  <button type="button" class="ov-example" data-sample="full">sample .ovpn</button>
+  <button type="button" class="ov-example" data-sample="cert">client cert only</button>
+  <button type="button" class="ov-example" data-sample="expired">expired cert</button>
+</div>
+<div id="ov-error" class="ov-error" hidden></div>
+<div id="ov-summary" class="ov-summary" hidden></div>
+<div id="ov-flags" class="ov-flags" hidden></div>
+<div id="ov-certs"></div>
+<div id="ov-config-wrap" hidden>
+  <div class="manifest-label ov-caption">configuration</div>
+  <table class="ov-config"><tbody id="ov-config"></tbody></table>
+</div>
+<script defer src="ovpn-inspector/x509.js"></script>
+<script defer src="ovpn-inspector/samples.js"></script>
+<script defer src="ovpn-inspector/tool.js"></script>

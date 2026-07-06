@@ -1,0 +1,58 @@
+.ch-io-row { display: flex; gap: 24px; flex-wrap: wrap; margin: 14px 0; }
+.ch-io { display: flex; flex-direction: column; gap: 4px; }
+.ch-io input {
+  background: var(--twb-bg-1); color: var(--twb-text-normal);
+  border: 1px solid var(--twb-border); border-radius: 6px;
+  font-family: var(--twb-font-mono); font-size: 17px;
+  padding: 8px 12px; width: 9em;
+}
+.ch-io input:focus {
+  outline: none; border-color: var(--twb-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--twb-accent) 25%, transparent);
+}
+
+.ch-examples { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 16px; }
+.ch-example {
+  font-family: var(--twb-font-mono); font-size: 12px;
+  background: color-mix(in srgb, var(--twb-accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--twb-accent) 30%, var(--twb-border));
+  border-radius: 4px; color: var(--twb-accent);
+  padding: 2px 8px; cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.ch-example:hover { background: var(--twb-accent); color: var(--twb-text-on-accent); }
+
+.ch-grid { margin: 16px 0; }
+.ch-grid th, .ch-grid td { text-align: center; padding: 6px 18px; }
+.ch-grid td:first-child {
+  font-family: var(--twb-font-mono); font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--twb-text-muted); text-align: left;
+}
+.ch-grid input { accent-color: var(--twb-accent); width: 16px; height: 16px; }
+
+.ch-special { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
+.ch-check {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--twb-font-mono); font-size: 12.5px;
+}
+.ch-check input { accent-color: var(--twb-warm); }
+
+.ch-error, .ch-warn {
+  margin: 14px 0; padding: 10px 14px;
+  border-radius: 6px;
+  font-family: var(--twb-font-mono); font-size: 13px;
+}
+.ch-error {
+  border: 1px solid color-mix(in srgb, var(--twb-red) 34%, var(--twb-border));
+  border-left: 3px solid var(--twb-red);
+  background: color-mix(in srgb, var(--twb-red) 9%, var(--twb-bg-0));
+}
+.ch-warn {
+  border: 1px solid color-mix(in srgb, var(--twb-orange) 34%, var(--twb-border));
+  border-left: 3px solid var(--twb-orange);
+  background: color-mix(in srgb, var(--twb-orange) 9%, var(--twb-bg-0));
+}
+
+.ch-ls-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
+.ch-ls-row code { color: var(--twb-accent-alt); font-size: 15px; }

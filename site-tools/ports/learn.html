@@ -1,0 +1,49 @@
+<h3>What a port is</h3>
+<p>An IP address gets traffic to a <em>machine</em>; a port number (0-65535, separate
+spaces for TCP and UDP) gets it to the right <em>program</em> on that machine. A
+connection is fully named by the five-tuple: protocol, source IP and port,
+destination IP and port.</p>
+
+<h3>The three ranges</h3>
+<table>
+<thead><tr><th>range</th><th>name</th><th>meaning</th></tr></thead>
+<tbody>
+<tr><td>0–1023</td><td>well-known</td><td>classic services; binding one requires root/Administrator</td></tr>
+<tr><td>1024–49151</td><td>registered</td><td>vendor defaults live here (3306, 5432, 8080…) — registration is convention, not enforcement</td></tr>
+<tr><td>49152–65535</td><td>ephemeral</td><td>what your OS grabs for the <em>source</em> side of outgoing connections</td></tr>
+</tbody>
+</table>
+<p>Nothing stops anyone running SSH on 8080 or a web server on 22 — ports are
+convention. That cuts both ways: scanners assume the convention, and so does this
+table.</p>
+
+<h3>TCP vs UDP</h3>
+<p><strong>TCP</strong> is a connection: ordered, acknowledged, retransmitted — web,
+mail, shells, databases. <strong>UDP</strong> is fire-and-forget datagrams — DNS
+queries, NTP, VoIP media, WireGuard — where a lost packet is better handled by the
+application (or ignored) than retransmitted late. Some services listen on both, and
+the same number means unrelated things in each space more often than you'd hope.</p>
+
+<h3>Seeing what's listening</h3>
+<table>
+<thead><tr><th>platform</th><th>command</th></tr></thead>
+<tbody>
+<tr><td>Linux</td><td><code>ss -tulpn</code> (or legacy <code>netstat -tulpn</code>)</td></tr>
+<tr><td>Windows</td><td><code>netstat -abno</code> or <code>Get-NetTCPConnection -State Listen</code></td></tr>
+<tr><td>macOS</td><td><code>lsof -i -P | grep LISTEN</code></td></tr>
+<tr><td>anywhere</td><td><code>curl -v host:port</code> / <code>Test-NetConnection host -Port 443</code> to poke one</td></tr>
+</tbody>
+</table>
+
+<h3>Rules of thumb</h3>
+<ul>
+<li><strong>"Open" just means something answered.</strong> Whether it's patched,
+authenticated, and supposed to be reachable is the actual question.</li>
+<li><strong>The legacy badge means it.</strong> Telnet (23), FTP (21), POP3 (110),
+and PPTP (1723) transmit credentials or use broken crypto — their TLS successors are
+in the table too.</li>
+<li><strong>Databases and RDP don't belong on the internet.</strong> 3389, 5432,
+3306, 6379, 27017, and 9200 exposed publicly are how breach write-ups begin.</li>
+<li><strong>Check both protocols.</strong> A firewall rule for TCP 53 does nothing
+for the UDP 53 queries that carry almost all real DNS traffic.</li>
+</ul>

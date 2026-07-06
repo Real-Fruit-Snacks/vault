@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="windows-events/tool.css">
+<p>Search by event ID, title, or keyword, then filter by channel, category, and
+criticality. Click any row to expand its detail — sub-code tables, the security
+relevance, and a <code>Get-WinEvent</code> query you can copy. Entirely offline.</p>
+
+<div class="we-controls">
+<input id="we-input" type="search" placeholder="4625, logon, service install, mimikatz…"
+  autocomplete="off" autocapitalize="off" spellcheck="false">
+<select id="we-channel" aria-label="Filter by channel"></select>
+<select id="we-cat" aria-label="Filter by category"></select>
+<select id="we-crit" aria-label="Filter by criticality">
+<option value="">any criticality</option>
+<option value="high">high</option>
+<option value="medium">medium</option>
+<option value="low">low</option>
+<option value="info">info</option>
+</select>
+</div>
+
+<p id="we-count" class="we-count"></p>
+
+<div class="we-table-wrap">
+<table id="we-table">
+<thead><tr>
+<th class="we-id-col">id</th>
+<th>channel</th>
+<th>category</th>
+<th>title</th>
+<th class="we-crit-col">criticality</th>
+</tr></thead>
+<tbody id="we-body"></tbody>
+</table>
+</div>
+<p id="we-empty" class="we-empty" hidden>No events match those filters.</p>
+
+<script defer src="windows-events/events.js"></script>
+<script defer src="windows-events/tool.js"></script>

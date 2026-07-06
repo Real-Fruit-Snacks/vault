@@ -1,0 +1,45 @@
+<h3>What a unit file is</h3>
+<p>systemd runs services from <strong>unit files</strong> — INI-style text describing how to
+start a program, what it depends on, and when to run it. It's the modern replacement for
+init scripts. A service unit has three sections: <code>[Unit]</code> (metadata and ordering),
+<code>[Service]</code> (how to run it), and <code>[Install]</code> (how it's enabled at boot).</p>
+
+<h3>[Unit] — metadata and ordering</h3>
+<table>
+<thead><tr><th>key</th><th>meaning</th></tr></thead>
+<tbody>
+<tr><td><code>Description</code></td><td>a one-line human label shown in <code>systemctl status</code></td></tr>
+<tr><td><code>After</code></td><td>start this unit <em>after</em> the listed units (ordering only). <code>network-online.target</code> is common for network services</td></tr>
+<tr><td><code>Wants</code> / <code>Requires</code></td><td>pull in other units. <code>Requires</code> is a hard dependency — if it fails, this unit fails too; <code>Wants</code> is a soft one</td></tr>
+</tbody>
+</table>
+
+<h3>[Service] — how it runs</h3>
+<table>
+<thead><tr><th>key</th><th>meaning</th></tr></thead>
+<tbody>
+<tr><td><code>Type</code></td><td><code>simple</code> (default — the process stays in the foreground), <code>exec</code> (like simple, waits for exec), <code>forking</code> (the process daemonizes itself), <code>oneshot</code> (runs once and exits), <code>notify</code> (signals readiness via <code>sd_notify()</code>)</td></tr>
+<tr><td><code>ExecStart</code></td><td>the command to run — must be an <strong>absolute path</strong>. Required.</td></tr>
+<tr><td><code>ExecStartPre</code> / <code>ExecStop</code></td><td>commands to run before start / on stop</td></tr>
+<tr><td><code>WorkingDirectory</code></td><td>the directory the process starts in</td></tr>
+<tr><td><code>User</code> / <code>Group</code></td><td>drop privileges to this account — don't run services as root unless they truly need it</td></tr>
+<tr><td><code>Environment</code></td><td>set an environment variable (repeatable); <code>EnvironmentFile</code> loads a file of them</td></tr>
+<tr><td><code>Restart</code></td><td><code>on-failure</code> restarts after a crash; <code>always</code> restarts even on clean exit; pair with <code>RestartSec</code> to back off</td></tr>
+<tr><td><code>RemainAfterExit</code></td><td>treat a <code>oneshot</code> unit as "active" after its command finishes</td></tr>
+</tbody>
+</table>
+
+<h3>[Install] — enabling at boot</h3>
+<p><code>WantedBy=multi-user.target</code> is the usual choice: when you
+<code>systemctl enable</code> the unit, it's linked to start in the normal multi-user
+(non-graphical) boot state. This section only matters for <code>enable</code>; it's ignored
+when you <code>start</code> the unit manually.</p>
+
+<h3>Installing it</h3>
+<pre><code>sudo cp myapp.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now myapp.service
+systemctl status myapp.service</code></pre>
+<p><code>daemon-reload</code> makes systemd re-read unit files after you add or edit one;
+<code>enable --now</code> both enables it at boot and starts it immediately. Check
+<code>journalctl -u myapp.service</code> for its logs.</p>

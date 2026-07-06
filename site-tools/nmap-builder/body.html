@@ -1,0 +1,126 @@
+<link rel="stylesheet" href="nmap-builder/tool.css">
+<p>Pick what to scan and how — the <code>nmap</code> command assembles live below, with a
+plain-language summary and privilege notes. Nothing runs here; copy the command and run it
+only against hosts you are authorized to test.</p>
+
+<div class="nm-form">
+  <div class="nm-row">
+    <label class="manifest-label" for="nm-targets">target(s)</label>
+    <input id="nm-targets" type="text" value="scanme.nmap.org" autocomplete="off"
+      spellcheck="false" placeholder="192.168.1.0/24, 10.0.0.1-50, host.example.com">
+  </div>
+
+  <div class="nm-row">
+    <label class="manifest-label" for="nm-scan">scan type</label>
+    <select id="nm-scan">
+      <optgroup label="port scans">
+        <option value="-sS" selected>TCP SYN (-sS)</option>
+        <option value="-sT">TCP connect (-sT)</option>
+        <option value="-sU">UDP (-sU)</option>
+        <option value="-sA">TCP ACK (-sA)</option>
+        <option value="-sF">TCP FIN (-sF)</option>
+        <option value="-sX">Xmas (-sX)</option>
+        <option value="-sN">TCP Null (-sN)</option>
+      </optgroup>
+      <optgroup label="no port scan">
+        <option value="-sn">ping sweep (-sn)</option>
+        <option value="-sL">list scan (-sL)</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <div class="nm-row" id="nm-row-ports">
+    <label class="manifest-label" for="nm-ports">ports</label>
+    <span class="nm-inline">
+      <select id="nm-ports">
+        <option value="" selected>default (top 1000)</option>
+        <option value="-F">fast — top 100 (-F)</option>
+        <option value="top">top N (--top-ports)</option>
+        <option value="spec">specific (-p)</option>
+        <option value="-p-">all 65535 (-p-)</option>
+      </select>
+      <input id="nm-topn" type="number" min="1" max="65535" value="20" hidden>
+      <input id="nm-portspec" type="text" placeholder="22,80,443,8000-8100"
+        autocomplete="off" spellcheck="false" hidden>
+    </span>
+  </div>
+
+  <div class="nm-row" id="nm-row-detect">
+    <label class="manifest-label">detection</label>
+    <div class="nm-checks">
+      <label class="nm-check"><input id="nm-sv" type="checkbox"> version (<code>-sV</code>)</label>
+      <label class="nm-check"><input id="nm-o" type="checkbox"> OS (<code>-O</code>)</label>
+      <label class="nm-check"><input id="nm-sc" type="checkbox"> default scripts (<code>-sC</code>)</label>
+      <label class="nm-check"><input id="nm-a" type="checkbox"> aggressive (<code>-A</code>)</label>
+    </div>
+  </div>
+
+  <div class="nm-row" id="nm-row-script">
+    <label class="manifest-label" for="nm-script">NSE script</label>
+    <input id="nm-script" type="text" autocomplete="off" spellcheck="false"
+      placeholder="vuln, http-title, smb-os-discovery… (--script)">
+  </div>
+
+  <div class="nm-row">
+    <label class="manifest-label">discovery</label>
+    <div class="nm-checks">
+      <label class="nm-check"><input id="nm-pn" type="checkbox"> skip host discovery (<code>-Pn</code>)</label>
+      <label class="nm-check"><input id="nm-n" type="checkbox"> no DNS (<code>-n</code>)</label>
+      <label class="nm-check"><input id="nm-6" type="checkbox"> IPv6 (<code>-6</code>)</label>
+    </div>
+  </div>
+
+  <div class="nm-row">
+    <label class="manifest-label" for="nm-timing">timing</label>
+    <select id="nm-timing">
+      <option value="" selected>default (T3)</option>
+      <option value="-T0">paranoid (-T0)</option>
+      <option value="-T1">sneaky (-T1)</option>
+      <option value="-T2">polite (-T2)</option>
+      <option value="-T3">normal (-T3)</option>
+      <option value="-T4">aggressive (-T4)</option>
+      <option value="-T5">insane (-T5)</option>
+    </select>
+  </div>
+
+  <div class="nm-row">
+    <label class="manifest-label">reporting</label>
+    <div class="nm-checks">
+      <label class="nm-check"><input id="nm-open" type="checkbox"> open ports only (<code>--open</code>)</label>
+      <label class="nm-check"><input id="nm-v" type="checkbox"> verbose (<code>-v</code>)</label>
+      <label class="nm-check"><input id="nm-reason" type="checkbox"> show reason (<code>--reason</code>)</label>
+    </div>
+  </div>
+
+  <div class="nm-row">
+    <label class="manifest-label" for="nm-output">save output</label>
+    <span class="nm-inline">
+      <select id="nm-output">
+        <option value="" selected>none</option>
+        <option value="-oN">normal (-oN)</option>
+        <option value="-oX">XML (-oX)</option>
+        <option value="-oG">grepable (-oG)</option>
+        <option value="-oA">all formats (-oA)</option>
+      </select>
+      <input id="nm-outfile" type="text" placeholder="scan (basename or filename)"
+        autocomplete="off" spellcheck="false" hidden>
+    </span>
+  </div>
+</div>
+
+<div id="nm-errors" class="nm-error" hidden></div>
+<div id="nm-summary" class="nm-summary" hidden></div>
+
+<figure class="code-block">
+<figcaption class="code-lang manifest-label">nmap</figcaption>
+<pre class="code-body"><code id="nm-output-cmd"></code></pre>
+</figure>
+
+<div id="nm-notes" class="nm-notes" hidden></div>
+
+<p class="nm-note">Raw-packet scans (<code>-sS</code>, <code>-sU</code>, the FIN/Xmas/Null
+scans), <code>-O</code>, and <code>-A</code> need root; without it nmap silently falls back
+to a slower <code>-sT</code> connect scan. Port scanning without permission is unlawful in
+many places — only scan systems you own or are explicitly authorized to test.</p>
+
+<script defer src="nmap-builder/tool.js"></script>

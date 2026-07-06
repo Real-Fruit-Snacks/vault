@@ -1,0 +1,172 @@
+<link rel="stylesheet" href="schtasks-builder/tool.css">
+<p>Fill in the blanks — the <code>schtasks /create</code> command assembles live below.
+The form adapts to the schedule type you pick.</p>
+
+<div class="st-form">
+  <div class="st-row">
+    <label class="manifest-label" for="st-name">task name</label>
+    <input id="st-name" type="text" value="Nightly Backup" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="st-row">
+    <label class="manifest-label" for="st-prog">program to run</label>
+    <input id="st-prog" type="text" value="C:\Scripts\backup.cmd" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="st-row" id="st-row-short" hidden>
+    <label class="manifest-label">short name</label>
+    <div class="st-short">
+      <div class="st-short-line"><code id="st-short-path"></code>
+        <button type="button" id="st-short-use" class="st-short-btn">use this path</button></div>
+      <p class="st-note">The <code>~1</code> suffix is Windows' usual default, but real
+      short names depend on the filesystem (and 8.3 names can be disabled). Confirm on
+      the target machine with:<br><code id="st-short-verify" class="st-verify"></code></p>
+    </div>
+  </div>
+  <div class="st-row">
+    <label class="manifest-label" for="st-args">arguments</label>
+    <input id="st-args" type="text" placeholder="(optional)" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="st-row">
+    <label class="manifest-label" for="st-sc">schedule</label>
+    <select id="st-sc">
+      <option value="DAILY" selected>daily</option>
+      <option value="WEEKLY">weekly</option>
+      <option value="MONTHLY">monthly</option>
+      <option value="MINUTE">every N minutes</option>
+      <option value="HOURLY">every N hours</option>
+      <option value="ONCE">once</option>
+      <option value="ONSTART">at system startup</option>
+      <option value="ONLOGON">at logon</option>
+      <option value="ONIDLE">when idle</option>
+    </select>
+  </div>
+  <div class="st-row" id="st-row-mo" hidden>
+    <label class="manifest-label" for="st-mo">every</label>
+    <span class="st-inline"><input id="st-mo" type="number" min="1" value="1">
+    <span id="st-mo-unit" class="st-unit">days</span></span>
+  </div>
+  <div class="st-row" id="st-row-monthly-mode" hidden>
+    <label class="manifest-label" for="st-monthly-mode">pattern</label>
+    <select id="st-monthly-mode">
+      <option value="DOM" selected>on a day of the month</option>
+      <option value="FIRST">on the first …</option>
+      <option value="SECOND">on the second …</option>
+      <option value="THIRD">on the third …</option>
+      <option value="FOURTH">on the fourth …</option>
+      <option value="LAST">on the last …</option>
+      <option value="LASTDAY">on the last day of the month</option>
+    </select>
+  </div>
+  <div class="st-row" id="st-row-dom" hidden>
+    <label class="manifest-label" for="st-dom">day of month</label>
+    <select id="st-dom"></select>
+  </div>
+  <div class="st-row" id="st-row-dow" hidden>
+    <label class="manifest-label" for="st-dow">weekday</label>
+    <select id="st-dow">
+      <option>MON</option><option>TUE</option><option>WED</option><option>THU</option>
+      <option>FRI</option><option>SAT</option><option>SUN</option>
+    </select>
+  </div>
+  <div class="st-row" id="st-row-days" hidden>
+    <label class="manifest-label">days</label>
+    <div class="st-chips" id="st-days"></div>
+  </div>
+  <div class="st-row" id="st-row-months" hidden>
+    <label class="manifest-label">months</label>
+    <div class="st-chips" id="st-months"></div>
+  </div>
+  <div class="st-row" id="st-row-st">
+    <label class="manifest-label" for="st-st">start time</label>
+    <input id="st-st" type="time" value="09:00">
+  </div>
+  <div class="st-row" id="st-row-sd" hidden>
+    <label class="manifest-label" for="st-sd">start date</label>
+    <input id="st-sd" type="date">
+  </div>
+  <div class="st-row" id="st-row-idle" hidden>
+    <label class="manifest-label" for="st-idle">idle minutes</label>
+    <input id="st-idle" type="number" min="1" max="999" value="10">
+  </div>
+  <div class="st-row">
+    <label class="manifest-label" for="st-ru">run as</label>
+    <span class="st-inline">
+      <select id="st-ru">
+        <option value="" selected>current user</option>
+        <option value="SYSTEM">SYSTEM</option>
+        <option value="custom">another account…</option>
+      </select>
+      <input id="st-ru-custom" type="text" placeholder="DOMAIN\user" autocomplete="off"
+        spellcheck="false" hidden>
+    </span>
+  </div>
+  <div class="st-row">
+    <label class="manifest-label" for="st-rl">run level</label>
+    <select id="st-rl">
+      <option value="" selected>limited (default)</option>
+      <option value="HIGHEST">highest privileges</option>
+    </select>
+  </div>
+  <div class="st-row">
+    <label class="manifest-label" for="st-f">overwrite</label>
+    <label class="st-check"><input id="st-f" type="checkbox"> replace the task if it
+      already exists (<code>/f</code>)</label>
+  </div>
+</div>
+
+<div id="st-errors" class="st-error" hidden></div>
+<div id="st-summary" class="st-summary" hidden></div>
+
+<figure class="code-block">
+<figcaption class="code-lang manifest-label">schtasks</figcaption>
+<pre class="code-body"><code id="st-output"></code></pre>
+</figure>
+
+<p class="st-note">The <code>/sd</code> and <code>/ed</code> date format follows the
+machine's regional settings (MM/DD/YYYY on US-locale systems). Creating tasks that run
+as SYSTEM or with highest privileges requires an elevated prompt. A custom account will
+be prompted for its password when the command runs.</p>
+
+<section class="rc-section">
+<h2>Last Run Result codes</h2>
+<p>When a scheduled task fails silently, Task Scheduler records a hex <em>Last Run
+Result</em> — the column in <code>taskschd.msc</code>, or the <code>Last Result</code>
+line from <code>schtasks /query /tn "Name" /v /fo LIST</code>. Search a code or keyword
+to see what it means and how to fix it. <code>0x0</code> is success; anything else is
+either the program's own exit code or a Task Scheduler <code>SCHED_*</code> constant.</p>
+
+<div class="rc-controls">
+<input id="rc-input" type="search" placeholder="0x41303, 0x1, access denied, not logged on…"
+  autocomplete="off" autocapitalize="off" spellcheck="false">
+<select id="rc-fam" aria-label="Filter by source">
+<option value="">any source</option>
+<option value="exit">program exit code</option>
+<option value="sched">task scheduler</option>
+</select>
+<select id="rc-sev" aria-label="Filter by severity">
+<option value="">any severity</option>
+<option value="high">high</option>
+<option value="medium">medium</option>
+<option value="low">low</option>
+<option value="info">info</option>
+</select>
+</div>
+
+<p id="rc-count" class="rc-count"></p>
+
+<div class="rc-table-wrap">
+<table id="rc-table">
+<thead><tr>
+<th class="rc-code-col">code</th>
+<th>constant</th>
+<th>meaning</th>
+<th class="rc-sev-col">severity</th>
+</tr></thead>
+<tbody id="rc-body"></tbody>
+</table>
+</div>
+<p id="rc-empty" class="rc-empty" hidden>No codes match those filters.</p>
+</section>
+
+<script defer src="schtasks-builder/tool.js"></script>
+<script defer src="schtasks-builder/result-codes.js"></script>
+<script defer src="schtasks-builder/result-codes-view.js"></script>

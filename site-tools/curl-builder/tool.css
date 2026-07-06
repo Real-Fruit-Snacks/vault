@@ -1,0 +1,47 @@
+.cb-form {
+  display: flex; flex-direction: column; gap: 10px;
+  border: 1px solid var(--twb-border); border-radius: 6px;
+  background: var(--twb-bg-1); padding: 16px; margin: 14px 0;
+}
+.cb-row { display: flex; align-items: flex-start; gap: 12px; }
+.cb-row > label:first-child { flex: 0 0 90px; padding-top: 6px; }
+.cb-inline { display: flex; align-items: center; gap: 8px; flex: 1; flex-wrap: wrap; }
+
+.cb-form input[type="text"],
+.cb-form select,
+.cb-form textarea {
+  background: var(--twb-bg-0); color: var(--twb-text-normal);
+  border: 1px solid var(--twb-border); border-radius: 6px;
+  font-family: var(--twb-font-mono); font-size: 13px; padding: 5px 10px;
+}
+.cb-form input[type="text"], .cb-form textarea { flex: 1; min-width: 0; }
+.cb-form textarea { resize: vertical; line-height: 1.5; }
+.cb-form input:focus, .cb-form select:focus, .cb-form textarea:focus {
+  outline: none; border-color: var(--twb-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--twb-accent) 25%, transparent);
+}
+
+.cb-checks { display: flex; flex-wrap: wrap; gap: 6px 16px; flex: 1; padding-top: 4px; }
+.cb-check { display: flex; align-items: center; gap: 6px; font-size: 13.5px; }
+.cb-check input { accent-color: var(--twb-accent); }
+.cb-check code { font-size: 12px; color: var(--twb-text-soft); }
+
+.cb-error {
+  margin: 14px 0; padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--twb-red) 34%, var(--twb-border));
+  border-left: 3px solid var(--twb-red);
+  background: color-mix(in srgb, var(--twb-red) 9%, var(--twb-bg-0));
+  border-radius: 6px; font-family: var(--twb-font-mono); font-size: 13px;
+}
+.cb-error div { padding: 1px 0; }
+
+.cb-summary {
+  margin: 14px 0; padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--twb-accent) 34%, var(--twb-border));
+  border-left: 3px solid var(--twb-accent);
+  background: color-mix(in srgb, var(--twb-accent) 9%, var(--twb-bg-0));
+  border-radius: 6px; font-size: 14px;
+}
+
+#cb-output { white-space: pre-wrap; word-break: break-all; }
+.cb-note { color: var(--twb-text-muted); font-size: 12.5px; }

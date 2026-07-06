@@ -1,0 +1,7 @@
+{
+  "title": "Fixture Vault",
+  "banner_enabled": true,
+  "banner_text": "Fixture banner text",
+  "banner_style": "warn",
+  "pet_enabled": true
+}
