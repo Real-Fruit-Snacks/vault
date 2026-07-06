@@ -1,6 +1,6 @@
 {
   "title": "Text Codec",
-  "description": "Encode and decode between plain text and Base64, URL-safe Base64, percent-encoding, or hex \u2014 live in both directions, fully offline.",
+  "description": "Encode and decode between plain text and Base64, URL-safe Base64, percent-encoding, or hex \u2014 live in both directions.",
   "learn_title": "encodings 101",
   "icon": "swap"
 }

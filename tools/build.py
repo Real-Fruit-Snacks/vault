@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the vault into a static site. Requires only Python 3.9+; no network."""
+"""Build the vault into a static site. Requires only Python 3.9+."""
 import argparse
 import html as html_mod
 import json
@@ -344,7 +344,7 @@ def main(argv=None) -> int:
             nav_html=pages.build_nav(vault, "", "tools/index.html", tools=nav_tools, home_note=home,
                                      canvases=canvas_paths, bases=base_paths),
             breadcrumbs="<span>tools</span>",
-            description="Interactive, offline browser tools."))
+            description="Interactive browser tools."))
 
     tool_paths = {toolpages.tool_output_path(t) for t in tools}
     if tools:

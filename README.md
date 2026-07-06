@@ -1,6 +1,6 @@
 # Vault
 
-Publish an Obsidian vault as a fast, self-contained static website.
+Publish an Obsidian vault as a fast static website.
 
 The vault lives in `Notes/`. Every Markdown file inside it becomes a page,
 unless its frontmatter says `publish: false`. Wikilinks, embeds, callouts,
@@ -8,13 +8,12 @@ task lists, Mermaid diagrams, tags, backlinks, and client-side search all
 work. Obsidian canvases (`.canvas`) publish as read-only pan-and-zoom pages,
 and Obsidian bases (`.base`) publish as build-time table and card views.
 
-The site ships with an optional toolbox of offline utilities (encoders,
-calculators, reference tables, command builders) under `Tools`.
+The site ships with an optional toolbox of utilities (encoders, calculators,
+reference tables, command builders) under `Tools`.
 
 ## Requirements
 
-Python 3.9 or newer. No pip, no npm, and no network access at build or run
-time. All dependencies are vendored in `tools/vendor/` and `site-assets/`.
+Python 3.9 or newer. Everything the build needs is included in the repository.
 
 ## Build
 
@@ -69,15 +68,14 @@ and deploys `public/` on every push.
 
 ### GitLab Pages
 
-`.gitlab-ci.yml` builds and publishes `public/` on `main` out of the box. On a
-self-hosted or airgapped GitLab instance, set the `BUILD_IMAGE` CI/CD variable
-to any Python 3.9+ image available in your internal registry.
+`.gitlab-ci.yml` builds and publishes `public/` on `main`. Set the
+`BUILD_IMAGE` CI/CD variable to any Python 3.9+ image if you need to override
+the default.
 
-### Airgapped and internal networks
+### Any static host
 
-The repository contains everything the build needs. Clone or copy it, run
-`python tools/build.py`, and serve `public/` with any static file server. No
-external requests are made at build or run time.
+Run `python tools/build.py` and serve the resulting `public/` directory with
+any static file server.
 
 ## Layout
 
@@ -86,7 +84,7 @@ external requests are made at build or run time.
 | `Notes/` | The vault. Every Markdown file inside is published (opt out per note with `publish: false`) |
 | `Notes/.obsidian/` | Obsidian configuration (dot-folders are never published) |
 | `Notes/site.config.json` | Site configuration |
-| `tools/` | Build system (pure Python, vendored dependencies) |
+| `tools/` | Build system |
 | `site-assets/` | Theme CSS, fonts, Mermaid, MiniSearch |
 | `site-tools/` | Standalone tool pages, published under `Tools` |
 | `tests/` | Unit and integration tests |
@@ -94,7 +92,7 @@ external requests are made at build or run time.
 
 ## License
 
-MIT. See `LICENSE`. Vendored components keep their own licenses:
+MIT. See `LICENSE`. Bundled third-party components keep their own licenses:
 markdown-it-py, mdurl, mdit-py-plugins, Pygments, and PyYAML in `tools/vendor/`;
 Mermaid and MiniSearch in `site-assets/`; JetBrains Mono and Inter in
 `site-assets/fonts/`.

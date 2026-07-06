@@ -160,7 +160,7 @@ class BuildTests(unittest.TestCase):
         # the home note is reachable via the site title, not listed here
         self.assertNotIn('href="Home.html"', html)
 
-    def test_all_links_relative_and_offline(self):
+    def test_all_links_relative_and_local(self):
         for page in self.out.rglob("*.html"):
             if page.name == "404.html":
                 continue  # 404 page intentionally uses absolute links for self-containment

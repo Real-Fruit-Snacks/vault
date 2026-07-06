@@ -1,6 +1,6 @@
 {
   "title": "Windows Event ID Reference",
-  "description": "A searchable, fully offline reference for the Windows Event IDs that matter to defenders and admins — logon, account, Kerberos, process, service, task, PowerShell, and Sysmon events, with logon-type and failure-code tables and a ready-to-copy Get-WinEvent query for each.",
+  "description": "A searchable reference for the Windows Event IDs that matter to defenders and admins — logon, account, Kerberos, process, service, task, PowerShell, and Sysmon events, with logon-type and failure-code tables and a ready-to-copy Get-WinEvent query for each.",
   "learn_title": "reading the Windows event logs",
   "icon": "shield"
 }

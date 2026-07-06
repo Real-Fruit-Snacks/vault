@@ -1,6 +1,6 @@
 {
   "title": "Port Reference",
-  "description": "A searchable, fully offline table of well-known ports \u2014 filter by number, service, or purpose.",
+  "description": "A searchable table of well-known ports \u2014 filter by number, service, or purpose.",
   "learn_title": "ports 101",
   "icon": "book"
 }

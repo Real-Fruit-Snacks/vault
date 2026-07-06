@@ -1,7 +1,7 @@
-# BUILD_IMAGE can be overridden as a CI/CD variable on self-hosted/airgapped
-# GitLab instances to point at any Python 3.9+ image in the internal registry.
-# The image must include a git binary so note last-updated dates can be
-# computed; the build still succeeds without git, but dates are omitted.
+# BUILD_IMAGE can be overridden as a CI/CD variable to point at any Python
+# 3.9+ image. The image should include a git binary so note last-updated
+# dates can be computed; the build still succeeds without git, but dates are
+# omitted.
 image: $BUILD_IMAGE
 
 variables:
