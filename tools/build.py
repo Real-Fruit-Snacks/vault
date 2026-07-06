@@ -417,7 +417,8 @@ def main(argv=None) -> int:
             "type": "tool",
         })
     write(out / "search-index.js",
-          "window.TWB_SEARCH_INDEX=" + json.dumps(entries, ensure_ascii=False) + ";")
+          "window.TWB_SEARCH_INDEX=" + json.dumps(entries, ensure_ascii=False) + ";\n"
+          + "window.TWB_NOTE_COUNT=" + str(len(vault.notes)) + ";")
 
     graph = graphdata.build_graph(vault, backlinks)
     write(out / "graph-index.js",

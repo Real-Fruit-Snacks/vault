@@ -70,10 +70,13 @@ class BuildTests(unittest.TestCase):
         js = self.read("search-index.js")
         self.assertTrue(js.startswith("window.TWB_SEARCH_INDEX="))
         self.assertIn("Site Plan", js)
+        # the boot splash reads this exact note count (fixture has 6 published)
+        self.assertIn("window.TWB_NOTE_COUNT=6;", js)
 
     def test_search_index_includes_typed_tool_entries(self):
         js = self.read("search-index.js")
-        entries = json.loads(js[len("window.TWB_SEARCH_INDEX="):].rstrip(";"))
+        array_line = js.splitlines()[0]  # note count trails on its own line
+        entries = json.loads(array_line[len("window.TWB_SEARCH_INDEX="):].rstrip(";"))
         self.assertEqual({e["type"] for e in entries}, {"note", "tool"})
         ids = [e["id"] for e in entries]
         self.assertEqual(ids, list(range(len(entries))), "ids must stay unique")

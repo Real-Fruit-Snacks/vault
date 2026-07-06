@@ -5,12 +5,15 @@
   // for reduced-motion). No flag: nothing to do.
   if (root.getAttribute("data-boot") !== "1") return;
 
-  var idx = window.TWB_SEARCH_INDEX || [];
-  var noteCount = idx.filter(function (e) { return e.type !== "tool"; }).length;
+  // The build emits the true note count; fall back to the search index
+  // (which also includes canvases and bases) only if it is missing.
+  var n = (typeof window.TWB_NOTE_COUNT === "number")
+    ? window.TWB_NOTE_COUNT
+    : (window.TWB_SEARCH_INDEX || []).filter(function (e) { return e.type !== "tool"; }).length;
   var lines = [
     "terminal-workbench :: boot",
     "mounting vault … ok",
-    "indexing " + noteCount + " notes … ok",
+    "indexing " + n + (n === 1 ? " note" : " notes") + " … ok",
     "loading search index … ok",
     "spawning ghost … ok",
     "ready."
