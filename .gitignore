@@ -5,6 +5,8 @@ _vendor_dl/
 .claude/
 .superpowers/
 
-# Obsidian per-machine UI state (changes constantly; noise for Git sync)
+# Obsidian per-machine UI state and caches (change constantly; noise for sync)
 Notes/.obsidian/workspace.json
 Notes/.obsidian/workspace-mobile.json
+Notes/.obsidian/cache
+Notes/.trash/
