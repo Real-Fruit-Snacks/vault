@@ -4,3 +4,7 @@ __pycache__/
 _vendor_dl/
 .claude/
 .superpowers/
+
+# Obsidian per-machine UI state (changes constantly; noise for Git sync)
+Notes/.obsidian/workspace.json
+Notes/.obsidian/workspace-mobile.json
