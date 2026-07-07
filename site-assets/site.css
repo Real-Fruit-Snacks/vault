@@ -510,7 +510,11 @@ button.copy-code {
 }
 button.copy-code:hover { color: var(--twb-accent); background: var(--twb-bg-3); }
 button.copy-code.copied { color: var(--twb-accent); }
-.code-body { margin: 0; padding: 12px; overflow-x: auto; }
+/* Wrap long lines (e.g. URLs) instead of scrolling; preserve indentation. */
+.code-body {
+  margin: 0; padding: 12px; overflow-x: auto;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
 .code-body code {
   background: none; border: none; padding: 0;
   font-size: 12.5px; line-height: 1.55;

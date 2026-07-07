@@ -104,7 +104,11 @@ class NoteRenderer:
                     f'<div class="callout-title manifest-label">{title}</div>\n'
                     f'<div class="callout-body">')
             tail = "</div>\n</div>"
-        return f"{head}\n\n{body_md}\n\n{tail}"
+        # Wrap the emitted HTML in blank lines so markdown-it treats it as a
+        # self-contained HTML block. Without the trailing blank line an
+        # immediately-following line (e.g. "## Heading" with no blank line, as
+        # Obsidian allows) gets swallowed into the block and rendered literally.
+        return f"\n{head}\n\n{body_md}\n\n{tail}\n"
 
     # --- inline elements ---
 
