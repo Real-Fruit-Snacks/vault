@@ -333,16 +333,8 @@ html[data-nav-colors="on"] .nav-notes li[data-color="5"] summary { color: var(--
   display: flex; align-items: center; gap: 7px; padding: 3px 6px;
   /* section header: outrank the 13px links below it */
   font-size: 12.5px; letter-spacing: 0.08em;
-  color: var(--twb-text-soft);
+  color: var(--twb-accent);
   margin-bottom: 4px;
-}
-/* Underline just the section header label (not the full sidebar width),
-   to set it off from the list below. */
-.nav-notes > a.manifest-label,
-.nav-tools > a.manifest-label {
-  width: fit-content;
-  border-bottom: 1px solid var(--twb-border);
-  padding-bottom: 7px; margin-bottom: 8px;
 }
 .nav-tools > a.manifest-label::before,
 .nav-notes > a.manifest-label::before {
@@ -356,7 +348,7 @@ html[data-nav-colors="on"] .nav-notes li[data-color="5"] summary { color: var(--
   mask-image: var(--ticon-book);
 }
 .nav-tools > a.manifest-label:hover,
-.nav-notes > a.manifest-label:hover { color: var(--twb-accent); text-decoration: none; }
+.nav-notes > a.manifest-label:hover { color: var(--twb-accent-alt); text-decoration: none; }
 .nav-tools .nav-tree a { display: flex; align-items: center; gap: 6px; }
 .nav-tools .nav-tree a::before {
   content: ""; flex: none; width: 1.05em; height: 1.05em;
