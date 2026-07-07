@@ -14,25 +14,46 @@
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var SIZE = 28, MARGIN = 8, TOP_CLAMP = 88;
-  var TRAIL = 44;          // resting distance behind the cursor
-  var EASE = 0.06;         // lerp factor per frame
-  var FLOAT_EASE = 0.045;  // gentler drift while roaming
-  var NAP_AFTER = 45000;   // ms of stillness before napping
+  var TRAIL = 44;            // cursor mode: resting distance behind the pointer
+  var EASE = 0.06;           // cursor mode: follow ease
+  var NAP_AFTER = 60000;     // idle this long with no input -> nap
+  var BORED_AFTER = 22000;   // no startle this long while drifting -> spin
+  var SPOOK_DIST = 50;       // pointer within this many px -> startled
+  var SPOOK_COOLDOWN = 2600; // minimum gap between startles
 
+  // Eased "core" position; roam mode renders a drifting bob on top of it.
   var x = window.innerWidth - SIZE - 16;
   var y = window.innerHeight - SIZE - 16;
   var mx = null, my = null;
+  var lean = 0;
+  var raf = null;
+
+  // cursor-mode nap bookkeeping (kept separate from the roam machine)
   var lastMove = Date.now();
   var lastZ = 0;
   var napping = false;
   var petting = false;
-  var lean = 0;
-  var raf = null;
-  // Float mode: the element currently being perched on, a stable horizontal
-  // offset along it, and the timestamp until which the pet rests there.
-  var perch = null, perchAt = 0.5, perchUntil = 0;
+
+  // --- roam ("float") state machine ---
+  // drift: jellyfish wander | peek: hide at an element edge | read: bob
+  // beside the paragraph in view | spook: startled zip | nap: idle corner.
+  var roamPhase = "drift";
+  var phaseUntil = 0;                // when the current timed phase ends
+  var tgt = { x: x, y: y };          // navigation target for the phase
+  var tgtEase = 0.02;               // how hard we chase tgt (per phase)
+  var bobT = Math.random() * 6.28;   // bob / weave accumulator
+  var lastActive = Date.now();       // last real user activity (any input)
+  var lastStartle = Date.now();      // last startle (drives the bored spin)
+  var lastRead = 0;                  // last reading-along anchor
+  var readEl = null;                 // paragraph being read along
+  var spinning = false;
+  var holdUntil = 0;                 // hover-in-place ("take a break") timer
+  var OFF = SIZE + 40;               // how far past an edge to park when hidden
+  var DRIFT_EASE = 0.013, PEEK_EASE = 0.09, READ_EASE = 0.08, SPOOK_EASE = 0.22;
+  var VANISH_EASE = 0.06, ARRIVE_EASE = 0.05;
+
   // Body color: an index into the six-token theme palette (0 = accent, the
-  // default). Petting the ghost advances it; the choice is remembered.
+  // default). Booping the ghost advances it; the choice is remembered.
   var COLOR_COUNT = 6;
   var petColor = 0;
   try { petColor = parseInt(localStorage.getItem("twb-pet-color"), 10) || 0; }
@@ -51,17 +72,33 @@
     } catch (e) { /* private mode */ }
   }
 
-  function clamp() {
-    var maxX = window.innerWidth - SIZE - MARGIN;
-    var maxY = window.innerHeight - SIZE - MARGIN;
+  // --- geometry helpers ---
+  function maxX() { return window.innerWidth - SIZE - MARGIN; }
+  function maxY() { return window.innerHeight - SIZE - MARGIN; }
+  function clampX(v) { return Math.max(MARGIN, Math.min(maxX(), v)); }
+  function clampY(v) { return Math.max(TOP_CLAMP, Math.min(maxY(), v)); }
+  function dist(ax, ay, bx, by) {
+    var dx = ax - bx, dy = ay - by;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+  function clampCore() {
     if (x < MARGIN) x = MARGIN;
     if (y < TOP_CLAMP) y = TOP_CLAMP;
-    if (x > maxX) x = maxX;
-    if (y > maxY) y = maxY;
+    if (x > maxX()) x = maxX();
+    if (y > maxY()) y = maxY();
   }
-  function apply() {
-    pet.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)";
+  function renderAt(px, py) {
+    pet.style.transform = "translate(" + px.toFixed(1) + "px," + py.toFixed(1) + "px)";
     tilt.style.transform = "rotate(" + lean.toFixed(1) + "deg)";
+  }
+  function apply() { renderAt(x, y); }
+  // Ease the core toward tgt and bank the lean into the motion.
+  function ease() {
+    var vx = (tgt.x - x) * tgtEase, vy = (tgt.y - y) * tgtEase;
+    x += vx; y += vy;
+    lean += (vx * 1.5 - lean) * 0.12;
+    if (lean > 12) lean = 12;
+    if (lean < -12) lean = -12;
   }
 
   function spawnParticle(ch, cls) {
@@ -73,104 +110,346 @@
       if (s.parentNode) s.parentNode.removeChild(s);
     }, 1400);
   }
+  // Only accept clicks while the ghost is holding still enough to boop; this
+  // also stops a wandering ghost from stealing clicks on the text beneath it.
+  function setBoopable(on) { sprite.style.pointerEvents = on ? "auto" : "none"; }
 
+  // --- cursor-mode nap (dim in place) ---
   function setNap(on) {
     if (napping === on) return;
     napping = on;
-    if (on) pet.className = "pet-nap";
-    else pet.className = "";
+    pet.className = on ? "pet-nap" : "";
   }
 
   function scheduleBlink() {
     setTimeout(function () {
-      if (!napping && !petting) {
+      if (!napping && !petting && !spinning && roamPhase !== "nap") {
         sprite.className = "pet-sprite pet-blink";
         setTimeout(function () {
-          if (!petting) sprite.className = "pet-sprite";
+          if (!petting && !spinning) sprite.className = "pet-sprite";
         }, 160);
       }
       scheduleBlink();
     }, 4000 + Math.random() * 3000);
   }
 
+  // --- activity + input ---
+  function markActivity() {
+    lastActive = Date.now();
+    if (petMode() === "float" && roamPhase === "nap") wakeFromNap();
+  }
   document.addEventListener("mousemove", function (e) {
-    mx = e.clientX;
-    my = e.clientY;
+    mx = e.clientX; my = e.clientY;
     lastMove = Date.now();
+    markActivity();
     if (napping) setNap(false);
+    if (petMode() === "float") maybeSpook();
     schedule();
   });
+  document.addEventListener("scroll", function () {
+    markActivity();
+    if (petMode() === "float") maybeRead();
+    schedule();
+  }, true);  // capture so inner scrollers count too
+  document.addEventListener("keydown", markActivity);
+  document.addEventListener("click", markActivity, true);
+  document.addEventListener("touchstart", markActivity, true);
 
+  // Boop: happy scale-bounce, a heart or a "!", then zip away.
   sprite.addEventListener("click", function () {
-    cyclePetColor();       // every pet nudges the ghost to the next color
-    if (petting) return;   // but the happy bounce only plays one at a time
+    markActivity();
+    cyclePetColor();
+    if (petting) return;
     petting = true;
     setNap(false);
-    lastMove = Date.now();
     sprite.className = "pet-sprite pet-happy";
-    spawnParticle("♥", "pet-heart");
+    if (Math.random() < 0.5) spawnParticle("♥", "pet-heart");
+    else spawnParticle("!", "pet-bang");
+    if (petMode() === "float") { wakeFromNap(); zipAway(false); }
     setTimeout(function () {
-      sprite.className = "pet-sprite";
+      if (!spinning) sprite.className = "pet-sprite";
       petting = false;
-    }, 1500);
+    }, 1100);
   });
 
-  // --- float mode: roam the page and perch on the note's text blocks ---
-  function perchCandidates() {
+  // --- startle (#3) and zip ---
+  function opposite() {
+    var cx = x + SIZE / 2;
+    var farX = cx < window.innerWidth / 2
+      ? maxX() - Math.random() * 90
+      : MARGIN + Math.random() * 90;
+    tgt = { x: clampX(farX), y: clampY(TOP_CLAMP + Math.random() * (maxY() - TOP_CLAMP)) };
+  }
+  function zipAway(scared) {
+    clearPeek();
+    pet.style.opacity = "";   // always visible for the zip
+    opposite();
+    tgtEase = SPOOK_EASE;
+    roamPhase = "spook";
+    phaseUntil = Date.now() + 750;
+    lastStartle = Date.now();
+    readEl = null;
+    setBoopable(false);
+    if (scared) {
+      sprite.className = "pet-sprite pet-spook";  // vertical squash-and-stretch
+      pet.className = "pet-startled";             // brief opacity dip
+    }
+  }
+  function maybeSpook() {
+    if (reduced || mx === null) return;
+    if (roamPhase === "spook" || roamPhase === "nap") return;
+    if (Date.now() - lastStartle < SPOOK_COOLDOWN) return;
+    if (dist(x + SIZE / 2, y + SIZE / 2, mx, my) <= SPOOK_DIST) zipAway(true);
+  }
+  function spookStep(now) {
+    ease();
+    renderAt(x, y);
+    if ((now > phaseUntil && dist(x, y, tgt.x, tgt.y) < 8) || now > phaseUntil + 1200)
+      endSpook(now);
+  }
+  function endSpook(now) {
+    sprite.className = petting ? "pet-sprite pet-happy" : "pet-sprite";
+    pet.className = "";
+    enterDrift(now);
+  }
+
+  // --- peek-a-boo (#2) ---
+  function clearPeek() {
+    sprite.style.clipPath = "";
+    sprite.style.webkitClipPath = "";
+  }
+  function peekCandidates() {
     var note = document.querySelector("article.note");
     if (!note) return [];
-    var els = note.querySelectorAll("h1,h2,h3,h4,h5,h6,p,li,blockquote");
+    var els = note.querySelectorAll("h1,h2,h3,h4,pre,blockquote,table,img");
     var out = [];
     for (var i = 0; i < els.length; i++) {
       var r = els[i].getBoundingClientRect();
-      // Wide enough to sit on and currently within the visible band.
-      if (r.width > SIZE && r.height > 0 &&
-          r.bottom > TOP_CLAMP + 8 && r.top < window.innerHeight - MARGIN) {
+      if (r.width > SIZE && r.height > SIZE &&
+          r.bottom > TOP_CLAMP + SIZE && r.top < window.innerHeight - SIZE) {
         out.push(els[i]);
       }
     }
     return out;
   }
-  function pickPerch() {
-    var pool = perchCandidates();
-    perch = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
-    perchAt = 0.15 + Math.random() * 0.7;  // where along the block to land
-    perchUntil = 0;
-  }
-  function floatTarget() {
-    if (!perch || !document.contains(perch)) pickPerch();
-    var maxX = window.innerWidth - SIZE - MARGIN;
-    var maxY = window.innerHeight - SIZE - MARGIN;
-    var idle = { x: Math.min(maxX, window.innerWidth - SIZE - 40), y: maxY - 20 };
-    if (!perch) return idle;  // no note to land on — drift to a resting corner
-    var r = perch.getBoundingClientRect();
-    if (r.bottom < TOP_CLAMP || r.top > window.innerHeight) {  // scrolled away
-      pickPerch();
-      if (!perch) return idle;
-      r = perch.getBoundingClientRect();
+  function enterPeek(now) {
+    var pool = peekCandidates();
+    if (!pool.length) { enterDrift(now); return; }
+    var r = pool[Math.floor(Math.random() * pool.length)].getBoundingClientRect();
+    var edge = Math.floor(Math.random() * 3), clip;
+    if (edge === 0) {           // peek over the top edge
+      tgt = { x: clampX(r.left + Math.random() * Math.max(1, r.width - SIZE)),
+              y: clampY(r.top - SIZE / 2) };
+      clip = "inset(0 0 46% 0)";
+    } else if (edge === 1) {    // cling to the left edge
+      tgt = { x: clampX(r.left - SIZE / 2),
+              y: clampY(r.top + Math.random() * Math.max(1, r.height - SIZE)) };
+      clip = "inset(0 50% 0 0)";
+    } else {                    // cling to the right edge
+      tgt = { x: clampX(r.right - SIZE / 2),
+              y: clampY(r.top + Math.random() * Math.max(1, r.height - SIZE)) };
+      clip = "inset(0 0 0 50%)";
     }
-    // Sit on top of the text line, like perching on a shelf.
-    var tx = r.left + perchAt * (r.width - SIZE);
-    var ty = r.top - SIZE + 2;
-    tx = Math.max(MARGIN, Math.min(maxX, tx));
-    ty = Math.max(TOP_CLAMP, Math.min(maxY, ty));
-    return { x: tx, y: ty };
+    tgtEase = PEEK_EASE;
+    roamPhase = "peek";
+    phaseUntil = now + 3200 + Math.random() * 2400;
+    sprite.style.clipPath = clip;
+    sprite.style.webkitClipPath = clip;
+    setBoopable(true);
   }
-  function stepFloat(now) {
-    if (napping) setNap(false);  // roaming never naps
-    var t = floatTarget();
-    var vx = (t.x - x) * FLOAT_EASE, vy = (t.y - y) * FLOAT_EASE;
-    x += vx;
-    y += vy;
-    lean += (vx * 1.6 - lean) * 0.1;
-    if (lean > 10) lean = 10;
-    if (lean < -10) lean = -10;
-    clamp();
-    apply();
-    // Landed: rest a beat, then choose the next block to visit.
-    if (Math.abs(t.x - x) < 2 && Math.abs(t.y - y) < 2) {
-      if (!perchUntil) perchUntil = now + 2600 + Math.random() * 2600;
-      else if (now > perchUntil) pickPerch();
+  function peekStep(now) {
+    ease();
+    bobT += 0.05;
+    renderAt(clampX(x + Math.sin(bobT) * 2.5), clampY(y + Math.sin(bobT * 1.3) * 2.5));
+    if (now > phaseUntil) { clearPeek(); enterDrift(now); }
+  }
+
+  // --- reading along (#5) ---
+  function paragraphNearCenter() {
+    var note = document.querySelector("article.note");
+    if (!note) return null;
+    var ps = note.querySelectorAll("p,li,h2,h3,blockquote");
+    var mid = window.innerHeight / 2, best = null, bestD = 1e9;
+    for (var i = 0; i < ps.length; i++) {
+      var r = ps[i].getBoundingClientRect();
+      if (r.height < 10 || r.bottom < TOP_CLAMP || r.top > window.innerHeight) continue;
+      var d = Math.abs((r.top + r.height / 2) - mid);
+      if (d < bestD) { bestD = d; best = ps[i]; }
+    }
+    return best;
+  }
+  function readAnchor() {
+    if (!readEl || !document.contains(readEl)) return null;
+    var r = readEl.getBoundingClientRect();
+    if (r.bottom < TOP_CLAMP || r.top > window.innerHeight) return null;
+    var rightX = r.right + 18, leftX = r.left - SIZE - 18;
+    var x0 = rightX <= maxX() ? rightX : (leftX >= MARGIN ? leftX : rightX);
+    return { x: clampX(x0), y: clampY(r.top + r.height / 2 - SIZE / 2) };
+  }
+  function maybeRead() {
+    if (reduced || petMode() !== "float" || roamPhase !== "drift") return;
+    var now = Date.now();
+    if (now - lastRead < 9000 || Math.random() > 0.5) return;
+    var p = paragraphNearCenter();
+    if (!p) return;
+    readEl = p;
+    lastRead = now;
+    roamPhase = "read";
+    phaseUntil = now + 4500 + Math.random() * 3500;
+    tgtEase = READ_EASE;
+    setBoopable(true);
+  }
+  function readStep(now) {
+    var a = readAnchor();
+    if (!a) { enterDrift(now); return; }
+    tgt = a;
+    ease();
+    bobT += 0.04;
+    renderAt(clampX(x), clampY(y + Math.sin(bobT) * 4));
+    if (now > phaseUntil) enterDrift(now);
+  }
+
+  // --- jellyfish drift (#1) + bored spin (#4) ---
+  // Drift is deliberately lazy: a slow cruise to a waypoint, then a hover in
+  // place, then a coin-flip over what to do next (rest again, wander on, peek,
+  // or fade off an edge and pop back in elsewhere).
+  function pickWaypoint() {
+    tgt = { x: MARGIN + Math.random() * (maxX() - MARGIN),
+            y: TOP_CLAMP + Math.random() * (maxY() - TOP_CLAMP) };
+    tgtEase = DRIFT_EASE;
+  }
+  function enterDrift(now) {
+    roamPhase = "drift";
+    pickWaypoint();
+    holdUntil = now + 1500 + Math.random() * 2500;  // settle before wandering
+    clearPeek();
+    setBoopable(false);
+    readEl = null;
+    pet.style.opacity = "";
+  }
+  function nextDriftAction(now) {
+    var r = Math.random();
+    if (r < 0.22) enterVanish(now);                        // fade off an edge
+    else if (r < 0.40) enterPeek(now);                     // hide on a block
+    else if (r < 0.72) holdUntil = now + 2600 + Math.random() * 3800;  // rest
+    else pickWaypoint();                                   // amble somewhere new
+  }
+  function doSpin(now) {
+    spinning = true;
+    lastStartle = now;
+    sprite.className = "pet-sprite " + (Math.random() < 0.5 ? "pet-spin" : "pet-flip");
+    setTimeout(function () {
+      spinning = false;
+      if (!petting) sprite.className = "pet-sprite";
+    }, 740);
+  }
+  function driftStep(now) {
+    var resting = holdUntil && now < holdUntil;
+    if (resting) {
+      /* hovering in place — barely a sway */
+    } else {
+      holdUntil = 0;
+      if (dist(x, y, tgt.x, tgt.y) < 20) nextDriftAction(now);
+      else ease();  // slow cruise
+    }
+    // Calm idle sway while resting; a touch livelier while cruising.
+    bobT += resting ? 0.014 : 0.024;
+    var amp = resting ? 2.2 : 4.2;
+    renderAt(clampX(x + Math.sin(bobT * 0.7) * amp),
+             clampY(y + Math.sin(bobT * 1.0 + 1.3) * amp * 0.8));
+    if (!spinning && now - lastStartle > BORED_AFTER) doSpin(now);
+  }
+
+  // --- fade off an edge, wait unseen, drift back in (#pop-in) ---
+  function edgePoint(ax, ay) {
+    var W = window.innerWidth, H = window.innerHeight;
+    switch (Math.floor(Math.random() * 4)) {
+      case 0: return { x: ax, y: -OFF };      // top
+      case 1: return { x: ax, y: H + OFF };   // bottom
+      case 2: return { x: -OFF, y: ay };      // left
+      default: return { x: W + OFF, y: ay };  // right
+    }
+  }
+  function enterVanish(now) {
+    roamPhase = "vanish";
+    tgt = edgePoint(x, y);   // slip out the nearest-aligned edge
+    tgtEase = VANISH_EASE;
+    pet.style.opacity = "0"; // CSS transitions the fade over 0.9s
+    phaseUntil = now + 1200;
+    clearPeek();
+    setBoopable(false);
+    readEl = null;
+  }
+  function vanishStep(now) {
+    ease();
+    renderAt(x, y);
+    if (dist(x, y, tgt.x, tgt.y) < 10 || now > phaseUntil) {
+      roamPhase = "gone";
+      phaseUntil = now + 600 + Math.random() * 1700;  // stay hidden a beat
+    }
+  }
+  function goneStep(now) {
+    if (now > phaseUntil) beginArrive(now);
+  }
+  function beginArrive(now) {
+    var w = { x: MARGIN + Math.random() * (maxX() - MARGIN),
+              y: TOP_CLAMP + Math.random() * (maxY() - TOP_CLAMP) };
+    var s = edgePoint(w.x, w.y);   // teleport just off an edge, still invisible
+    x = s.x; y = s.y; lean = 0;
+    renderAt(x, y);
+    pet.style.opacity = "";        // fade back in while sliding on
+    tgt = w;
+    tgtEase = ARRIVE_EASE;
+    roamPhase = "arrive";
+    phaseUntil = now + 4500;
+  }
+  function arriveStep(now) {
+    ease();
+    bobT += 0.03;
+    renderAt(clampX(x + Math.sin(bobT * 0.8) * 4), clampY(y + Math.sin(bobT * 1.1) * 3));
+    if (dist(x, y, tgt.x, tgt.y) < 16 || now > phaseUntil) enterDrift(now);
+  }
+
+  // --- nap (#6) ---
+  function enterNap(now) {
+    roamPhase = "nap";
+    clearPeek();
+    pet.style.opacity = "";          // visible while it settles (napStep dims it)
+    tgt = { x: maxX(), y: maxY() };  // settle into the bottom corner
+    tgtEase = 0.06;
+    pet.className = "pet-nap";       // sleepy closed eyes
+    setBoopable(true);
+  }
+  function napStep(now) {
+    ease();
+    renderAt(x, y);
+    if (dist(x, y, tgt.x, tgt.y) < 3) {
+      pet.style.opacity = "0.2";
+      if (now - lastZ > 3200) { lastZ = now; spawnParticle("z", "pet-z"); }
+    }
+  }
+  function wakeFromNap() {
+    if (roamPhase !== "nap") return;
+    pet.style.opacity = "";
+    pet.className = "";
+    lastStartle = Date.now();  // don't spin the instant it wakes
+    enterDrift(Date.now());
+  }
+
+  function stepRoam(now) {
+    // Only a settled ghost naps; let transient animations finish first.
+    if ((roamPhase === "drift" || roamPhase === "peek" || roamPhase === "read") &&
+        now - lastActive > NAP_AFTER)
+      enterNap(now);
+    switch (roamPhase) {
+      case "drift":  driftStep(now);  break;
+      case "peek":   peekStep(now);   break;
+      case "read":   readStep(now);   break;
+      case "spook":  spookStep(now);  break;
+      case "nap":    napStep(now);    break;
+      case "vanish": vanishStep(now); break;
+      case "gone":   goneStep(now);   break;
+      case "arrive": arriveStep(now); break;
     }
   }
 
@@ -178,32 +457,26 @@
     raf = null;
     var now = Date.now();
     if (petMode() === "float") {
-      if (!reduced) stepFloat(now);
+      if (reduced) renderAt(x, y);  // static in the corner
+      else stepRoam(now);
       schedule();
       return;
     }
+    // ---- cursor mode: trail behind the pointer, dim-nap when idle ----
     if (!napping && now - lastMove > NAP_AFTER) setNap(true);
-    if (napping && now - lastZ > 3000) {
-      lastZ = now;
-      spawnParticle("z", "pet-z");
-    }
+    if (napping && now - lastZ > 3000) { lastZ = now; spawnParticle("z", "pet-z"); }
     if (!reduced && !napping && mx !== null) {
-      // Ease toward a point TRAIL px behind the cursor, along the line
-      // from the cursor to the pet, so it follows without covering it.
       var cx = x + SIZE / 2, cy = y + SIZE / 2;
       var dx = cx - mx, dy = cy - my;
       var d = Math.sqrt(dx * dx + dy * dy) || 1;
       var txp = mx + (dx / d) * TRAIL - SIZE / 2;
       var typ = my + (dy / d) * TRAIL - SIZE / 2;
       var vx = (txp - x) * EASE, vy = (typ - y) * EASE;
-      if (Math.abs(vx) > 0.05 || Math.abs(vy) > 0.05) {
-        x += vx;
-        y += vy;
-      }
+      if (Math.abs(vx) > 0.05 || Math.abs(vy) > 0.05) { x += vx; y += vy; }
       lean += (vx * 1.6 - lean) * 0.1;
       if (lean > 10) lean = 10;
       if (lean < -10) lean = -10;
-      clamp();
+      clampCore();
       apply();
     }
     schedule();
@@ -214,29 +487,38 @@
     }
   }
 
+  // --- mode transitions ---
+  function enterRoam() {
+    pet.className = "";
+    pet.style.opacity = "";
+    lastActive = Date.now();
+    lastStartle = Date.now();
+    if (reduced) { x = maxX(); y = maxY(); renderAt(x, y); return; }
+    enterDrift(Date.now());
+  }
+  function leaveRoam() {
+    clearPeek();
+    pet.style.opacity = "";
+    pet.className = napping ? "pet-nap" : "";
+    sprite.style.pointerEvents = "";  // restore the CSS default for cursor mode
+  }
+
   document.addEventListener("visibilitychange", function () {
-    if (!document.hidden) {
-      lastMove = Date.now();
-      schedule();
-    }
+    if (!document.hidden) { lastMove = Date.now(); markActivity(); schedule(); }
   });
-  // The top-bar toggle flips data-pet; re-arm the loop for the new mode.
   window.addEventListener("twb:pet", function () {
     if (!petOn()) return;  // hidden: schedule() parks itself
     setNap(false);
-    if (petMode() === "float") pickPerch();
-    else lastMove = Date.now();
+    if (petMode() === "float") enterRoam();
+    else { leaveRoam(); lastMove = Date.now(); }
     schedule();
   });
-  window.addEventListener("resize", function () {
-    clamp();
-    apply();
-  });
+  window.addEventListener("resize", function () { clampCore(); apply(); });
 
-  clamp();
-  apply();
+  clampCore();
   applyPetColor();
   scheduleBlink();
-  if (petMode() === "float") pickPerch();
+  if (petMode() === "float") enterRoam();
+  else apply();
   schedule();
 })();

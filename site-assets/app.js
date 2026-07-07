@@ -81,7 +81,7 @@
 
   var petToggle = document.getElementById("pet-toggle");
   if (petToggle) {
-    // Three modes cycle in this order; "cursor" is the default (no stored key).
+    // Three modes cycle in this order; "float" (roam) is the default (no key).
     var PET_MODES = ["cursor", "float", "off"];
     function petMode() {
       var a = root.getAttribute("data-pet");
@@ -107,8 +107,8 @@
       // pet.js reads data-pet and re-arms its loop (parked while hidden).
       window.dispatchEvent(new Event("twb:pet"));
       try {
-        // Off is the default (no stored key); cursor and float are explicit.
-        if (next === "off") localStorage.removeItem("twb-pet");
+        // Float (roam) is the default (no stored key); cursor and off explicit.
+        if (next === "float") localStorage.removeItem("twb-pet");
         else localStorage.setItem("twb-pet", next);
       } catch (e) { /* private mode */ }
     });

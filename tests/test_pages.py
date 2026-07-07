@@ -178,10 +178,10 @@ class PageShellTests(VaultCase):
                                output_path="x.html", page_title="X",
                                content_html="", nav_html="")
         self.assertIn('id="pet-toggle"', on)
-        # Off is the default: any stored value other than "cursor" (including
-        # an absent key) resolves to hidden before paint.
+        # Float (roam) is the default: any stored value other than "cursor" or
+        # "off" (including an absent key) resolves to roaming before paint.
         self.assertIn('if(pm!=="cursor")', on)
-        self.assertIn('pm==="float"?"float":"off"', on)
+        self.assertIn('pm==="off"?"off":"float"', on)
 
 
 class NavTests(VaultCase):

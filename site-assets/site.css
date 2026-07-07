@@ -97,7 +97,15 @@ html[data-banner] #graph-view { height: calc(100vh - 182px); }
 .pet-sprite.pet-blink .pet-eyes-closed,
 #site-pet.pet-nap .pet-eyes-closed { display: inline; }
 .pet-sprite.pet-happy .pet-eyes-happy { display: inline; }
-.pet-sprite.pet-happy { animation: pet-wiggle 0.5s ease-in-out 3; }
+/* Boop: a quick happy squish-and-pop (overrides the idle bob while it plays). */
+.pet-sprite.pet-happy { animation: pet-boop 0.5s ease-in-out; }
+/* Startled: cartoon vertical squash-and-stretch as it zips away (#3). */
+.pet-sprite.pet-spook { animation: pet-spook 0.5s ease-out; }
+/* Bored barrel-roll / flip (#4). */
+.pet-sprite.pet-spin { animation: pet-spin 0.74s ease-in-out; }
+.pet-sprite.pet-flip { animation: pet-flip 0.74s ease-in-out; }
+/* The whole ghost dips in opacity for the beat of a startle. */
+#site-pet.pet-startled { animation: pet-startle-fade 0.7s ease-out; }
 .pet-particle {
   position: absolute; left: 9px; top: -8px;
   font-family: var(--twb-font-mono); font-size: 12px; font-weight: 700;
@@ -105,15 +113,35 @@ html[data-banner] #graph-view { height: calc(100vh - 182px); }
   animation: pet-float 1.3s ease-out forwards;
 }
 .pet-heart { color: var(--twb-red); }
+.pet-bang { color: var(--twb-accent); }
 .pet-z { color: var(--twb-text-muted); }
 @keyframes pet-bob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-3px); }
 }
-@keyframes pet-wiggle {
-  0%, 100% { transform: rotate(0); }
-  25% { transform: rotate(-9deg); }
-  75% { transform: rotate(9deg); }
+@keyframes pet-boop {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.35); }
+  60% { transform: scale(0.9); }
+}
+@keyframes pet-spook {
+  0% { transform: scaleY(1) scaleX(1); }
+  25% { transform: scaleY(1.5) scaleX(0.65); }
+  60% { transform: scaleY(0.9) scaleX(1.12); }
+  100% { transform: scaleY(1) scaleX(1); }
+}
+@keyframes pet-spin {
+  from { transform: rotate(0); }
+  to { transform: rotate(360deg); }
+}
+@keyframes pet-flip {
+  from { transform: rotateY(0); }
+  to { transform: rotateY(360deg); }
+}
+@keyframes pet-startle-fade {
+  0% { opacity: 0.7; }
+  30% { opacity: 0.25; }
+  100% { opacity: 0.7; }
 }
 @keyframes pet-float {
   from { opacity: 1; transform: translateY(0); }
