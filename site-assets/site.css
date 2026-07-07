@@ -336,6 +336,13 @@ html[data-nav-colors="on"] .nav-notes li[data-color="5"] summary { color: var(--
   color: var(--twb-text-soft);
   margin-bottom: 4px;
 }
+/* Underline just the notes header label (not the full sidebar width),
+   to separate it from the tree below. */
+.nav-notes > a.manifest-label {
+  width: fit-content;
+  border-bottom: 1px solid var(--twb-border);
+  padding-bottom: 7px; margin-bottom: 8px;
+}
 .nav-tools > a.manifest-label::before,
 .nav-notes > a.manifest-label::before {
   content: ""; flex: none; width: 1.05em; height: 1.05em;
