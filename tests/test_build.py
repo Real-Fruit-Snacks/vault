@@ -455,5 +455,40 @@ class TagHandlingTests(unittest.TestCase):
         self.assertNotIn('href="A.html"', b_page)
 
 
+class NoHomeNoteHomepageTests(unittest.TestCase):
+    """With no home note, the homepage is only the recently-updated / tags /
+    tools sections — not a full listing of every note."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls._tmp = tempfile.TemporaryDirectory()
+        vault = Path(cls._tmp.name) / "vault"
+        vault.mkdir()
+        (vault / "Alpha.md").write_text("# Alpha\ntext", encoding="utf-8")
+        (vault / "Beta.md").write_text("# Beta\ntext", encoding="utf-8")
+        cls.out = Path(cls._tmp.name) / "public"
+        with contextlib.redirect_stdout(io.StringIO()):
+            cls.rc = build.main(["--vault", str(vault), "--out", str(cls.out)])
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tmp.cleanup()
+
+    def test_homepage_shows_sections_not_notes_listing(self):
+        self.assertEqual(self.rc, 0)
+        html = (self.out / "index.html").read_text(encoding="utf-8")
+        # The homepage sections (tools always exist) are present...
+        self.assertIn('class="home-sections"', html)
+        self.assertIn(">tools</a>", html)
+        # ...but the full "Notes" listing is not repeated on the homepage.
+        self.assertNotIn("<h1>Notes</h1>", html)
+
+    def test_notes_index_still_lists_every_note(self):
+        notes = (self.out / "notes.html").read_text(encoding="utf-8")
+        self.assertIn("<h1>Notes</h1>", notes)
+        self.assertIn('href="Alpha.html"', notes)
+        self.assertIn('href="Beta.html"', notes)
+
+
 if __name__ == "__main__":
     unittest.main()

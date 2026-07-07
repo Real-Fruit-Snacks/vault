@@ -291,9 +291,12 @@ def main(argv=None) -> int:
             note_id=urls.note_output_path(home),
             description=note_description(note)))
     else:
+        # No home note: the homepage is just the recently-updated, tags, and
+        # tools sections. The full note listing lives on notes.html and in the
+        # sidebar, so it isn't repeated here.
         write(out / "index.html", pages.render_page(
             config=config, output_path="index.html", page_title=config.title,
-            content_html=pages.auto_index_content(vault, "index.html") + home_extra,
+            content_html=home_extra,
             nav_html=pages.build_nav(vault, "", "index.html", tools=nav_tools, home_note=home,
                                      canvases=canvas_paths, bases=base_paths),
             description=config.description))

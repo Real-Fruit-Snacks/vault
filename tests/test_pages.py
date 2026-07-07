@@ -261,12 +261,6 @@ class ChromeTests(VaultCase):
         index = pages.tags_index_content({"alpha": {"A.md", "B.md"}}, "_tags/index.html")
         self.assertIn("#alpha", index)
 
-    def test_auto_index(self):
-        vault = scan_vault(self.make_vault({"Zed.md": "x", "sub/Alpha.md": "y"}), SiteConfig())
-        content = pages.auto_index_content(vault, "index.html")
-        self.assertIn('href="sub/Alpha.html"', content)
-        self.assertIn('href="Zed.html"', content)
-
 
 if __name__ == "__main__":
     unittest.main()

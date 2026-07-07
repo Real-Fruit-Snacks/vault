@@ -520,11 +520,3 @@ def notes_index_content(vault: Vault, tag_map: dict, output_path: str, home_note
             f'href="{urls.rel_href(output_path, "_tags/index.html")}">tags</a>'
             f'<div class="home-tags">{_tag_chips(tag_map, output_path)}</div></section>')
     return f"<h1>Notes</h1>{''.join(sections)}"
-
-
-def auto_index_content(vault: Vault, output_path: str) -> str:
-    items = "".join(
-        f'<li><a href="{urls.rel_href(output_path, urls.note_output_path(p))}">'
-        f"{html_mod.escape(p[:-3])}</a></li>"
-        for p in sorted(vault.notes, key=str.lower))
-    return f'<h1>Notes</h1><ul class="note-list">{items}</ul>'
