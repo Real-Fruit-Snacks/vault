@@ -10,6 +10,8 @@
   }
   var tilt = pet.querySelector(".pet-tilt");
   var sprite = pet.querySelector(".pet-sprite");
+  var pupilRects = pet.querySelectorAll(".pet-pupils rect");
+  var PUP_BASE = [{ x: 6, y: 11 }, { x: 14, y: 11 }];
   var reduced = window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -174,9 +176,27 @@
     }
   }
 
+  // Nudge the pupils one pixel toward the cursor within the eye whites
+  // (crisp pixel-art gaze; runs in every mode the ghost is visible).
+  function gaze() {
+    if (!pupilRects.length || reduced) return;
+    var ox = 0, oy = 0;
+    if (mx !== null) {
+      var gx = mx - (x + SIZE / 2), gy = my - (y + SIZE / 2);
+      var gd = Math.sqrt(gx * gx + gy * gy) || 1;
+      ox = Math.max(-1, Math.min(1, Math.round(gx / gd)));
+      oy = Math.max(-1, Math.min(1, Math.round(gy / gd)));
+    }
+    for (var i = 0; i < pupilRects.length; i++) {
+      pupilRects[i].setAttribute("x", PUP_BASE[i].x + ox);
+      pupilRects[i].setAttribute("y", PUP_BASE[i].y + oy);
+    }
+  }
+
   function tick() {
     raf = null;
     var now = Date.now();
+    gaze();
     if (petMode() === "float") {
       if (!reduced) stepFloat(now);
       schedule();
@@ -200,9 +220,11 @@
         x += vx;
         y += vy;
       }
-      lean += (vx * 1.6 - lean) * 0.1;
-      if (lean > 10) lean = 10;
-      if (lean < -10) lean = -10;
+      // Lean into the motion and toward the cursor, so it turns to face it.
+      var gl = Math.max(-1, Math.min(1, (mx - cx) / 90)) * 5;
+      lean += ((vx * 1.4) + gl - lean) * 0.1;
+      if (lean > 12) lean = 12;
+      if (lean < -12) lean = -12;
       clamp();
       apply();
     }
