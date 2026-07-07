@@ -889,7 +889,9 @@ a.section-head:hover { color: var(--twb-accent); text-decoration: none; }
 html[data-pet="off"] #site-pet { display: none; }
 
 /* --- settings popup (holds the appearance / behavior toggles) --- */
-.settings-wrap { position: relative; flex: none; }
+/* flex so the wrapper is exactly the button's height (no inline line-leading),
+   keeping the cog vertically aligned with the other top-bar icons. */
+.settings-wrap { position: relative; flex: none; display: flex; align-items: center; }
 .settings-menu {
   position: absolute; right: 0; top: calc(100% + 8px);
   width: 236px; padding: 6px; z-index: 40;
