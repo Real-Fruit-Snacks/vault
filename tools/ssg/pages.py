@@ -419,6 +419,15 @@ def tags_index_content(tag_map: dict, output_path: str) -> str:
     return f'<h1>Tags</h1><ul class="note-list">{items}</ul>'
 
 
+def home_hero(config) -> str:
+    """Title + description banner atop the generated homepage (no home note)."""
+    title = html_mod.escape(config.title)
+    desc = (f'<p class="home-hero-desc">{html_mod.escape(config.description)}</p>'
+            if config.description else "")
+    return (f'<header class="home-hero">'
+            f'<h1 class="home-hero-title">{title}</h1>{desc}</header>')
+
+
 def home_sections(vault: Vault, dates: dict, tag_map: dict, tools,
                   output_path: str, home_note=None, canvases=(), bases=()) -> str:
     """Build-time homepage sections: recently updated notes, tag chips, tools.
@@ -438,13 +447,19 @@ def home_sections(vault: Vault, dates: dict, tag_map: dict, tools,
             if p.lower().endswith(".base"):
                 return p.rsplit("/", 1)[-1][:-5], urls.base_output_path(p)
             return vault.notes[p].title, urls.note_output_path(p)
-        items = "".join(
-            f'<li><a href="{urls.rel_href(output_path, entry(p)[1])}">'
-            f"{html_mod.escape(entry(p)[0])}</a>"
-            f'<span class="home-date">{html_mod.escape(d)}</span></li>'
-            for d, p in dated[:8])
+        rows = []
+        for d, p in dated[:8]:
+            title, out = entry(p)
+            href = urls.rel_href(output_path, out)
+            folder = p.rsplit("/", 1)[0] if "/" in p else ""
+            crumb = (f'<span class="home-recent-path">{html_mod.escape(folder)}</span>'
+                     if folder else "")
+            rows.append(
+                f'<li><a class="home-recent-link" href="{href}">'
+                f'<span class="home-recent-title">{html_mod.escape(title)}</span>{crumb}</a>'
+                f'<span class="home-date">{html_mod.escape(d)}</span></li>')
         sections.append(_home_section(
-            "recently updated", "", f'<ul class="home-recent">{items}</ul>', output_path))
+            "recently updated", "", f'<ul class="home-recent">{"".join(rows)}</ul>', output_path))
     if tag_map:
         sections.append(_home_section(
             "tags", "_tags/index.html",

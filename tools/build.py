@@ -296,7 +296,7 @@ def main(argv=None) -> int:
         # sidebar, so it isn't repeated here.
         write(out / "index.html", pages.render_page(
             config=config, output_path="index.html", page_title=config.title,
-            content_html=home_extra,
+            content_html=pages.home_hero(config) + home_extra,
             nav_html=pages.build_nav(vault, "", "index.html", tools=nav_tools, home_note=home,
                                      canvases=canvas_paths, bases=base_paths),
             description=config.description))

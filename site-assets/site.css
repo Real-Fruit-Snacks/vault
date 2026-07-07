@@ -638,41 +638,68 @@ li.task-important .task-marker { color: var(--twb-warm); border-color: var(--twb
 .note-list { list-style: none; padding-left: 0; }
 .note-list li { padding: 3px 0; border-bottom: 1px solid var(--twb-border); }
 
-/* --- homepage sections (generated at build time) --- */
-.home-sections { margin-top: 44px; display: flex; flex-direction: column; gap: 30px; }
+/* --- homepage (generated at build time) --- */
+.home-hero { margin: 6px 0 2px; }
+.home-hero-title {
+  margin: 0; font-size: 1.95rem; line-height: 1.15; letter-spacing: -0.01em;
+  color: var(--twb-text-normal);
+}
+.home-hero-title::after { display: none; }  /* no heading rule under the hero */
+.home-hero-desc {
+  margin: 9px 0 0; max-width: 62ch; line-height: 1.5;
+  color: var(--twb-text-muted); font-size: 1rem;
+}
+.home-sections { margin-top: 38px; display: flex; flex-direction: column; gap: 34px; }
 .section-head {
   display: block; font-size: 12px; letter-spacing: 0.08em;
   color: var(--twb-text-soft);
   border-bottom: 1px solid var(--twb-border);
-  padding-bottom: 6px; margin-bottom: 10px;
+  padding-bottom: 6px; margin-bottom: 8px;
 }
 a.section-head:hover { color: var(--twb-accent); text-decoration: none; }
+
 .home-recent { list-style: none; padding-left: 0; margin: 0; }
 .home-recent li {
   display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
-  padding: 4px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--twb-border) 45%, transparent);
+  padding: 8px 10px; margin: 0 -10px; border-radius: 6px;
+  transition: background 120ms ease;
 }
-.home-recent li:last-child { border-bottom: none; }
+.home-recent li:hover { background: var(--twb-bg-1); }
+.home-recent-link { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.home-recent-link:hover { text-decoration: none; }
+.home-recent-title { color: var(--twb-accent); }
+.home-recent li:hover .home-recent-title { text-decoration: underline; }
+.home-recent-path {
+  font-family: var(--twb-font-mono); font-size: 10.5px; letter-spacing: 0.02em;
+  color: var(--twb-text-faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .home-date {
   font-family: var(--twb-font-mono); font-size: 11.5px;
   color: var(--twb-text-muted); white-space: nowrap;
 }
+
 .home-tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .home-count { margin-left: 6px; font-size: 10px; color: var(--twb-text-muted); }
 .tag:hover .home-count { color: var(--twb-text-on-accent); }
+
 .home-tools {
   list-style: none; padding-left: 0; margin: 0;
   display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 4px 18px;
+  gap: 2px 16px;
 }
-.home-tools a { display: flex; align-items: center; gap: 7px; padding: 3px 0; }
+.home-tools a {
+  display: flex; align-items: center; gap: 8px; padding: 6px 0;
+  color: var(--twb-text-soft); transition: color 120ms ease;
+}
+.home-tools a:hover { color: var(--twb-accent); text-decoration: none; }
 .home-tools a::before {
   content: ""; flex: none; width: 1.05em; height: 1.05em;
   background-color: currentColor; opacity: 0.75;
   -webkit-mask: var(--icon-tool) no-repeat center / contain;
   mask: var(--icon-tool) no-repeat center / contain;
 }
+.home-tools a:hover::before { opacity: 1; }
 
 /* --- notes index page --- */
 .notes-folder { margin-top: 28px; }

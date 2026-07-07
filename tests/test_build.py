@@ -51,6 +51,9 @@ class BuildTests(unittest.TestCase):
         # fixture notes are committed, so git dates exist for the recent list
         self.assertIn(">recently updated</span>", html)
         self.assertIn('class="home-recent"', html)
+        # recent rows carry their folder for context (fixture notes live in
+        # Daily/ and Projects/)
+        self.assertIn('class="home-recent-path"', html)
         self.assertIn('href="_tags/index.html">tags</a>', html)
         self.assertIn('href="tools/index.html">tools</a>', html)
         self.assertIn('class="home-tools"', html)
@@ -477,7 +480,9 @@ class NoHomeNoteHomepageTests(unittest.TestCase):
     def test_homepage_shows_sections_not_notes_listing(self):
         self.assertEqual(self.rc, 0)
         html = (self.out / "index.html").read_text(encoding="utf-8")
-        # The homepage sections (tools always exist) are present...
+        # The hero (site title) tops the generated homepage...
+        self.assertIn('class="home-hero"', html)
+        # ...and the sections (tools always exist) follow.
         self.assertIn('class="home-sections"', html)
         self.assertIn(">tools</a>", html)
         # ...but the full "Notes" listing is not repeated on the homepage.
