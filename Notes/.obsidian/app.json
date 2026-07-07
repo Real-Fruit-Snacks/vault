@@ -1,4 +1,7 @@
 {
   "promptDelete": false,
-  "readableLineLength": false
+  "readableLineLength": false,
+  "userIgnoreFilters": [
+    "_slate_files"
+  ]
 }

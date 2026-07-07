@@ -1,5 +1,1 @@
-{
-  "terminal-workbench@@ta-colored-folders": false,
-  "terminal-workbench@@callout-default": "var(--color-blue-rgb)",
-  "terminal-workbench@@callout-info": "var(--ta-green-rgb)"
-}
+{}

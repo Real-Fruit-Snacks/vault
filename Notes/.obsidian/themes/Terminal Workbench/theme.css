@@ -218,7 +218,7 @@ settings:
   - id: callout-default
     title: Note callout
     type: variable-select
-    default: 'var(--color-blue-rgb)'
+    default: 'var(--ta-green-rgb)'
     options:
       - label: Blue
         value: 'var(--color-blue-rgb)'
@@ -260,7 +260,7 @@ settings:
   - id: callout-info
     title: Info callout
     type: variable-select
-    default: 'var(--color-blue-rgb)'
+    default: 'var(--ta-cyan-rgb)'
     options:
       - label: Blue
         value: 'var(--color-blue-rgb)'
@@ -281,7 +281,7 @@ settings:
   - id: callout-todo
     title: Todo callout
     type: variable-select
-    default: 'var(--color-blue-rgb)'
+    default: 'var(--ta-cyan-rgb)'
     options:
       - label: Blue
         value: 'var(--color-blue-rgb)'
@@ -365,7 +365,7 @@ settings:
   - id: callout-question
     title: Question / Help callout
     type: variable-select
-    default: 'var(--ta-orange-rgb)'
+    default: 'var(--ta-violet-rgb)'
     options:
       - label: Blue
         value: 'var(--color-blue-rgb)'
@@ -386,7 +386,7 @@ settings:
   - id: callout-warning
     title: Warning / Caution callout
     type: variable-select
-    default: 'var(--ta-amber-rgb)'
+    default: 'var(--ta-orange-rgb)'
     options:
       - label: Blue
         value: 'var(--color-blue-rgb)'
@@ -1891,6 +1891,27 @@ body:not(.ta-plain-mermaid) .mermaid .labelBox {
 body:not(.ta-plain-mermaid) .mermaid .labelText,
 body:not(.ta-plain-mermaid) .mermaid .labelText > tspan {
   fill: var(--text-normal) !important;
+}
+
+/* Default callout palette — each type maps to the theme palette so callouts
+   match the theme out of the box: green for the default/note flavor, cyan for
+   the info family, orange for warnings, red for danger, violet for questions,
+   gray for quotes. Style Settings can override any of these per type. */
+body {
+  --callout-default: var(--ta-green-rgb);
+  --callout-summary: var(--ta-cyan-rgb);
+  --callout-info: var(--ta-cyan-rgb);
+  --callout-todo: var(--ta-cyan-rgb);
+  --callout-tip: var(--ta-cyan-rgb);
+  --callout-important: var(--ta-cyan-rgb);
+  --callout-success: var(--ta-green-rgb);
+  --callout-question: var(--ta-violet-rgb);
+  --callout-warning: var(--ta-orange-rgb);
+  --callout-fail: var(--ta-red-rgb);
+  --callout-error: var(--ta-red-rgb);
+  --callout-bug: var(--ta-red-rgb);
+  --callout-example: var(--ta-violet-rgb);
+  --callout-quote: var(--ta-gray-rgb);
 }
 
 .callout {
