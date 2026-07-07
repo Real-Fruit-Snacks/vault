@@ -163,7 +163,12 @@ html[data-banner] #graph-view { height: calc(100vh - 182px); }
 .site-title:hover { text-decoration: none; color: var(--twb-accent-alt); }
 .breadcrumbs { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .crumb-sep { margin: 0 6px; color: var(--twb-text-faint); }
-.nav-toggle { display: inline-block; }
+/* Match the fixed size of the other top-row icon buttons. */
+.nav-toggle {
+  flex: none; display: inline-flex; width: 26px; height: 24px;
+  align-items: center; justify-content: center; padding: 0;
+  font-size: 15px; line-height: 1;
+}
 
 button {
   background: none; border: 1px solid var(--twb-border);
