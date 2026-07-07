@@ -79,23 +79,17 @@ html[data-banner] #graph-view { height: calc(100vh - 182px); }
   animation: pet-bob 2.4s ease-in-out infinite;
 }
 .pet-sprite svg { display: block; width: 100%; height: 100%; shape-rendering: crispEdges; }
-/* The shaded pixel ghost derives its whole ramp from one --pet-accent, so
-   petting only needs to swap that variable (same six theme tokens as the
-   folder colors; index 0 = default accent). color-mix keeps it theme-aware. */
-#site-pet { --pet-accent: var(--twb-accent); }
-#site-pet[data-color="1"] { --pet-accent: var(--twb-accent-alt); }
-#site-pet[data-color="2"] { --pet-accent: var(--twb-warm); }
-#site-pet[data-color="3"] { --pet-accent: var(--twb-violet); }
-#site-pet[data-color="4"] { --pet-accent: var(--twb-orange); }
-#site-pet[data-color="5"] { --pet-accent: var(--twb-red); }
-.pet-out { fill: color-mix(in srgb, var(--pet-accent) 46%, #000); }
-.pet-dk { fill: color-mix(in srgb, var(--pet-accent) 72%, #000); }
-.pet-body { fill: var(--pet-accent); }
-.pet-lt { fill: color-mix(in srgb, var(--pet-accent) 66%, #fff); }
-.pet-hi { fill: color-mix(in srgb, var(--pet-accent) 30%, #fff); }
-.pet-cheek { fill: #ff9bb0; }
-.pet-eye-w { fill: #eafff5; }
-.pet-eye-p { fill: #0d2e20; }
+/* Petting the ghost cycles its body through the theme palette (same six
+   tokens as the folder colors); the index rides on data-color, and 0 is the
+   default accent. Tokens are theme-aware, so the color follows light/dark. */
+.pet-body { fill: var(--twb-accent); }
+#site-pet[data-color="1"] .pet-body { fill: var(--twb-accent-alt); }
+#site-pet[data-color="2"] .pet-body { fill: var(--twb-warm); }
+#site-pet[data-color="3"] .pet-body { fill: var(--twb-violet); }
+#site-pet[data-color="4"] .pet-body { fill: var(--twb-orange); }
+#site-pet[data-color="5"] .pet-body { fill: var(--twb-red); }
+.pet-eyes-open rect, .pet-eyes-closed rect { fill: var(--twb-bg-0); }
+.pet-eyes-happy path { stroke: var(--twb-bg-0); stroke-width: 1.2; fill: none; }
 .pet-eyes-closed, .pet-eyes-happy { display: none; }
 .pet-sprite.pet-blink .pet-eyes-open,
 #site-pet.pet-nap .pet-eyes-open,
