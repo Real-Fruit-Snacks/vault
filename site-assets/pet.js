@@ -20,6 +20,7 @@
   var EASE = 0.06;         // lerp factor per frame
   var FLOAT_EASE = 0.045;  // gentler drift while roaming
   var NAP_AFTER = 45000;   // ms of stillness before napping
+  var LEAN_REACH = 7;      // px the body leans toward the cursor (any direction)
 
   var x = window.innerWidth - SIZE - 16;
   var y = window.innerHeight - SIZE - 16;
@@ -29,6 +30,7 @@
   var napping = false;
   var petting = false;
   var lean = 0;
+  var leanX = 0, leanY = 0;   // directional body lean offset toward the cursor
   var raf = null;
   // Float mode: the element currently being perched on, a stable horizontal
   // offset along it, and the timestamp until which the pet rests there.
@@ -63,7 +65,8 @@
   }
   function apply() {
     pet.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)";
-    tilt.style.transform = "rotate(" + lean.toFixed(1) + "deg)";
+    tilt.style.transform = "translate(" + leanX.toFixed(1) + "px," +
+      leanY.toFixed(1) + "px) rotate(" + lean.toFixed(1) + "deg)";
   }
 
   function spawnParticle(ch, cls) {
@@ -167,6 +170,8 @@
     lean += (vx * 1.6 - lean) * 0.1;
     if (lean > 10) lean = 10;
     if (lean < -10) lean = -10;
+    leanX += (0 - leanX) * 0.15;  // roaming doesn't chase the cursor
+    leanY += (0 - leanY) * 0.15;
     clamp();
     apply();
     // Landed: rest a beat, then choose the next block to visit.
@@ -225,6 +230,10 @@
       lean += ((vx * 2.4) + gl - lean) * 0.18;
       if (lean > 28) lean = 28;
       if (lean < -28) lean = -28;
+      // Reach the whole body toward the cursor. Rotation only tips left/right,
+      // so this is what lets it lean down when it sits above the cursor.
+      leanX += ((-dx / d) * LEAN_REACH - leanX) * 0.22;
+      leanY += ((-dy / d) * LEAN_REACH - leanY) * 0.22;
       clamp();
       apply();
     }
