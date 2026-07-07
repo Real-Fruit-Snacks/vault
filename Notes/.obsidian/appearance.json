@@ -1,5 +1,6 @@
 {
   "cssTheme": "Terminal Workbench",
   "theme": "obsidian",
-  "accentColor": ""
+  "accentColor": "",
+  "showViewHeader": true
 }

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "AI/odysseus/Installation.md",
+                "file": "Pentesting/Windows/Persistence/schtasks.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Installation"
+              "title": "schtasks"
             }
           }
         ]
@@ -63,22 +63,12 @@
               "icon": "lucide-search",
               "title": "Search"
             }
-          },
-          {
-            "id": "8dc43231bd4c8baa",
-            "type": "leaf",
-            "state": {
-              "type": "bookmarks",
-              "state": {},
-              "icon": "lucide-bookmark",
-              "title": "Bookmarks"
-            }
           }
         ]
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200
   },
   "right": {
     "id": "776a0d58e92d3f21",
@@ -122,55 +112,21 @@
             }
           },
           {
-            "id": "98f43fbc03d81e77",
+            "id": "2684da76fdb24856",
             "type": "leaf",
             "state": {
-              "type": "tag",
-              "state": {
-                "sortOrder": "frequency",
-                "useHierarchy": true,
-                "showSearch": false,
-                "searchQuery": ""
-              },
-              "icon": "lucide-tags",
-              "title": "Tags"
-            }
-          },
-          {
-            "id": "f05acf78168c3daf",
-            "type": "leaf",
-            "state": {
-              "type": "all-properties",
-              "state": {
-                "sortOrder": "frequency",
-                "showSearch": false,
-                "searchQuery": ""
-              },
-              "icon": "lucide-archive",
-              "title": "All properties"
-            }
-          },
-          {
-            "id": "0ec98b66b8479c88",
-            "type": "leaf",
-            "state": {
-              "type": "outline",
-              "state": {
-                "file": "Demo/Start Here.md",
-                "followCursor": false,
-                "showSearch": false,
-                "searchQuery": ""
-              },
-              "icon": "lucide-list",
-              "title": "Outline of Start Here"
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -180,29 +136,48 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "obsidian-git:Open Git source control": false
     }
   },
-  "active": "06091131d411d1a7",
+  "active": "ffe60557210f6837",
   "lastOpenFiles": [
-    "Home.md",
+    "Pentesting/Windows/Persistence/sc.md",
+    "Pentesting/Windows/Persistence/Registry Run Keys.md",
+    "Pentesting/Windows/Persistence/schtasks.md",
     "AI/odysseus/Installation.md",
-    "AI/odysseus",
-    "AI",
-    "Demo/Linking/Transclusion Target.md",
-    "Demo/Linking/Links and Embeds.md",
-    "Demo/Formatting/Typography.md",
-    "Demo/Formatting/Tasks.md",
-    "Demo/Formatting/Callouts.md",
-    "Demo/Code/Diagrams.md",
-    "Demo/Code/Code Blocks.md",
-    "Demo/Start Here.md",
-    "Demo/Meta/Tags and Frontmatter.md",
-    "Demo/Daily/2026-07-04.md",
-    "Demo/Daily/2026-07-05.md",
-    "Reference/Linux/File Permissions.md",
-    "Projects/Site Roadmap.md",
-    "Drafts/Unfinished Idea.md",
+    "Pentesting/Windows/Commands/schtasks.md",
+    "Pentesting/Windows/Commands/sc.md",
+    "Pentesting/Windows/Commands/reg.md",
+    "Pentesting/Windows/Commands",
+    "Pentesting/Windows/Persistence",
+    "Pentesting/Windows",
+    "Pentesting",
+    "Pentesting/C2/Sliver/Armory/tgtdelegation.md",
+    "Pentesting/C2/Sliver/Armory/sqlrecon.md",
+    "Pentesting/C2/Sliver/Armory/sharplaps.md",
+    "Pentesting/C2/Sliver/Armory/seatbelt.md",
+    "Pentesting/C2/Sliver/Armory/sa-whoami.md",
+    "Pentesting/C2/Sliver/Armory/sa-tasklist.md",
+    "Pentesting/C2/Sliver/Armory/sa-reg-query.md",
+    "Pentesting/C2/Sliver/Armory/sa-netshares.md",
+    "Pentesting/C2/Sliver/Armory/sa-ipconfig.md",
+    "Pentesting/C2/Sliver/Armory/sa-adcs-enum.md",
+    "Pentesting/C2/Sliver/Armory/nanodump.md",
+    "Pentesting/C2/Sliver/Armory/kerbrute.md",
+    "Pentesting/C2/Sliver/Armory/certify.md",
+    "Pentesting/C2/Sliver/Armory/c2tc-kerberoast.md",
+    "Pentesting/C2/Sliver/Armory/c2tc-domaininfo.md",
+    "Pentesting/C2/Sliver/Armory/bof-roast.md",
+    "Pentesting/C2/Sliver/Workflows/Network Reachability.md",
+    "Pentesting/C2/Sliver/Workflows/Kerberos Review.md",
+    "Pentesting/C2/Sliver/Workflows/Initial Windows Triage.md",
+    "Pentesting/C2/Sliver/Workflows",
+    "Pentesting/C2/Sliver/Commands",
+    "Pentesting/C2/Sliver/Armory",
+    "Pentesting/VM Setup/Tool",
+    "Pentesting/Enumeration/Windows",
+    "Pentesting/File Transfer/Windows",
     "Demo/Attachments/circuit-pattern.svg",
     "Boards/Site Map.canvas"
   ]

@@ -3,9 +3,9 @@ tags:
   - AI
   - odysseus
 ---
-## Github Page
+## GitHub Page
 
-> [!Resources]
+> [!Info]
 > - [odysseus Github](https://web.archive.org/web/20260628180455/https://github.com/pewdiepie-archdaemon/odysseus)
 ## Quick Start
 

@@ -205,6 +205,310 @@ settings:
     description: Disables the theme's diagram styling and uses Obsidian's defaults.
     type: class-toggle
     default: false
+  - id: ta-callouts
+    title: Callout colors
+    type: heading
+    level: 1
+    collapsed: true
+  - id: ta-callouts-info
+    title: Recolor callouts
+    description: Pick a palette color for each callout type. Aliases follow their base type (for example, hint follows Tip, and caution follows Warning).
+    type: info-text
+    markdown: false
+  - id: callout-default
+    title: Note callout
+    type: variable-select
+    default: 'var(--color-blue-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-summary
+    title: Abstract / Summary callout
+    type: variable-select
+    default: 'var(--ta-cyan-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-info
+    title: Info callout
+    type: variable-select
+    default: 'var(--color-blue-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-todo
+    title: Todo callout
+    type: variable-select
+    default: 'var(--color-blue-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-tip
+    title: Tip / Hint callout
+    type: variable-select
+    default: 'var(--ta-cyan-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-important
+    title: Important callout
+    type: variable-select
+    default: 'var(--ta-cyan-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-success
+    title: Success / Done callout
+    type: variable-select
+    default: 'var(--ta-green-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-question
+    title: Question / Help callout
+    type: variable-select
+    default: 'var(--ta-orange-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-warning
+    title: Warning / Caution callout
+    type: variable-select
+    default: 'var(--ta-amber-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-fail
+    title: Failure / Missing callout
+    type: variable-select
+    default: 'var(--ta-red-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-error
+    title: Danger / Error callout
+    type: variable-select
+    default: 'var(--ta-red-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-bug
+    title: Bug callout
+    type: variable-select
+    default: 'var(--ta-red-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-example
+    title: Example callout
+    type: variable-select
+    default: 'var(--ta-violet-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
+  - id: callout-quote
+    title: Quote / Cite callout
+    type: variable-select
+    default: 'var(--ta-gray-rgb)'
+    options:
+      - label: Blue
+        value: 'var(--color-blue-rgb)'
+      - label: Green
+        value: 'var(--ta-green-rgb)'
+      - label: Cyan
+        value: 'var(--ta-cyan-rgb)'
+      - label: Amber
+        value: 'var(--ta-amber-rgb)'
+      - label: Orange
+        value: 'var(--ta-orange-rgb)'
+      - label: Red
+        value: 'var(--ta-red-rgb)'
+      - label: Violet
+        value: 'var(--ta-violet-rgb)'
+      - label: Gray
+        value: 'var(--ta-gray-rgb)'
 
 */
 
@@ -296,6 +600,13 @@ body.theme-dark {
   --ta-muted: #879994;
   --ta-faint: #63736f;
   --ta-inverted: #07100d;
+  --ta-green-rgb: 99, 242, 171;
+  --ta-cyan-rgb: 107, 220, 255;
+  --ta-amber-rgb: 240, 198, 116;
+  --ta-orange-rgb: 247, 163, 92;
+  --ta-red-rgb: 255, 110, 122;
+  --ta-violet-rgb: 183, 140, 255;
+  --ta-gray-rgb: 135, 153, 148;
   --ta-mermaid-node-bg: #102022;
   --ta-mermaid-node-border: #35d8c3;
   --ta-mermaid-cluster-bg: #0d1618;
@@ -415,6 +726,13 @@ body.theme-light {
   --ta-orange: #b65800;
   --ta-violet: #7357b8;
   --ta-inverted: #f9fbf8;
+  --ta-green-rgb: 0, 122, 77;
+  --ta-cyan-rgb: 0, 111, 158;
+  --ta-amber-rgb: 164, 102, 0;
+  --ta-orange-rgb: 182, 88, 0;
+  --ta-red-rgb: 200, 50, 76;
+  --ta-violet-rgb: 115, 87, 184;
+  --ta-gray-rgb: 96, 112, 106;
 
   --background-primary: var(--ta-bg-0);
   --background-primary-alt: var(--ta-bg-1);
