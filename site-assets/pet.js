@@ -220,11 +220,11 @@
         x += vx;
         y += vy;
       }
-      // Lean into the motion and toward the cursor, so it turns to face it.
-      var gl = Math.max(-1, Math.min(1, (mx - cx) / 90)) * 5;
-      lean += ((vx * 1.4) + gl - lean) * 0.1;
-      if (lean > 12) lean = 12;
-      if (lean < -12) lean = -12;
+      // Turn hard toward the cursor while following, plus lean into the motion.
+      var gl = Math.max(-1, Math.min(1, (mx - cx) / 55)) * 20;
+      lean += ((vx * 2.4) + gl - lean) * 0.18;
+      if (lean > 28) lean = 28;
+      if (lean < -28) lean = -28;
       clamp();
       apply();
     }
