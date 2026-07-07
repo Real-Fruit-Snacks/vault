@@ -39,6 +39,22 @@ class ScanTests(VaultCase):
         self.assertEqual(vault.assets, {})
         self.assertEqual(vault.warnings, [])
 
+    def test_top_level_underscore_folders_never_publish(self):
+        # Top-level "_" folders are private scratch space; their contents (of
+        # any file type) stay off the site, without warnings. Nested "_"
+        # folders and top-level "_" files are ordinary content.
+        vault = scan_vault(self.make_vault({
+            "Real.md": "keep",
+            "_drafts/WIP.md": "hidden",
+            "_drafts/img.png": "hidden asset",
+            "Sub/_keep/Note.md": "nested underscore still publishes",
+            "_top-file.md": "top-level underscore file still publishes",
+        }), SiteConfig())
+        self.assertEqual(sorted(vault.notes),
+                         ["Real.md", "Sub/_keep/Note.md", "_top-file.md"])
+        self.assertEqual(vault.assets, {})
+        self.assertEqual(vault.warnings, [])
+
     def test_infrastructure_names_publish_inside_vault(self):
         # The vault is isolated in Notes/, so user folders named like repo
         # machinery are ordinary content; only build-output names stay reserved.

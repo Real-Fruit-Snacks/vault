@@ -3,7 +3,9 @@
 Publish an Obsidian vault as a fast static website.
 
 The vault lives in `Notes/`. Every Markdown file inside it becomes a page,
-unless its frontmatter says `publish: false`. Wikilinks, embeds, callouts,
+unless its frontmatter says `publish: false` or it sits in a top-level folder
+whose name starts with `_` (e.g. `_drafts/`), which is treated as private and
+never published. Wikilinks, embeds, callouts,
 task lists, Mermaid diagrams, tags, backlinks, and client-side search all
 work. Obsidian canvases (`.canvas`) publish as read-only pan-and-zoom pages,
 and Obsidian bases (`.base`) publish as build-time table and card views.

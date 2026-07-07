@@ -77,6 +77,11 @@ def scan_vault(root: Path, config: SiteConfig) -> Vault:
             continue
         if any(part.startswith(".") for part in parts):
             continue
+        # Top-level folders whose name starts with "_" (e.g. "_drafts") are
+        # private scratch space and never publish. Only the vault root is
+        # checked, so nested "_" folders and top-level "_" files are unaffected.
+        if len(parts) > 1 and parts[0].startswith("_"):
+            continue
         if len(parts) == 1 and parts[0] in BUILTIN_EXCLUDE_FILES:
             continue
         if any(rel == ex or rel.startswith(ex + "/") for ex in exclude):
