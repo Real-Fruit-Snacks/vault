@@ -1,0 +1,6 @@
+# The vault (Notes/) is committed to the repo and published by GitHub Pages,
+# but it is stripped from release archives (git archive / GitHub release
+# tarballs) so a downloaded release ships a clean starter vault rather than
+# personal notes. site.config.json is kept so the release still builds.
+Notes/** export-ignore
+Notes/site.config.json -export-ignore

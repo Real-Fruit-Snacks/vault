@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Demo/Start Here.md",
+                "file": "AI/odysseus/Installation.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Start Here"
+              "title": "Installation"
             }
           }
         ]
@@ -185,6 +185,10 @@
   },
   "active": "06091131d411d1a7",
   "lastOpenFiles": [
+    "Home.md",
+    "AI/odysseus/Installation.md",
+    "AI/odysseus",
+    "AI",
     "Demo/Linking/Transclusion Target.md",
     "Demo/Linking/Links and Embeds.md",
     "Demo/Formatting/Typography.md",
