@@ -183,6 +183,14 @@ class PageShellTests(VaultCase):
         self.assertIn('if(pm!=="cursor")', on)
         self.assertIn('pm==="off"?"off":"float"', on)
 
+    def test_pet_head_script_has_appearance_keys(self):
+        on = pages.render_page(config=SiteConfig(pet_enabled=True), output_path="x.html",
+                               page_title="X", content_html="", nav_html="")
+        self.assertIn("twb-pet-size", on)
+        self.assertIn("twb-pet-opacity", on)
+        self.assertIn("--pet-size", on)
+        self.assertIn("--pet-base-opacity", on)
+
 
 class NavTests(VaultCase):
     def test_tree_structure_active_and_open(self):

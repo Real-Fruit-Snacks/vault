@@ -63,12 +63,13 @@ html[data-banner] #graph-view { height: calc(100vh - 182px); }
 
 /* --- site pet (site.config.json: pet_enabled) --- */
 #site-pet {
-  position: fixed; left: 0; top: 0; width: 28px; height: 28px;
+  position: fixed; left: 0; top: 0;
+  width: var(--pet-size, 28px); height: var(--pet-size, 28px);
   /* Below the topbar's stacking context (20) so the ghost never covers the
      open search dropdown or steals a click on a result; still floats above
      the article's auto-stacked content. */
   z-index: 19; pointer-events: none;
-  opacity: 0.7;  /* translucent, ghostly; dims further while napping */
+  opacity: var(--pet-base-opacity, 0.7);  /* translucent; dims further while napping */
   transition: opacity 0.9s ease;
 }
 #site-pet.pet-nap { opacity: 0.3; }

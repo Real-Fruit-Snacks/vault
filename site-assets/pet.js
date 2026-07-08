@@ -13,7 +13,13 @@
   var reduced = window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  var SIZE = 28, MARGIN = 8, TOP_CLAMP = 88;
+  var SIZE_MIN = 16, SIZE_MAX = 64, SIZE_DEFAULT = 28;
+  function readSize() {
+    var s = parseInt(localStorage.getItem("twb-pet-size"), 10);
+    if (!(s >= SIZE_MIN && s <= SIZE_MAX)) s = SIZE_DEFAULT;
+    return s;
+  }
+  var SIZE = readSize(), MARGIN = 8, TOP_CLAMP = 88;
   var TRAIL = 44;            // cursor mode: resting distance behind the pointer
   var EASE = 0.06;           // cursor mode: follow ease
   var NAP_AFTER = 60000;     // idle this long with no input -> nap
@@ -33,6 +39,7 @@
   var lastZ = 0;
   var napping = false;
   var petting = false;
+  var lastMode = petMode();
 
   // --- roam ("float") state machine ---
   // drift: jellyfish wander | peek: hide at an element edge | read: bob
@@ -70,6 +77,37 @@
       if (petColor) localStorage.setItem("twb-pet-color", String(petColor));
       else localStorage.removeItem("twb-pet-color");
     } catch (e) { /* private mode */ }
+  }
+
+  // Per-quirk flags + appearance, read from localStorage (default on; speech off).
+  var cfgNap = true, cfgFlee = true, cfgRead = true, cfgTricks = true, cfgSpeech = false;
+  function boolKey(k, dflt) {
+    try {
+      var v = localStorage.getItem(k);
+      if (v === "on") return true;
+      if (v === "off") return false;
+    } catch (e) { /* private mode */ }
+    return dflt;
+  }
+  function applySize() {
+    SIZE = readSize();
+    document.documentElement.style.setProperty("--pet-size", SIZE + "px");
+    clampCore();
+    apply();
+  }
+  function applyOpacity() {
+    var o = parseInt(localStorage.getItem("twb-pet-opacity"), 10);
+    if (!(o >= 15 && o <= 100)) o = 70;
+    document.documentElement.style.setProperty("--pet-base-opacity", (o / 100).toFixed(3));
+  }
+  function readCfg() {
+    cfgNap = boolKey("twb-pet-nap", true);
+    cfgFlee = boolKey("twb-pet-flee", true);
+    cfgRead = boolKey("twb-pet-read", true);
+    cfgTricks = boolKey("twb-pet-tricks", true);
+    cfgSpeech = boolKey("twb-pet-speech", false);
+    applySize();
+    applyOpacity();
   }
 
   // --- geometry helpers ---
@@ -507,10 +545,20 @@
     if (!document.hidden) { lastMove = Date.now(); markActivity(); schedule(); }
   });
   window.addEventListener("twb:pet", function () {
-    if (!petOn()) return;  // hidden: schedule() parks itself
-    setNap(false);
-    if (petMode() === "float") enterRoam();
-    else { leaveRoam(); lastMove = Date.now(); }
+    readCfg();                         // apply size/opacity/quirks live
+    var m = petMode();
+    if (m === "off") { lastMode = m; return; }   // schedule() parks itself
+    // If a quirk toggle turned napping off mid-nap, wake up.
+    if (!cfgNap && (napping || roamPhase === "nap")) {
+      setNap(false);
+      if (roamPhase === "nap") wakeFromNap();
+    }
+    if (m !== lastMode) {              // only reset the machine on a real mode change
+      setNap(false);
+      if (m === "float") enterRoam();
+      else { leaveRoam(); lastMove = Date.now(); }
+    }
+    lastMode = m;
     schedule();
   });
   window.addEventListener("resize", function () { clampCore(); apply(); });
@@ -520,5 +568,6 @@
   scheduleBlink();
   if (petMode() === "float") enterRoam();
   else apply();
+  readCfg();
   schedule();
 })();
