@@ -76,9 +76,11 @@ html[data-banner] #graph-view { height: calc(100vh - 182px); }
 .pet-tilt { width: 100%; height: 100%; }
 .pet-sprite {
   width: 100%; height: 100%;
-  pointer-events: auto; cursor: pointer;
+  pointer-events: auto; cursor: grab;
+  touch-action: none;
   animation: pet-bob 2.4s ease-in-out infinite;
 }
+.pet-sprite:active { cursor: grabbing; }
 .pet-sprite svg { display: block; width: 100%; height: 100%; shape-rendering: crispEdges; }
 /* Petting the ghost cycles its body through the theme palette (same six
    tokens as the folder colors); the index rides on data-color, and 0 is the

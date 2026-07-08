@@ -220,7 +220,7 @@
   document.addEventListener("touchstart", markActivity, true);
 
   // Boop: happy scale-bounce, a heart or a "!", then zip away.
-  sprite.addEventListener("click", function () {
+  function boop() {
     markActivity();
     cyclePetColor();
     if (petting) return;
@@ -235,7 +235,77 @@
       if (!spinning) sprite.className = "pet-sprite";
       petting = false;
     }, 1100);
+  }
+
+  // --- drag & fling ---
+  var drag = null, flingVX = 0, flingVY = 0;
+  function beginDrag() {
+    clearPeek(); pet.style.opacity = ""; pet.className = "";
+    napping = false; readEl = null; roamPhase = "drag";
+    sprite.style.cursor = "grabbing"; setBoopable(true);
+  }
+  function endDrag(vx, vy) {
+    sprite.style.cursor = ""; markActivity();
+    if (petMode() === "float" && !reduced) {
+      flingVX = Math.max(-42, Math.min(42, vx));
+      flingVY = Math.max(-42, Math.min(42, vy));
+      if (Math.abs(flingVX) + Math.abs(flingVY) > 6) say(pick(QUIPS.fling), "good", true);
+      roamPhase = "fling";
+    } else if (petMode() === "float") {
+      enterDrift(Date.now());
+    } else {
+      lastMove = Date.now();
+    }
+    schedule();
+  }
+  function flingStep(now) {
+    x += flingVX; y += flingVY;
+    flingVX *= 0.90; flingVY *= 0.90;
+    if (x < MARGIN) { x = MARGIN; flingVX = -flingVX * 0.5; }
+    if (x > maxX()) { x = maxX(); flingVX = -flingVX * 0.5; }
+    if (y < TOP_CLAMP) { y = TOP_CLAMP; flingVY = -flingVY * 0.5; }
+    if (y > maxY()) { y = maxY(); flingVY = -flingVY * 0.5; }
+    lean += (flingVX * 1.2 - lean) * 0.2;
+    if (lean > 16) lean = 16;
+    if (lean < -16) lean = -16;
+    renderAt(x, y);
+    if (Math.abs(flingVX) + Math.abs(flingVY) < 1.2) { lean = 0; enterDrift(now); }
+  }
+
+  sprite.addEventListener("pointerdown", function (e) {
+    if (e.button != null && e.button !== 0) return;
+    markActivity();
+    drag = { sx: e.clientX, sy: e.clientY, moved: false,
+             gx: e.clientX - x, gy: e.clientY - y,
+             lx: e.clientX, ly: e.clientY,
+             lt: (window.performance ? performance.now() : Date.now()), vx: 0, vy: 0 };
+    try { sprite.setPointerCapture(e.pointerId); } catch (err) {}
   });
+  window.addEventListener("pointermove", function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    if (!drag.moved && (dx * dx + dy * dy) > 25) { drag.moved = true; beginDrag(); }
+    if (!drag.moved) return;
+    x = clampX(e.clientX - drag.gx);
+    y = clampY(e.clientY - drag.gy);
+    var t = (window.performance ? performance.now() : Date.now());
+    var dt = Math.max(1, t - drag.lt);
+    drag.vx = (e.clientX - drag.lx) / dt * 16;
+    drag.vy = (e.clientY - drag.ly) / dt * 16;
+    drag.lx = e.clientX; drag.ly = e.clientY; drag.lt = t;
+    lean = Math.max(-16, Math.min(16, drag.vx * 0.5));
+    renderAt(x, y);
+    schedule();
+  });
+  function endPointer(e) {
+    if (!drag) return;
+    var moved = drag.moved, vx = drag.vx, vy = drag.vy;
+    try { sprite.releasePointerCapture(e.pointerId); } catch (err) {}
+    drag = null;
+    if (moved) endDrag(vx, vy); else boop();
+  }
+  window.addEventListener("pointerup", endPointer);
+  window.addEventListener("pointercancel", endPointer);
 
   // --- startle (#3) and zip ---
   function opposite() {
@@ -520,12 +590,15 @@
       case "vanish": vanishStep(now); break;
       case "gone":   goneStep(now);   break;
       case "arrive": arriveStep(now); break;
+      case "fling":  flingStep(now);  break;
+      case "drag":   /* positioned by pointermove */ break;
     }
   }
 
   function tick() {
     raf = null;
     var now = Date.now();
+    if (drag && drag.moved) { schedule(); return; }
     if (petMode() === "float") {
       if (reduced) renderAt(x, y);  // static in the corner
       else stepRoam(now);
