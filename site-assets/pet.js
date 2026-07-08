@@ -234,7 +234,7 @@
     }
   }
   function maybeSpook() {
-    if (reduced || mx === null) return;
+    if (reduced || mx === null || !cfgFlee) return;
     if (roamPhase === "spook" || roamPhase === "nap") return;
     if (Date.now() - lastStartle < SPOOK_COOLDOWN) return;
     if (dist(x + SIZE / 2, y + SIZE / 2, mx, my) <= SPOOK_DIST) zipAway(true);
@@ -325,7 +325,7 @@
     return { x: clampX(x0), y: clampY(r.top + r.height / 2 - SIZE / 2) };
   }
   function maybeRead() {
-    if (reduced || petMode() !== "float" || roamPhase !== "drift") return;
+    if (reduced || !cfgRead || petMode() !== "float" || roamPhase !== "drift") return;
     var now = Date.now();
     if (now - lastRead < 9000 || Math.random() > 0.5) return;
     var p = paragraphNearCenter();
@@ -395,7 +395,7 @@
     var amp = resting ? 2.2 : 4.2;
     renderAt(clampX(x + Math.sin(bobT * 0.7) * amp),
              clampY(y + Math.sin(bobT * 1.0 + 1.3) * amp * 0.8));
-    if (!spinning && now - lastStartle > BORED_AFTER) doSpin(now);
+    if (cfgTricks && !spinning && now - lastStartle > BORED_AFTER) doSpin(now);
   }
 
   // --- fade off an edge, wait unseen, drift back in (#pop-in) ---
@@ -476,7 +476,7 @@
 
   function stepRoam(now) {
     // Only a settled ghost naps; let transient animations finish first.
-    if ((roamPhase === "drift" || roamPhase === "peek" || roamPhase === "read") &&
+    if (cfgNap && (roamPhase === "drift" || roamPhase === "peek" || roamPhase === "read") &&
         now - lastActive > NAP_AFTER)
       enterNap(now);
     switch (roamPhase) {
@@ -501,7 +501,7 @@
       return;
     }
     // ---- cursor mode: trail behind the pointer, dim-nap when idle ----
-    if (!napping && now - lastMove > NAP_AFTER) setNap(true);
+    if (cfgNap && !napping && now - lastMove > NAP_AFTER) setNap(true);
     if (napping && now - lastZ > 3000) { lastZ = now; spawnParticle("z", "pet-z"); }
     if (!reduced && !napping && mx !== null) {
       var cx = x + SIZE / 2, cy = y + SIZE / 2;
