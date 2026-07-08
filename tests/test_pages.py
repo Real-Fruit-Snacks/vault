@@ -138,7 +138,7 @@ class PageShellTests(VaultCase):
         menu = html[html.find('id="settings-menu"'):]
         for cid in ['id="theme-toggle"', 'id="accent-color"', 'id="nav-colors"',
                     'id="width-toggle"', 'id="rail-toggle"', 'id="progress-toggle"',
-                    'id="text-size"', 'id="pet-toggle"', 'id="crt-toggle"']:
+                    'id="text-size"', 'id="pet-open"', 'id="crt-toggle"']:
             self.assertIn(cid, menu)
         # the reading-progress bar is opt-in: gated on data-progress
         self.assertIn('localStorage.getItem("twb-progress")==="on"', html)
@@ -173,11 +173,11 @@ class PageShellTests(VaultCase):
     def test_pet_toggle_tracks_pet_enabled(self):
         off = pages.render_page(config=SiteConfig(), output_path="x.html",
                                 page_title="X", content_html="", nav_html="")
-        self.assertNotIn("pet-toggle", off)
+        self.assertNotIn("pet-open", off)
         on = pages.render_page(config=SiteConfig(pet_enabled=True),
                                output_path="x.html", page_title="X",
                                content_html="", nav_html="")
-        self.assertIn('id="pet-toggle"', on)
+        self.assertIn('id="pet-open"', on)
         # Float (roam) is the default: any stored value other than "cursor" or
         # "off" (including an absent key) resolves to roaming before paint.
         self.assertIn('if(pm!=="cursor")', on)
@@ -190,6 +190,19 @@ class PageShellTests(VaultCase):
         self.assertIn("twb-pet-opacity", on)
         self.assertIn("--pet-size", on)
         self.assertIn("--pet-base-opacity", on)
+
+    def test_pet_panel_renders_when_enabled(self):
+        on = pages.render_page(config=SiteConfig(pet_enabled=True), output_path="x.html",
+                               page_title="X", content_html="", nav_html="")
+        for needle in ['id="pet-panel"', 'id="pet-open"', 'id="pet-size"', 'id="pet-opacity"',
+                       'id="pet-color"', 'data-mode="float"', 'id="pet-q-nap"', 'id="pet-q-speech"']:
+            self.assertIn(needle, on)
+
+    def test_pet_panel_absent_when_disabled(self):
+        off = pages.render_page(config=SiteConfig(), output_path="x.html",
+                                page_title="X", content_html="", nav_html="")
+        self.assertNotIn('id="pet-panel"', off)
+        self.assertNotIn('id="pet-open"', off)
 
 
 class NavTests(VaultCase):

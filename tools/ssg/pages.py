@@ -52,7 +52,7 @@ $banner<header class="topbar">
 $pet_toggle<button id="crt-toggle" class="settings-row"><span class="settings-label">CRT mode</span><span class="settings-val"></span></button>
 </div>
 </div>
-</header>
+$pet_panel</header>
 <div class="layout">
 <nav class="sidebar" id="sidebar">
 <div class="nav-controls">
@@ -247,13 +247,41 @@ def render_page(*, config: SiteConfig, output_path: str, page_title: str,
         banner_attr = ' data-banner="on"'  # shifts the sticky chrome offsets
     pet = ""
     pet_toggle = ""
+    pet_panel = ""
     if config.pet_enabled:
         pet = PET_HTML + f'\n<script defer src="{root}site-assets/pet.js"></script>\n'
         # Runtime show/hide lives in the top bar; the pet markup and script are
-        # still gated by pet_enabled, so the toggle only appears alongside them.
-        pet_toggle = ('<button id="pet-toggle" class="settings-row">'
-                      '<span class="settings-label">Pet</span>'
-                      '<span class="settings-val"></span></button>\n')
+        # still gated by pet_enabled, so the opener only appears alongside them.
+        pet_toggle = ('<button id="pet-open" class="settings-row" aria-haspopup="true" '
+                      'aria-expanded="false"><span class="settings-label">Pet</span>'
+                      '<span class="settings-val"></span></button>')
+        pet_panel = (
+            '<div id="pet-panel" class="settings-menu pet-panel" hidden>'
+            '<div class="settings-head">Pet</div>'
+            '<div class="pet-group-label manifest-label">Appearance</div>'
+            '<div id="pet-mode" class="pet-seg" role="group" aria-label="Pet mode">'
+            '<button data-mode="float">Roam</button>'
+            '<button data-mode="cursor">Cursor</button>'
+            '<button data-mode="off">Off</button></div>'
+            '<label class="pet-slider"><span>Size</span>'
+            '<input id="pet-size" type="range" min="16" max="64" step="2"></label>'
+            '<label class="pet-slider"><span>Opacity</span>'
+            '<input id="pet-opacity" type="range" min="15" max="100" step="5"></label>'
+            '<div id="pet-color" class="pet-swatches" role="group" aria-label="Pet color">'
+            + "".join('<button data-color="%d" style="--sw:var(%s)"></button>' % (i, tok)
+                      for i, tok in enumerate(
+                          ["--twb-accent", "--twb-accent-alt", "--twb-warm",
+                           "--twb-violet", "--twb-orange", "--twb-red"]))
+            + '</div>'
+            '<div class="pet-group-label manifest-label">Behavior</div>'
+            + "".join(
+                '<button id="pet-q-%s" class="settings-row pet-quirk">'
+                '<span class="settings-label">%s</span><span class="settings-val"></span></button>'
+                % (qid, label) for qid, label in [
+                    ("nap", "Nap when idle"), ("flee", "Flee from cursor"),
+                    ("read", "Read along"), ("tricks", "Do tricks"),
+                    ("speech", "Speech bubbles")])
+            + '</div>')
     note_attr = f' data-note="{html_mod.escape(note_id)}"' if note_id else ""
     note_class = " note-full" if full_width else (" note-wide" if wide else "")
     return _PAGE.substitute(
@@ -272,6 +300,7 @@ def render_page(*, config: SiteConfig, output_path: str, page_title: str,
         banner_attr=banner_attr,
         pet=pet,
         pet_toggle=pet_toggle,
+        pet_panel=pet_panel,
         note_attr=note_attr,
         note_class=note_class,
     )
