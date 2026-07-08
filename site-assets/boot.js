@@ -1,8 +1,8 @@
 (function () {
   "use strict";
   var root = document.documentElement;
-  // The pre-paint head script sets data-boot once per tab session (and never
-  // for reduced-motion). No flag: nothing to do.
+  // The pre-paint head script sets data-boot once per tab session.
+  // No flag: nothing to do.
   if (root.getAttribute("data-boot") !== "1") return;
 
   // The build emits the true note count; fall back to the search index
