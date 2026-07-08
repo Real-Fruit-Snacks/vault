@@ -18,7 +18,7 @@
   function commands() {
     return [
       { label: "Toggle theme", hint: "light / dark", run: function () { press("theme-toggle"); } },
-      { label: "Cycle pet", hint: "cursor / roam / off", run: function () { press("pet-toggle"); } },
+      { label: "Pet settings", hint: "open panel", run: function () { press("pet-open"); } },
       { label: "Toggle folder colors", run: function () { press("nav-colors"); } },
       { label: "Toggle full-width notes", run: function () { press("width-toggle"); } },
       { label: "Toggle CRT mode", hint: "retro", run: function () { press("crt-toggle"); } },

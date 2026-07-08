@@ -49,6 +49,13 @@ All settings live in `Notes/site.config.json`. Every key is optional.
 | `banner_style` | `info` | `info` for an accent strip, `warn` for an amber strip |
 | `pet_enabled` | `false` | Enable the optional cursor companion (off by default in the reader) |
 
+When `pet_enabled` is on, readers get a small ghost companion that follows the
+cursor or roams the page. It has its own management panel under the settings
+cog's Pet row, with controls for mode (Roam, Cursor, or Off), size, opacity,
+color, and per-quirk toggles for napping, fleeing, read-along, tricks, and
+speech. The ghost can also be dragged to reposition it, and flung with a
+throw in Roam mode.
+
 Keys beginning with `_` are ignored and can be used as inline comments.
 
 Each build also emits `robots.txt`, `site.webmanifest`, `sitemap.xml`, and an

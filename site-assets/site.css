@@ -946,10 +946,6 @@ html[data-width="full"] #width-toggle .settings-val { color: var(--twb-accent); 
 #rail-toggle .settings-val::after { content: "On"; }
 html[data-rail="collapsed"] #rail-toggle .settings-val::after { content: "Off"; }
 html:not([data-rail="collapsed"]) #rail-toggle .settings-val { color: var(--twb-accent); }
-#pet-toggle .settings-val::after { content: "Cursor"; }
-html[data-pet="float"] #pet-toggle .settings-val::after { content: "Roam"; }
-html[data-pet="off"] #pet-toggle .settings-val::after { content: "Off"; }
-html:not([data-pet="off"]) #pet-toggle .settings-val { color: var(--twb-accent); }
 #crt-toggle .settings-val::after { content: "Off"; }
 html[data-crt="on"] #crt-toggle .settings-val::after { content: "On"; }
 html[data-crt="on"] #crt-toggle .settings-val { color: var(--twb-accent); }
