@@ -922,9 +922,19 @@ html[data-pet="off"] #site-pet { display: none; }
 }
 .settings-menu[hidden] { display: none; }
 .settings-head {
-  padding: 6px 8px 8px; font-size: 11px; letter-spacing: 0.08em;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 4px 8px 8px; font-size: 11px; letter-spacing: 0.08em;
   text-transform: uppercase; color: var(--twb-text-muted);
 }
+.menu-close {
+  flex: none; width: 18px; height: 18px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 4px; background: none; cursor: pointer;
+  font-size: 16px; line-height: 1; text-transform: none;
+  color: var(--twb-text-faint);
+  transition: color 120ms ease, background 120ms ease;
+}
+.menu-close:hover { color: var(--twb-text-normal); background: var(--twb-bg-3); }
 .settings-row {
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px; width: 100%; padding: 9px 10px;

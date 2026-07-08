@@ -119,21 +119,33 @@
     }
     function fire() { window.dispatchEvent(new Event("twb:pet")); }
 
+    function closePanel() {
+      panel.setAttribute("hidden", "");
+      open.setAttribute("aria-expanded", "false");
+    }
+    function openPanel() {
+      // Only one popover at a time: close the settings menu first.
+      var sm = document.getElementById("settings-menu");
+      if (sm && !sm.hidden) {
+        sm.hidden = true;
+        var st = document.getElementById("settings-toggle");
+        if (st) st.setAttribute("aria-expanded", "false");
+      }
+      sync();
+      panel.removeAttribute("hidden");
+      open.setAttribute("aria-expanded", "true");
+    }
     open.addEventListener("click", function (e) {
       e.stopPropagation();
-      var show = panel.hasAttribute("hidden");
-      if (show) { sync(); panel.removeAttribute("hidden"); } else panel.setAttribute("hidden", "");
-      open.setAttribute("aria-expanded", show ? "true" : "false");
+      if (panel.hasAttribute("hidden")) openPanel(); else closePanel();
     });
+    var petClose = document.getElementById("pet-close");
+    if (petClose) petClose.addEventListener("click", function (e) { e.stopPropagation(); closePanel(); });
     document.addEventListener("click", function (e) {
-      if (!panel.hasAttribute("hidden") && !panel.contains(e.target) && e.target !== open) {
-        panel.setAttribute("hidden", ""); open.setAttribute("aria-expanded", "false");
-      }
+      if (!panel.hasAttribute("hidden") && !panel.contains(e.target) && e.target !== open) closePanel();
     });
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && !panel.hasAttribute("hidden")) {
-        panel.setAttribute("hidden", ""); open.setAttribute("aria-expanded", "false"); open.focus();
-      }
+      if (e.key === "Escape" && !panel.hasAttribute("hidden")) { closePanel(); open.focus(); }
     });
 
     panel.querySelector("#pet-mode").addEventListener("click", function (e) {
@@ -254,12 +266,21 @@
     };
     settingsToggle.addEventListener("click", function (e) {
       e.stopPropagation();
+      // Only one popover at a time: close the pet panel if it's open.
+      var petPanel = document.getElementById("pet-panel");
+      if (petPanel && !petPanel.hidden) {
+        petPanel.hidden = true;
+        var petOpen = document.getElementById("pet-open");
+        if (petOpen) petOpen.setAttribute("aria-expanded", "false");
+      }
       var open = !settingsMenu.hidden;
       settingsMenu.hidden = open;
       settingsToggle.setAttribute("aria-expanded", open ? "false" : "true");
     });
     // Adjusting a setting shouldn't dismiss the menu; keep it open.
     settingsMenu.addEventListener("click", function (e) { e.stopPropagation(); });
+    var settingsClose = document.getElementById("settings-close");
+    if (settingsClose) settingsClose.addEventListener("click", closeSettings);
     document.addEventListener("click", function () {
       if (!settingsMenu.hidden) closeSettings();
     });

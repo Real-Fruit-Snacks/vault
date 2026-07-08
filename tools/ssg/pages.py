@@ -41,7 +41,7 @@ $banner<header class="topbar">
 <div class="settings-wrap">
 <button id="settings-toggle" aria-label="Settings" aria-haspopup="true" aria-expanded="false" title="Settings"><span></span></button>
 <div id="settings-menu" class="settings-menu" hidden>
-<div class="settings-head">Settings</div>
+<div class="settings-head"><span>Settings</span><button id="settings-close" class="menu-close" type="button" aria-label="Close settings">&times;</button></div>
 <button id="theme-toggle" class="settings-row"><span class="settings-label">Theme</span><span class="settings-val"></span></button>
 <button id="accent-color" class="settings-row"><span class="settings-label">Accent color</span><span class="settings-val"></span></button>
 <button id="nav-colors" class="settings-row"><span class="settings-label">Folder colors</span><span class="settings-val"></span></button>
@@ -257,7 +257,8 @@ def render_page(*, config: SiteConfig, output_path: str, page_title: str,
                       '<span class="settings-val"></span></button>')
         pet_panel = (
             '<div id="pet-panel" class="settings-menu pet-panel" hidden>'
-            '<div class="settings-head">Pet</div>'
+            '<div class="settings-head"><span>Pet</span>'
+            '<button id="pet-close" class="menu-close" type="button" aria-label="Close pet panel">&times;</button></div>'
             '<div class="pet-group-label manifest-label">Appearance</div>'
             '<div id="pet-mode" class="pet-seg" role="group" aria-label="Pet mode">'
             '<button data-mode="float">Roam</button>'
