@@ -148,8 +148,27 @@ html[data-banner] #graph-view { height: calc(100vh - 182px); }
   from { opacity: 1; transform: translateY(0); }
   to { opacity: 0; transform: translateY(-26px); }
 }
+.pet-bubble {
+  position: absolute; left: 50%; bottom: 100%; margin-bottom: 6px;
+  transform: translateX(-50%);
+  padding: 3px 7px; font-family: var(--twb-font-mono); font-size: 11px; line-height: 1.2;
+  white-space: nowrap; color: var(--twb-text-normal);
+  background: var(--twb-bg-2); border: 1px solid var(--twb-border);
+  border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.28);
+  pointer-events: none; animation: pet-bubble-in 2.6s ease forwards;
+}
+.pet-bubble::after {
+  content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 4px solid transparent; border-top-color: var(--twb-bg-2);
+}
+.pet-bubble-boop, .pet-bubble-good { color: var(--twb-accent); }
+@keyframes pet-bubble-in {
+  0% { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  12%, 82% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-2px); }
+}
 @media (prefers-reduced-motion: reduce) {
-  .pet-sprite, .pet-particle { animation: none !important; }
+  .pet-sprite, .pet-particle, .pet-bubble { animation: none !important; }
 }
 
 /* --- top bar --- */

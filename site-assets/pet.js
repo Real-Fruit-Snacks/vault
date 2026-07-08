@@ -13,6 +13,32 @@
   var reduced = window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  var QUIPS = {
+    idle:  ["> idle", "$ _", "hi", "just vibing", "boop me?", "^_^", "> uptime"],
+    peek:  ["whatcha reading?", "ooh", "> peek", "nice note"],
+    read:  ["reading...", "go on", "> tail -f", "good line"],
+    nap:   ["zzz", "> sleep 60", "afk", "5 more min"],
+    boop:  ["boop!", "yay", "<3", "again!", ":D"],
+    spook: ["!", "eek", "> ^C", "yikes"],
+    fling: ["wheee", "whoa", "> yeet"]
+  };
+  function pick(a) { return a[(Math.random() * a.length) | 0]; }
+  var lastQuip = 0, QUIP_GAP = 12000;
+  function say(text, kind, force) {
+    if (!cfgSpeech) return;
+    if (reduced && !force) return;
+    var now = Date.now();
+    if (!force && now - lastQuip < QUIP_GAP) return;
+    lastQuip = now;
+    var old = pet.querySelector(".pet-bubble");
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var b = document.createElement("div");
+    b.className = "pet-bubble" + (kind ? " pet-bubble-" + kind : "");
+    b.textContent = text;
+    pet.appendChild(b);
+    setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 2600);
+  }
+
   var SIZE_MIN = 16, SIZE_MAX = 64, SIZE_DEFAULT = 28;
   function readSize() {
     var s = parseInt(localStorage.getItem("twb-pet-size"), 10);
@@ -203,6 +229,7 @@
     sprite.className = "pet-sprite pet-happy";
     if (Math.random() < 0.5) spawnParticle("♥", "pet-heart");
     else spawnParticle("!", "pet-bang");
+    say(pick(QUIPS.boop), "boop", true);
     if (petMode() === "float") { wakeFromNap(); zipAway(false); }
     setTimeout(function () {
       if (!spinning) sprite.className = "pet-sprite";
@@ -231,6 +258,7 @@
     if (scared) {
       sprite.className = "pet-sprite pet-spook";  // vertical squash-and-stretch
       pet.className = "pet-startled";             // brief opacity dip
+      say(pick(QUIPS.spook), "boop");
     }
   }
   function maybeSpook() {
@@ -294,6 +322,7 @@
     sprite.style.clipPath = clip;
     sprite.style.webkitClipPath = clip;
     setBoopable(true);
+    say(pick(QUIPS.peek));
   }
   function peekStep(now) {
     ease();
@@ -336,6 +365,7 @@
     phaseUntil = now + 4500 + Math.random() * 3500;
     tgtEase = READ_EASE;
     setBoopable(true);
+    say(pick(QUIPS.read));
   }
   function readStep(now) {
     var a = readAnchor();
@@ -385,6 +415,7 @@
     var resting = holdUntil && now < holdUntil;
     if (resting) {
       /* hovering in place — barely a sway */
+      if (Math.random() < 0.02) say(pick(QUIPS.idle));
     } else {
       holdUntil = 0;
       if (dist(x, y, tgt.x, tgt.y) < 20) nextDriftAction(now);
@@ -457,6 +488,7 @@
     tgtEase = 0.06;
     pet.className = "pet-nap";       // sleepy closed eyes
     setBoopable(true);
+    say(pick(QUIPS.nap));
   }
   function napStep(now) {
     ease();
