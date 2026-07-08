@@ -79,40 +79,85 @@
     });
   }
 
-  var petToggle = document.getElementById("pet-toggle");
-  if (petToggle) {
-    // Three modes cycle in this order; "float" (roam) is the default (no key).
-    var PET_MODES = ["cursor", "float", "off"];
-    function petMode() {
+  // Pet management panel: opens from the cog's "Pet" opener, reflects stored
+  // state into its controls, and on each change writes the localStorage key +
+  // dispatches "twb:pet" so pet.js re-reads config live.
+  (function () {
+    var open = document.getElementById("pet-open");
+    var panel = document.getElementById("pet-panel");
+    if (!open || !panel) return;
+    var root = document.documentElement;
+
+    function getMode() {
       var a = root.getAttribute("data-pet");
       return a === "off" || a === "float" ? a : "cursor";
     }
-    function petTitle(m) {
-      if (m === "cursor") return "Pet: follows the cursor (click to let it roam)";
-      if (m === "float") return "Pet: roams and lands on notes (click to hide)";
-      return "Pet: hidden (click to show)";
+    function setMode(m) {
+      if (m === "cursor") root.removeAttribute("data-pet");
+      else root.setAttribute("data-pet", m);
+      try { if (m === "float") localStorage.removeItem("twb-pet"); else localStorage.setItem("twb-pet", m); } catch (e) {}
+      sync(); fire();
     }
-    function applyPetButton(m) {
-      petToggle.classList.remove("pet-cursor", "pet-float", "pet-off");
-      petToggle.classList.add("pet-" + m);
-      petToggle.title = petTitle(m);
+    function num(k, dflt) { var v = parseInt(localStorage.getItem(k), 10); return isNaN(v) ? dflt : v; }
+    function onq(k, dflt) { var v = localStorage.getItem(k); return v === "on" ? true : v === "off" ? false : dflt; }
+    function setKey(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+    function sync() {
+      var m = getMode();
+      var segs = panel.querySelectorAll("#pet-mode button");
+      for (var i = 0; i < segs.length; i++) segs[i].classList.toggle("on", segs[i].getAttribute("data-mode") === m);
+      panel.querySelector("#pet-size").value = num("twb-pet-size", 28);
+      panel.querySelector("#pet-opacity").value = num("twb-pet-opacity", 70);
+      var col = num("twb-pet-color", 0);
+      var sw = panel.querySelectorAll("#pet-color button");
+      for (var j = 0; j < sw.length; j++) sw[j].classList.toggle("on", (+sw[j].getAttribute("data-color")) === col);
+      var q = [["nap", true], ["flee", true], ["read", true], ["tricks", true], ["speech", false]];
+      for (var n = 0; n < q.length; n++) {
+        var b = panel.querySelector("#pet-q-" + q[n][0]);
+        if (b) b.classList.toggle("on", onq("twb-pet-" + q[n][0], q[n][1]));
+      }
     }
-    // The head script already applied the stored mode before paint.
-    applyPetButton(petMode());
-    petToggle.addEventListener("click", function () {
-      var next = PET_MODES[(PET_MODES.indexOf(petMode()) + 1) % PET_MODES.length];
-      if (next === "cursor") root.removeAttribute("data-pet");
-      else root.setAttribute("data-pet", next);
-      applyPetButton(next);
-      // pet.js reads data-pet and re-arms its loop (parked while hidden).
-      window.dispatchEvent(new Event("twb:pet"));
-      try {
-        // Float (roam) is the default (no stored key); cursor and off explicit.
-        if (next === "float") localStorage.removeItem("twb-pet");
-        else localStorage.setItem("twb-pet", next);
-      } catch (e) { /* private mode */ }
+    function fire() { window.dispatchEvent(new Event("twb:pet")); }
+
+    open.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var show = panel.hasAttribute("hidden");
+      if (show) { sync(); panel.removeAttribute("hidden"); } else panel.setAttribute("hidden", "");
+      open.setAttribute("aria-expanded", show ? "true" : "false");
     });
-  }
+    document.addEventListener("click", function (e) {
+      if (!panel.hasAttribute("hidden") && !panel.contains(e.target) && e.target !== open) {
+        panel.setAttribute("hidden", ""); open.setAttribute("aria-expanded", "false");
+      }
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !panel.hasAttribute("hidden")) {
+        panel.setAttribute("hidden", ""); open.setAttribute("aria-expanded", "false"); open.focus();
+      }
+    });
+
+    panel.querySelector("#pet-mode").addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-mode]"); if (b) setMode(b.getAttribute("data-mode"));
+    });
+    panel.querySelector("#pet-size").addEventListener("input", function () { setKey("twb-pet-size", this.value); fire(); });
+    panel.querySelector("#pet-opacity").addEventListener("input", function () { setKey("twb-pet-opacity", this.value); fire(); });
+    panel.querySelector("#pet-color").addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-color]"); if (!b) return;
+      var c = b.getAttribute("data-color");
+      try { if (c === "0") localStorage.removeItem("twb-pet-color"); else localStorage.setItem("twb-pet-color", c); } catch (er) {}
+      sync(); fire();
+    });
+    var quirks = ["nap", "flee", "read", "tricks", "speech"];
+    for (var i = 0; i < quirks.length; i++) (function (id) {
+      var b = panel.querySelector("#pet-q-" + id);
+      if (!b) return;
+      b.addEventListener("click", function () {
+        var cur = onq("twb-pet-" + id, id === "speech" ? false : true);
+        setKey("twb-pet-" + id, cur ? "off" : "on");
+        sync(); fire();
+      });
+    })(quirks[i]);
+  })();
 
   var navColors = document.getElementById("nav-colors");
   if (navColors) {

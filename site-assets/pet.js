@@ -132,6 +132,9 @@
     cfgRead = boolKey("twb-pet-read", true);
     cfgTricks = boolKey("twb-pet-tricks", true);
     cfgSpeech = boolKey("twb-pet-speech", false);
+    var c = parseInt(localStorage.getItem("twb-pet-color"), 10);
+    petColor = (c >= 1 && c < COLOR_COUNT) ? c : 0;
+    applyPetColor();
     applySize();
     applyOpacity();
   }

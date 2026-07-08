@@ -965,6 +965,21 @@ html[data-textsize="l"] #text-size .settings-val::after { content: "L"; }
   background: var(--twb-accent); border: 1px solid var(--twb-border-strong);
 }
 
+/* --- pet management panel (reuses .settings-menu popover styling) --- */
+.pet-panel { right: 8px; }                 /* anchor near the cog, like #settings-menu */
+.pet-group-label { display: block; padding: 2px 12px; margin-top: 6px; font-size: 10px; color: var(--twb-text-faint); }
+.pet-seg { display: flex; margin: 4px 10px 8px; border: 1px solid var(--twb-border); border-radius: 6px; overflow: hidden; }
+.pet-seg button { flex: 1; background: none; border: none; color: var(--twb-text-soft); font: inherit; font-size: 12px; padding: 5px 0; cursor: pointer; }
+.pet-seg button.on { background: color-mix(in srgb, var(--twb-accent) 18%, transparent); color: var(--twb-accent); }
+.pet-slider { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 12px; font-size: 12px; color: var(--twb-text-soft); }
+.pet-slider input[type="range"] { flex: 1; accent-color: var(--twb-accent); }
+.pet-swatches { display: flex; gap: 8px; padding: 6px 12px 8px; }
+.pet-swatches button { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--twb-border); background: var(--sw); cursor: pointer; padding: 0; }
+.pet-swatches button.on { outline: 2px solid var(--twb-accent); outline-offset: 2px; }
+.pet-quirk .settings-val::after { content: "Off"; }
+.pet-quirk.on .settings-val::after { content: "On"; }
+.pet-quirk.on .settings-val { color: var(--twb-accent); }
+
 /* Reader text size scales the article; headings/prose use em, so they follow. */
 html[data-textsize="s"] article.note { font-size: 0.9rem; }
 html[data-textsize="l"] article.note { font-size: 1.13rem; }
