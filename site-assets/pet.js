@@ -10,8 +10,9 @@
   }
   var tilt = pet.querySelector(".pet-tilt");
   var sprite = pet.querySelector(".pet-sprite");
-  var reduced = window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // The pet intentionally animates regardless of the OS "reduce motion"
+  // setting; readers who don't want it can turn the pet off entirely.
+  var reduced = false;
 
   var QUIPS = {
     idle:  ["> idle", "$ _", "hi", "just vibing", "boop me?", "^_^", "> uptime"],
