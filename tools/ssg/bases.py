@@ -3,13 +3,14 @@ from __future__ import annotations
 import datetime
 import html as html_mod
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import yaml
 
-from . import mdtext, urls
+from . import baseexpr, mdtext, urls
+from .basevalue import BaseError, Link
 
-VIEW_TYPES = {"table", "cards"}
+VIEW_TYPES = {"table", "cards", "list"}
 
 
 @dataclass
@@ -21,6 +22,8 @@ class BaseView:
     sort: list
     limit: int
     image: str
+    group_by: object = None            # (property, "ASC"|"DESC") or None
+    summaries: list = field(default_factory=list)  # [(column, agg_or_expr)]
 
 
 @dataclass
@@ -30,6 +33,7 @@ class Base:
     filters: object
     views: list
     display_names: dict
+    formulas: dict = field(default_factory=dict)  # name -> AST (or None)
 
 
 def _parse_filters(node, rel, warnings):
@@ -58,8 +62,13 @@ def parse_base(text, rel, warnings):
     if not isinstance(data, dict):
         warnings.append(f"{rel}: base is not a YAML mapping; skipped")
         return None
-    if data.get("formulas"):
-        warnings.append(f"{rel}: formulas are not supported; formula columns render empty")
+    formulas = {}
+    raw_formulas = data.get("formulas")
+    if isinstance(raw_formulas, dict):
+        for name, expr in raw_formulas.items():
+            formulas[str(name)] = baseexpr.parse(expr) if isinstance(expr, str) else None
+            if formulas[str(name)] is None:
+                warnings.append(f"{rel}: formula {name!r} did not parse; renders empty")
     display_names = {}
     props = data.get("properties")
     if isinstance(props, dict):
@@ -80,46 +89,141 @@ def parse_base(text, rel, warnings):
         order = ([str(c) for c in item["order"] if isinstance(c, (str, int))]
                  if isinstance(item.get("order"), list) else [])
         sort = []
-        raw_sort = item.get("sort")
-        for s in raw_sort if isinstance(raw_sort, list) else []:
+        for s in item.get("sort") if isinstance(item.get("sort"), list) else []:
             if isinstance(s, dict) and isinstance(s.get("property"), str):
                 direction = str(s.get("direction", "ASC")).upper()
                 sort.append((s["property"], "DESC" if direction == "DESC" else "ASC"))
         limit = (item["limit"] if isinstance(item.get("limit"), int)
                  and not isinstance(item.get("limit"), bool) and item["limit"] > 0 else 0)
         image = item.get("image") if isinstance(item.get("image"), str) else ""
-        views.append(BaseView(name=name, type=vtype,
-                              filters=_parse_filters(item.get("filters"), rel, warnings),
-                              order=order, sort=sort, limit=limit, image=image))
+        group_by = None
+        gb = item.get("groupBy")
+        if isinstance(gb, dict) and isinstance(gb.get("property"), str):
+            gdir = "DESC" if str(gb.get("direction", "ASC")).upper() == "DESC" else "ASC"
+            group_by = (gb["property"], gdir)
+        elif isinstance(gb, str):
+            group_by = (gb, "ASC")
+        summaries = []
+        sm = item.get("summaries")
+        if isinstance(sm, dict):
+            for col, agg in sm.items():
+                summaries.append((str(col), str(agg)))
+        views.append(BaseView(
+            name=name, type=vtype,
+            filters=_parse_filters(item.get("filters"), rel, warnings),
+            order=order, sort=sort, limit=limit, image=image,
+            group_by=group_by, summaries=summaries))
     return Base(path=rel, title=rel.rsplit("/", 1)[-1][:-5],
                 filters=_parse_filters(data.get("filters"), rel, warnings),
-                views=views, display_names=display_names)
+                views=views, display_names=display_names, formulas=formulas)
 
 
 class NoteCtx:
-    """Per-note evaluation context for filter expressions and cell values."""
+    """Per-note evaluation context for the expression engine."""
 
-    def __init__(self, path, note, resolver):
+    def __init__(self, path, note, resolver, filedata=None, formulas=None,
+                 build_now=None):
         self.path = path
         self.note = note
         self.resolver = resolver
+        self.filedata = filedata or {}
+        self.formulas = formulas or {}
+        self.build_now = build_now or datetime.datetime.now()
         self._links = None
+        self._formula_cache = {}
+        self._formula_active = set()
 
-    def get(self, operand):
-        if operand == "file.name":
-            return self.path.rsplit("/", 1)[-1][:-3]
-        if operand == "file.path":
-            return self.path
-        if operand == "file.folder":
-            return self.path.rsplit("/", 1)[0] if "/" in self.path else ""
-        if operand == "file.ext":
-            return "md"
-        if operand == "file.tags":
-            return list(self.note.tags)
-        value = self.note.frontmatter.get(operand)
-        if isinstance(value, (datetime.date, datetime.datetime)):
-            return value.isoformat()
+    # -- engine protocol ----------------------------------------------------
+    def resolve(self, name):
+        if name == "file" or name == "note":
+            # bare namespace refs are not values on their own
+            raise BaseError(f"{name} is not a value")
+        if name.startswith("file."):
+            return self._file_field(name[5:])
+        if name.startswith("note."):
+            return self._prop(name[5:])
+        if name.startswith("formula."):
+            return self._formula(name[8:])
+        return self._prop(name)
+
+    def file_method(self, name, args):
+        if name == "hasTag":
+            return True, (all(self.has_tag(a) for a in args) if args else False)
+        if name == "inFolder":
+            return True, (self.in_folder(args[0]) if args else False)
+        if name == "hasLink":
+            return True, (self.has_link(args[0]) if args else False)
+        if name == "hasProperty":
+            return True, (self.has_property(args[0]) if args else False)
+        if name == "asLink":
+            return True, Link(self.path[:-3], str(args[0]) if args else "")
+        return False, None
+
+    # -- value helpers ------------------------------------------------------
+    def value(self, ref):
+        """Public: value of a column/sort/group ref; null on failure."""
+        try:
+            return self.resolve(ref)
+        except BaseError:
+            return None
+
+    def _prop(self, prop):
+        value = self.note.frontmatter.get(prop)
+        if isinstance(value, str):
+            m = _WIKILINK_VAL_RE.match(value.strip())
+            if m:
+                return Link(m.group(1).strip(), (m.group(2) or "").strip())
         return value
+
+    def _file_field(self, fieldname):
+        base = self.path.rsplit("/", 1)[-1]
+        if fieldname == "name":
+            return base
+        if fieldname == "basename":
+            return base[:-3] if base.lower().endswith(".md") else base
+        if fieldname == "path":
+            return self.path
+        if fieldname == "folder":
+            return self.path.rsplit("/", 1)[0] if "/" in self.path else ""
+        if fieldname == "ext":
+            return "md"
+        if fieldname == "tags":
+            return list(self.note.tags)
+        if fieldname == "size":
+            return self.filedata.get("size", {}).get(self.path)
+        if fieldname == "ctime":
+            return self.filedata.get("ctime", {}).get(self.path)
+        if fieldname == "mtime":
+            return self.filedata.get("mtime", {}).get(self.path)
+        if fieldname == "links":
+            return sorted(self._link_set())
+        if fieldname == "properties":
+            return dict(self.note.frontmatter)
+        raise BaseError(f"unknown file.{fieldname}")
+
+    def _formula(self, name):
+        if name in self._formula_cache:
+            return self._formula_cache[name]
+        if name in self._formula_active:      # cycle
+            return None
+        ast = self.formulas.get(name)
+        if ast is None:
+            self._formula_cache[name] = None
+            return None
+        self._formula_active.add(name)
+        result = baseexpr.evaluate(ast, self)
+        self._formula_active.discard(name)
+        self._formula_cache[name] = result
+        return result
+
+    def _link_set(self):
+        if self._links is None:
+            self._links = set()
+            for t in mdtext.find_wikilink_targets(self.note.body):
+                dest = self.resolver.resolve_note(t, self.path)
+                if dest:
+                    self._links.add(dest)
+        return self._links
 
     def has_tag(self, tag):
         t = str(tag).lstrip("#").lower()
@@ -132,149 +236,40 @@ class NoteCtx:
         return mine == f or mine.startswith(f + "/")
 
     def has_link(self, target):
-        if self._links is None:
-            self._links = set()
-            for t in mdtext.find_wikilink_targets(self.note.body):
-                dest = self.resolver.resolve_note(t, self.path)
-                if dest:
-                    self._links.add(dest)
         dest = self.resolver.resolve_note(str(target), self.path)
-        return dest is not None and dest in self._links
+        return dest is not None and dest in self._link_set()
 
     def has_property(self, prop):
         return str(prop) in self.note.frontmatter
 
 
-_LIT = r'"[^"]*"|\'[^\']*\'|-?\d+(?:\.\d+)?|true|false|null'
-_OPERAND = r'file\.(?:name|path|folder|ext|tags)|[A-Za-z_][A-Za-z0-9_-]*'
-_CMP_RE = re.compile(rf'^({_OPERAND})\s*(==|!=|>=|<=|>|<)\s*({_LIT})$')
-_FUNC_RE = re.compile(rf'^file\.(hasTag|inFolder|hasLink|hasProperty)\(\s*({_LIT})\s*\)$')
-_CONTAINS_RE = re.compile(rf'^contains\(\s*({_OPERAND})\s*,\s*({_LIT})\s*\)$')
-_BARE_RE = re.compile(rf'^({_OPERAND})$')
-_FUNC_METHOD = {"hasTag": "has_tag", "inFolder": "in_folder",
-                "hasLink": "has_link", "hasProperty": "has_property"}
-
-
-def _literal(text):
-    if text.startswith(('"', "'")):
-        return text[1:-1]
-    if text == "true":
-        return True
-    if text == "false":
-        return False
-    if text == "null":
-        return None
-    return float(text) if "." in text else int(text)
-
-
-def _compare(val, op, lit):
-    if op == "==":
-        return val == lit
-    if op == "!=":
-        return val != lit
-    # Ordering needs matching, orderable types; anything else is false.
-    if isinstance(val, bool) or isinstance(lit, bool):
-        return False
-    both_num = isinstance(val, (int, float)) and isinstance(lit, (int, float))
-    both_str = isinstance(val, str) and isinstance(lit, str)
-    if not (both_num or both_str):
-        return False
-    if op == ">":
-        return val > lit
-    if op == "<":
-        return val < lit
-    if op == ">=":
-        return val >= lit
-    return val <= lit
-
-
-def compile_expr(text):
-    """Compile one filter expression to a predicate, or None if unsupported."""
-    t = text.strip()
-    if not t:
-        return None
-    # Consume every leading negation (whitespace-interleaved too) in one
-    # loop, so hostile chains like "! ! ! …" can't recurse per run.
-    negations = 0
-    while t.startswith("!"):
-        t = t[1:].lstrip()
-        negations += 1
-    if negations:
-        if not t:
-            return None
-        inner = compile_expr(t)  # t has no leading "!", so depth is 2 max
-        if inner is None:
-            return None
-        if negations % 2 == 0:
-            return inner
-        return lambda ctx: not inner(ctx)
-    m = _FUNC_RE.match(t)
-    if m:
-        method, lit = _FUNC_METHOD[m.group(1)], _literal(m.group(2))
-        return lambda ctx: getattr(ctx, method)(lit)
-    m = _CONTAINS_RE.match(t)
-    if m:
-        operand, lit = m.group(1), _literal(m.group(2))
-
-        def contains(ctx):
-            val = ctx.get(operand)
-            if isinstance(val, list):
-                return lit in val
-            if isinstance(val, str) and isinstance(lit, str):
-                return lit.lower() in val.lower()
-            return False
-        return contains
-    m = _CMP_RE.match(t)
-    if m:
-        operand, op, lit = m.group(1), m.group(2), _literal(m.group(3))
-        return lambda ctx: _compare(ctx.get(operand), op, lit)
-    m = _BARE_RE.match(t)
-    if m:
-        operand = m.group(1)
-
-        def truthy(ctx):
-            val = ctx.get(operand)
-            if isinstance(val, str):
-                return bool(val.strip())
-            return bool(val)
-        return truthy
-    return None
-
-
-def _precompile(tree, cache, rel, warnings, warned):
-    """Precompile every leaf expression in the filter tree and warn if unsupported."""
+def _compile_tree(tree, cache, rel, warnings, warned):
+    """Compile every leaf expression once; warn on unparseable leaves."""
     if tree is None:
         return
     if tree[0] == "expr":
         text = tree[1]
         if text not in cache:
-            cache[text] = compile_expr(text)
+            cache[text] = baseexpr.as_predicate(text)
         if cache[text] is None and text not in warned:
             warned.add(text)
-            warnings.append(
-                f"{rel}: unsupported filter expression {text!r}; treated as false")
+            warnings.append(f"{rel}: unsupported filter expression {text!r}; treated as false")
         return
     for child in tree[1]:
-        _precompile(child, cache, rel, warnings, warned)
+        _compile_tree(child, cache, rel, warnings, warned)
 
 
-def _eval_tree(tree, ctx, cache, rel, warnings, warned):
+def _match_tree(tree, ctx, cache):
     kind = tree[0]
     if kind == "expr":
-        text = tree[1]
-        if text not in cache:
-            cache[text] = compile_expr(text)
-        fn = cache[text]
-        if fn is None:
-            return False
-        return fn(ctx)
+        fn = cache.get(tree[1])
+        return bool(fn(ctx)) if fn else False
     children = tree[1]
     if kind == "and":
-        return all(_eval_tree(c, ctx, cache, rel, warnings, warned) for c in children)
+        return all(_match_tree(c, ctx, cache) for c in children)
     if kind == "or":
-        return any(_eval_tree(c, ctx, cache, rel, warnings, warned) for c in children)
-    # not: true when no child matches
-    return not any(_eval_tree(c, ctx, cache, rel, warnings, warned) for c in children)
+        return any(_match_tree(c, ctx, cache) for c in children)
+    return not any(_match_tree(c, ctx, cache) for c in children)  # not
 
 
 def _cmp_key(val):
@@ -282,37 +277,41 @@ def _cmp_key(val):
         return (0, float(val), "")
     if isinstance(val, (int, float)):
         return (0, float(val), "")
+    if isinstance(val, datetime.date):
+        base = val if isinstance(val, datetime.datetime) else datetime.datetime(val.year, val.month, val.day)
+        return (0, base.timestamp(), "")
     if isinstance(val, str):
         return (1, 0.0, val.lower())
+    if isinstance(val, Link):
+        return (1, 0.0, (val.display or val.target).lower())
     return (2, 0.0, str(val).lower())
 
 
-def evaluate(base, view, vault, resolver, warnings):
+def make_ctx(path, vault, resolver, filedata, formulas, build_now):
+    return NoteCtx(path, vault.notes[path], resolver,
+                   filedata=filedata, formulas=formulas, build_now=build_now)
+
+
+def evaluate(base, view, vault, resolver, warnings, filedata=None, build_now=None):
     cache, warned = {}, set()
-    # Precompile every expression once and warn if unsupported, so warnings
-    # appear even if short-circuit evaluation skips the expression.
     for tree in (base.filters, view.filters):
         if tree is not None:
-            _precompile(tree, cache, base.path, warnings, warned)
-    ctxs = {}
-    matches = []
+            _compile_tree(tree, cache, base.path, warnings, warned)
+    ctxs, matches = {}, []
     for path in sorted(vault.notes):
-        ctx = NoteCtx(path, vault.notes[path], resolver)
+        ctx = make_ctx(path, vault, resolver, filedata or {}, base.formulas, build_now)
         ctxs[path] = ctx
         ok = True
         for tree in (base.filters, view.filters):
-            if tree is not None and not _eval_tree(
-                    tree, ctx, cache, base.path, warnings, warned):
+            if tree is not None and not _match_tree(tree, ctx, cache):
                 ok = False
                 break
         if ok:
             matches.append(path)
-    # Apply sort keys lowest-priority first (stable), missing values last.
     for prop, direction in reversed(view.sort):
-        present = [p for p in matches if ctxs[p].get(prop) is not None]
-        absent = [p for p in matches if ctxs[p].get(prop) is None]
-        present.sort(key=lambda p: _cmp_key(ctxs[p].get(prop)),
-                     reverse=(direction == "DESC"))
+        present = [p for p in matches if ctxs[p].value(prop) is not None]
+        absent = [p for p in matches if ctxs[p].value(prop) is None]
+        present.sort(key=lambda p: _cmp_key(ctxs[p].value(prop)), reverse=(direction == "DESC"))
         matches = present + absent
     if view.limit:
         matches = matches[:view.limit]
@@ -381,7 +380,7 @@ def _row_cells(base, cols, path, ctx, vault, resolver, output_path):
             cells.append("<td></td>")
         else:
             cells.append(
-                f"<td>{_cell_html(ctx.get(col), col, resolver, output_path, path)}</td>")
+                f"<td>{_cell_html(ctx.value(col), col, resolver, output_path, path)}</td>")
     return "".join(cells)
 
 
@@ -418,7 +417,7 @@ def _cards_html(base, view, matches, vault, resolver, output_path, warnings):
         ctx = NoteCtx(path, vault.notes[path], resolver)
         img = ""
         if view.image:
-            raw = ctx.get(view.image)
+            raw = ctx.value(view.image)
             src = _resolve_image(raw, resolver, path)
             if src:
                 img = (f'<img src="{urls.rel_href(output_path, src)}" alt="" '
@@ -432,7 +431,7 @@ def _cards_html(base, view, matches, vault, resolver, output_path, warnings):
         rows = "".join(
             f'<div class="base-card-prop"><span class="manifest-label">'
             f"{html_mod.escape(_col_label(base, c))}</span>"
-            f"{_cell_html(ctx.get(c), c, resolver, output_path, path)}</div>"
+            f"{_cell_html(ctx.value(c), c, resolver, output_path, path)}</div>"
             for c in props)
         cards.append(f'<div class="base-card">{img}<div class="base-card-body">'
                      f"{title}{rows}</div></div>")
