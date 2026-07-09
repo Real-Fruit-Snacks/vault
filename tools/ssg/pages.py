@@ -504,17 +504,24 @@ def home_hero(config) -> str:
 
 
 def home_sections(vault: Vault, dates: dict, tag_roots, tools,
-                  output_path: str, home_note=None, canvases=(), bases=()) -> str:
+                  output_path: str, home_note=None, canvases=(), bases=(),
+                  orders=None) -> str:
     """Build-time homepage sections: recently updated notes, tag chips, tools.
 
     Regenerated on every build, so the homepage tracks the vault as notes
-    change. Sections with nothing to show are omitted (e.g. no git dates)."""
+    change. Sections with nothing to show are omitted (e.g. no git dates).
+
+    `dates` supplies the displayed `YYYY-MM-DD` per path; `orders` (from
+    ssg.updated) supplies a finer `YYYY-MM-DDTHH:MM:SS` sort key so same-day
+    notes with a frontmatter time order correctly. `orders` defaults to
+    `dates` when omitted."""
+    orders = orders if orders is not None else dates
     sections = []
     dated = [(dates[p], p) for p in vault.notes if p in dates and p != home_note]
     dated += [(dates[p], p) for p in canvases if p in dates and p != home_note]
     dated += [(dates[p], p) for p in bases if p in dates and p != home_note]
     dated.sort(key=lambda dp: dp[1].lower())
-    dated.sort(key=lambda dp: dp[0], reverse=True)
+    dated.sort(key=lambda dp: orders.get(dp[1], ""), reverse=True)
     if dated:
         def entry(p):
             if p.lower().endswith(".canvas"):

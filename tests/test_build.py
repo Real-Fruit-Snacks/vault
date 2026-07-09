@@ -1,6 +1,7 @@
 import contextlib
 import io
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -389,6 +390,19 @@ class TagHandlingTests(unittest.TestCase):
             rc = build.main(["--vault", str(root), "--out", str(out)])
         self.assertEqual(rc, 0)
         return out, buf.getvalue()
+
+    def test_homepage_orders_by_frontmatter_updated(self):
+        # The temp vault is not a git repo (no commit dates), so the frontmatter
+        # `updated:` field is the sole ordering signal — the newest floats first.
+        out, _ = self._build({
+            "Older.md": "---\nupdated: 2026-07-01\n---\nbody",
+            "Newer.md": "---\nupdated: 2026-07-09T08:30\n---\nbody",
+        })
+        html = (out / "index.html").read_text(encoding="utf-8")
+        block = re.search(r"recently updated.*?</ul>", html, re.S).group(0)
+        titles = re.findall(r'home-recent-title">([^<]+)</span>', block)
+        self.assertEqual(titles[:2], ["Newer", "Older"])
+        self.assertIn("2026-07-09", block)  # displays the frontmatter date
 
     def test_case_variant_tags_merge_with_warning(self):
         out, stdout = self._build({"A.md": "about #Reading", "B.md": "about #reading"})

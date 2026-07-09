@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from ssg import bases as basesmod  # noqa: E402
 from ssg import canvas as canvasmod  # noqa: E402
-from ssg import gitdates, graphdata, mdtext, pages, tags, toolpages, urls  # noqa: E402
+from ssg import gitdates, graphdata, mdtext, pages, tags, toolpages, updated, urls  # noqa: E402
 from ssg.config import load_config  # noqa: E402
 from ssg.links import LinkResolver, build_backlinks  # noqa: E402
 from ssg.obsidian import NoteRenderer  # noqa: E402
@@ -143,7 +143,10 @@ def main(argv=None) -> int:
 
     config = load_config(vault_root)
     vault = scan_vault(vault_root, config)
-    dates = gitdates.note_dates(vault_root)
+    # "Updated" dates: a note's frontmatter date wins over the git commit date
+    # (which is day-granular and reflects when you committed, not edited).
+    # `orders` carries a finer sort key so same-day notes order correctly.
+    dates, date_orders = updated.resolve(vault, gitdates.note_dates(vault_root))
     resolver = LinkResolver(vault)
     backlinks = build_backlinks(vault, resolver)
     renderer = NoteRenderer(vault, resolver)
@@ -296,7 +299,7 @@ def main(argv=None) -> int:
         description="Browse every note, folder, and tag in the vault."))
 
     home_extra = pages.home_sections(vault, dates, tag_roots, nav_tools, "index.html", home,
-                                     canvases=canvas_paths, bases=base_paths)
+                                     canvases=canvas_paths, bases=base_paths, orders=date_orders)
     if home is not None:
         # Rewrites index.html even when the home note's own output path is
         # index.html, so the homepage sections are always appended there.
