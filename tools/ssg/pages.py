@@ -461,7 +461,7 @@ def tag_page_content(node, vault: Vault, output_path: str) -> str:
                     f'<div class="tag-children">{chips}</div></section>')
     rows = "".join(
         _note_row(p, vault, output_path)
-        for p in sorted(node.notes, key=lambda p: vault.notes[p].title.lower()))
+        for p in sorted(node.notes, key=lambda p: (vault.notes[p].title.lower(), p)))
     return (f'<h1><span class="manifest-label">tag</span> '
             f'#{html_mod.escape(node.path)}</h1>'
             f'{count}{children}'

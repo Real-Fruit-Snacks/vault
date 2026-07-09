@@ -228,17 +228,32 @@ def main(argv=None) -> int:
             description=note_description(note),
             note_nav=pages.build_note_nav(prev, nxt, out_path)))
 
+    # Canonicalize each tag segment to one spelling per slug so that variants
+    # which map to the same URL component (e.g. "Net" vs "net", "Net Ops" vs
+    # "net-ops") collapse onto a single spelling. This dedups not just whole
+    # tags but the parent segments the hierarchy layer synthesizes, so a
+    # case/format variant of a parent maps to one page and one chip instead of
+    # silently overwriting. Each distinct raw tag that gets rewritten warns once.
+    seg_canon: dict = {}     # segment slug -> first-seen segment spelling
+    warned_tags: set = set()
     tag_direct: dict = {}    # canonical display tag -> set of note paths
-    slug_display: dict = {}  # output path -> first-seen display spelling
     tag_warnings: list = []
     for path, note in sorted(vault.notes.items()):
         for tag in note.tags:
-            tag_out = urls.tag_output_path(tag)
-            display = slug_display.setdefault(tag_out, tag)
-            if display != tag:
+            segs = []
+            merged = False
+            for seg in tag.split("/"):
+                disp = seg_canon.setdefault(urls.tag_slug(seg), seg)
+                if disp != seg:
+                    merged = True
+                segs.append(disp)
+            canon = "/".join(segs)
+            if merged and tag not in warned_tags:
+                warned_tags.add(tag)
                 tag_warnings.append(
-                    f"tag '{tag}' merges with '{display}' (both map to {tag_out})")
-            tag_direct.setdefault(display, set()).add(path)
+                    f"tag '{tag}' merges with '{canon}' "
+                    f"(both map to {urls.tag_output_path(tag)})")
+            tag_direct.setdefault(canon, set()).add(path)
     tag_roots = tags.build_tag_tree(tag_direct)
     for node in tags.iter_nodes(tag_roots):
         out_path = urls.tag_output_path(node.path)

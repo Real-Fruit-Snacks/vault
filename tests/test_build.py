@@ -397,6 +397,23 @@ class TagHandlingTests(unittest.TestCase):
         self.assertIn("B.html", page)
         self.assertIn("merges with", stdout)
 
+    def test_case_variant_parent_segments_merge(self):
+        out, stdout = self._build({"A.md": "#Net/vpn", "B.md": "#net/dns"})
+        # The two case-variant parents collapse onto one page listing both notes.
+        self.assertTrue((out / "_tags/net.html").is_file())
+        parent = (out / "_tags/net.html").read_text(encoding="utf-8")
+        self.assertIn("A.html", parent)
+        self.assertIn("B.html", parent)
+        self.assertIn("2 notes", parent)
+        # Child pages exist at nested paths under the single canonical parent.
+        self.assertTrue((out / "_tags/net/vpn.html").is_file())
+        self.assertTrue((out / "_tags/net/dns.html").is_file())
+        # The index shows the canonical spelling only, and a merge warning fired.
+        index = (out / "_tags/index.html").read_text(encoding="utf-8")
+        self.assertIn("#Net/dns", index)
+        self.assertNotIn("#net/dns", index)
+        self.assertIn("merges with", stdout)
+
     def test_tag_breadcrumb_is_escaped(self):
         out, _ = self._build({"A.md": "---\ntags: ['<em>weird</em>']\n---\nbody"})
         tag_page = next(p for p in (out / "_tags").rglob("*.html")
