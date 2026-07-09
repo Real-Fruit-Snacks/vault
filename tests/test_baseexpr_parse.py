@@ -80,3 +80,7 @@ class ParseTests(unittest.TestCase):
         self.assertIsNone(be.parse("price >"))
         self.assertIsNone(be.parse("@#$"))
         self.assertIsNone(be.parse(""))
+
+    def test_deeply_nested_input_degrades_not_crash(self):
+        self.assertIsNone(be.parse("!" * 5000 + "x"))
+        self.assertIsNone(be.parse("(" * 5000 + "1" + ")" * 5000))

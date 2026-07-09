@@ -62,3 +62,9 @@ class EvalTests(unittest.TestCase):
         self.assertFalse(pred(FakeCtx({"price": 1})))
         self.assertIsNone(be.compile("1 +"))       # parse error -> None
         self.assertIsNone(be.as_predicate("1 +"))
+
+    def test_deep_valid_chain_degrades_not_crash(self):
+        node = be.parse("x" + ".reverse()" * 4000)  # parses via the iterative postfix loop
+        self.assertIsNotNone(node)
+        # evaluation recurses on .recv; must degrade to None rather than raise
+        self.assertIsNone(be.evaluate(node, FakeCtx({"x": [1, 2]})))

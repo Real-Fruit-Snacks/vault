@@ -202,7 +202,7 @@ def parse(text):
         if p.peek()[0] != "end":
             raise _ParseError(f"trailing input {p.peek()[1]!r}")
         return node
-    except _ParseError:
+    except (_ParseError, RecursionError):
         return None
 
 
@@ -216,7 +216,7 @@ def evaluate(node, ctx):
     try:
         return _eval(node, ctx)
     except (BaseError, ValueError, TypeError, IndexError, KeyError,
-            AttributeError, ArithmeticError, OverflowError):
+            AttributeError, ArithmeticError, OverflowError, RecursionError):
         return None
 
 

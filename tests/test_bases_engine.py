@@ -99,6 +99,15 @@ class EvaluateTests(VaultCase):
         matches = bases.evaluate(base, base.views[0], vault, resolver, [], build_now=NOW)
         self.assertEqual(matches, ["B.md", "A.md"])  # neg ascending => price desc
 
+    def test_sort_by_pre_epoch_date_does_not_crash(self):
+        base, vault, resolver = self._eval(
+            {"A.md": "---\npublished: 1955-01-01\n---\nx",
+             "B.md": "---\npublished: 1980-01-01\n---\nx"},
+            "views:\n  - type: table\n    name: V\n"
+            "    sort:\n      - {property: published, direction: ASC}\n")
+        matches = bases.evaluate(base, base.views[0], vault, resolver, [], build_now=NOW)
+        self.assertEqual(matches, ["A.md", "B.md"])  # 1955 before 1980, no OSError
+
 
 class ParseTests(unittest.TestCase):
     def test_parse_groupby_and_summaries(self):

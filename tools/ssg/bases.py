@@ -279,7 +279,9 @@ def _cmp_key(val):
         return (0, float(val), "")
     if isinstance(val, datetime.date):
         base = val if isinstance(val, datetime.datetime) else datetime.datetime(val.year, val.month, val.day)
-        return (0, base.timestamp(), "")
+        if base.tzinfo is not None:
+            base = base.replace(tzinfo=None)
+        return (0, (base - datetime.datetime(1970, 1, 1)).total_seconds(), "")
     if isinstance(val, str):
         return (1, 0.0, val.lower())
     if isinstance(val, Link):
