@@ -1212,11 +1212,10 @@ html[data-crt="on"] .content { filter: saturate(1.15) contrast(1.04); }
 @keyframes crt-roll {
   0% { transform: translateY(-30vh); } 100% { transform: translateY(100vh); }
 }
-/* Motion-sensitive visitors keep the look, lose the animation. */
-@media (prefers-reduced-motion: reduce) {
-  html[data-crt="on"] body::after { animation: none; }
-  html[data-crt="on"]::after { display: none; }
-}
+/* CRT mode is off by default and explicitly opt-in; when a visitor turns it
+   on they get the full effect (flicker + rolling sweep) regardless of the OS
+   "reduce motion" setting, consistent with the pet and boot splash. Visitors
+   who don't want the motion simply leave CRT mode off. */
 
 /* --- reading progress bar (opt-in via the settings menu) --- */
 #read-progress {
