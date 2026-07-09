@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from ssg import bases as basesmod  # noqa: E402
 from ssg import canvas as canvasmod  # noqa: E402
-from ssg import gitdates, graphdata, mdtext, pages, toolpages, urls  # noqa: E402
+from ssg import gitdates, graphdata, mdtext, pages, tags, toolpages, urls  # noqa: E402
 from ssg.config import load_config  # noqa: E402
 from ssg.links import LinkResolver, build_backlinks  # noqa: E402
 from ssg.obsidian import NoteRenderer  # noqa: E402
@@ -228,31 +228,40 @@ def main(argv=None) -> int:
             description=note_description(note),
             note_nav=pages.build_note_nav(prev, nxt, out_path)))
 
-    tag_map: dict = {}       # display tag -> set of note paths (one display spelling per slug)
-    slug_display: dict = {}  # slug -> first-seen display spelling
+    tag_direct: dict = {}    # canonical display tag -> set of note paths
+    slug_display: dict = {}  # output path -> first-seen display spelling
     tag_warnings: list = []
     for path, note in sorted(vault.notes.items()):
         for tag in note.tags:
-            slug = urls.tag_slug(tag)
-            display = slug_display.setdefault(slug, tag)
+            tag_out = urls.tag_output_path(tag)
+            display = slug_display.setdefault(tag_out, tag)
             if display != tag:
                 tag_warnings.append(
-                    f"tag '{tag}' merges with '{display}' (both map to _tags/{slug}.html)")
-            tag_map.setdefault(display, set()).add(path)
-    for tag in sorted(tag_map):
-        out_path = urls.tag_output_path(tag)
+                    f"tag '{tag}' merges with '{display}' (both map to {tag_out})")
+            tag_direct.setdefault(display, set()).add(path)
+    tag_roots = tags.build_tag_tree(tag_direct)
+    for node in tags.iter_nodes(tag_roots):
+        out_path = urls.tag_output_path(node.path)
+        crumbs = ['<span>tags</span>']
+        for anc in tags.ancestors(node.path):
+            crumbs.append('<span class="crumb-sep">/</span>')
+            if anc == node.path:
+                crumbs.append(f'<span>{html_mod.escape(node.name)}</span>')
+            else:
+                href = urls.rel_href(out_path, urls.tag_output_path(anc))
+                label = html_mod.escape(anc.rsplit("/", 1)[-1])
+                crumbs.append(f'<a href="{href}">{label}</a>')
         write(out / out_path, pages.render_page(
-            config=config, output_path=out_path, page_title=f"#{tag}",
-            content_html=pages.tag_page_content(tag, tag_map[tag], vault, out_path),
+            config=config, output_path=out_path, page_title=f"#{node.path}",
+            content_html=pages.tag_page_content(node, vault, out_path),
             nav_html=pages.build_nav(vault, "", out_path, tools=nav_tools, home_note=home,
                                      canvases=canvas_paths, bases=base_paths),
-            breadcrumbs=f"<span>tags</span><span class=\"crumb-sep\">/</span>"
-                        f"<span>{html_mod.escape(tag)}</span>",
-            description=f"Notes tagged #{tag}."))
-    if tag_map:
+            breadcrumbs="".join(crumbs),
+            description=f"Notes tagged #{node.path}."))
+    if tag_roots:
         write(out / "_tags/index.html", pages.render_page(
             config=config, output_path="_tags/index.html", page_title="Tags",
-            content_html=pages.tags_index_content(tag_map, "_tags/index.html"),
+            content_html=pages.tags_index_content(tag_roots, "_tags/index.html"),
             nav_html=pages.build_nav(vault, "", "_tags/index.html", tools=nav_tools, home_note=home,
                                      canvases=canvas_paths, bases=base_paths),
             breadcrumbs="<span>tags</span>",
@@ -264,14 +273,14 @@ def main(argv=None) -> int:
             f"note '{notes_collision}' is overwritten by the notes index page at notes.html")
     write(out / "notes.html", pages.render_page(
         config=config, output_path="notes.html", page_title="Notes",
-        content_html=pages.notes_index_content(vault, tag_map, "notes.html", home,
+        content_html=pages.notes_index_content(vault, tag_roots, "notes.html", home,
                                                canvases=canvas_paths, bases=base_paths),
         nav_html=pages.build_nav(vault, "", "notes.html", tools=nav_tools, home_note=home,
                                  canvases=canvas_paths, bases=base_paths),
         breadcrumbs="<span>notes</span>",
         description="Browse every note, folder, and tag in the vault."))
 
-    home_extra = pages.home_sections(vault, dates, tag_map, nav_tools, "index.html", home,
+    home_extra = pages.home_sections(vault, dates, tag_roots, nav_tools, "index.html", home,
                                      canvases=canvas_paths, bases=base_paths)
     if home is not None:
         # Rewrites index.html even when the home note's own output path is
@@ -432,8 +441,8 @@ def main(argv=None) -> int:
     # and root-relative paths otherwise.
     page_paths = list(dict.fromkeys(
         [urls.note_output_path(p) for p in sorted(vault.notes)]
-        + [urls.tag_output_path(t) for t in sorted(tag_map)]
-        + (["_tags/index.html"] if tag_map else [])
+        + [urls.tag_output_path(n.path) for n in tags.iter_nodes(tag_roots)]
+        + (["_tags/index.html"] if tag_roots else [])
         + ["notes.html", "index.html"]
         + [urls.canvas_output_path(p) for p in canvas_paths]
         + [urls.base_output_path(p) for p in base_paths]
@@ -473,8 +482,9 @@ def main(argv=None) -> int:
     for warning in warnings:
         print(f"WARNING: {warning}")
     skipped = f" ({vault.skipped} unpublished)" if vault.skipped else ""
+    tag_count = sum(1 for _ in tags.iter_nodes(tag_roots))
     print(f"Built {len(vault.notes)} notes{skipped}, {len(vault.assets)} assets, "
-          f"{len(tag_map)} tags, {len(tools)} tools, {len(canvases)} canvases, "
+          f"{tag_count} tags, {len(tools)} tools, {len(canvases)} canvases, "
           f"{len(bases)} bases, {len(warnings)} warnings -> {out}")
     return 0
 

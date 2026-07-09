@@ -99,7 +99,7 @@ class CalloutTests(VaultCase):
 class TagTests(VaultCase):
     def test_inline_tag_links(self):
         _, res = render(self, {"sub/A.md": "about #proj/site stuff"}, "sub/A.md")
-        self.assertIn('<a class="tag" href="../_tags/proj-site.html">#proj/site</a>', res.html)
+        self.assertIn('<a class="tag" href="../_tags/proj/site.html">#proj/site</a>', res.html)
 
 
 class OutputPathTests(VaultCase):

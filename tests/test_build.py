@@ -29,9 +29,18 @@ class BuildTests(unittest.TestCase):
 
     def test_pages_written(self):
         for rel in ["index.html", "Home.html", "Projects/Site Plan.html",
-                    "Daily/Log.html", "_tags/proj-site.html", "_tags/fixture.html",
-                    "_tags/index.html"]:
+                    "Daily/Log.html", "_tags/proj/site.html", "_tags/proj.html",
+                    "_tags/fixture.html", "_tags/index.html"]:
             self.assertTrue((self.out / rel).is_file(), rel)
+
+    def test_nested_parent_aggregates_children(self):
+        parent = self.read("_tags/proj.html")
+        self.assertIn("sub-tags", parent)
+        self.assertIn("#proj/site", parent)              # child chip, full path
+        # both notes tagged #proj/site surface on the synthesized parent page
+        # (hrefs are URL-quoted: "Site Plan.md" -> "Site%20Plan.html")
+        self.assertIn("Site%20Plan.html", parent)
+        self.assertIn("2 notes", parent)
 
     def test_static_and_assets_copied(self):
         self.assertTrue((self.out / "site-assets/tokens.css").is_file())
@@ -390,9 +399,11 @@ class TagHandlingTests(unittest.TestCase):
 
     def test_tag_breadcrumb_is_escaped(self):
         out, _ = self._build({"A.md": "---\ntags: ['<em>weird</em>']\n---\nbody"})
-        tag_page = next(p for p in (out / "_tags").glob("*.html") if p.name != "index.html")
+        tag_page = next(p for p in (out / "_tags").rglob("*.html")
+                        if p.name != "index.html")
         html_text = tag_page.read_text(encoding="utf-8")
         self.assertNotIn("<span><em>", html_text)
+        self.assertIn("&lt;em&gt;", html_text)
 
     def test_graph_page_collision_warns(self):
         out, stdout = self._build({"graph.md": "hello", "A.md": "x"})
