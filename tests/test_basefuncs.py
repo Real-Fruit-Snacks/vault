@@ -84,3 +84,27 @@ class ListMethodTests(unittest.TestCase):
     def test_unknown_method_raises(self):
         with self.assertRaises(bv.BaseError):
             bf.call_method("x", "nope", [])
+
+
+class DegradeTests(unittest.TestCase):
+    def test_missing_args_raise_baseerror(self):
+        cases = [
+            lambda: bf.call_global("min", [], NOW),
+            lambda: bf.call_global("max", [], NOW),
+            lambda: bf.call_global("link", [], NOW),
+            lambda: bf.call_method("hi", "contains", []),
+            lambda: bf.call_method("hi", "startsWith", []),
+            lambda: bf.call_method("hi", "repeat", []),
+            lambda: bf.call_method("hi", "replace", ["a"]),
+            lambda: bf.call_method([1, 2], "contains", []),
+            lambda: bf.call_method(bv.Link("a"), "linksTo", []),
+        ]
+        for fn in cases:
+            with self.assertRaises(bv.BaseError):
+                fn()
+
+    def test_bad_values_raise_baseerror(self):
+        with self.assertRaises(bv.BaseError):
+            bf.call_method("a,b", "split", [""])
+        with self.assertRaises(bv.BaseError):
+            bf.call_method(3.14, "toFixed", [-1])

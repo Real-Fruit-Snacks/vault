@@ -13,10 +13,11 @@ def _as_str(v):
     raise BaseError("expected string")
 
 
-def _as_list(v):
-    if isinstance(v, list):
-        return v
-    raise BaseError("expected list")
+def _arg(args, idx):
+    """Return args[idx] or raise BaseError if the argument is missing."""
+    if idx >= len(args):
+        raise BaseError("missing argument")
+    return args[idx]
 
 
 # ---- global functions ------------------------------------------------------
@@ -35,15 +36,22 @@ def call_global(name, args, build_now):
     if name == "number":
         return to_number(args[0]) if args else None
     if name == "min":
-        return min(to_number(a) for a in args)
+        nums = [to_number(a) for a in args]
+        if not nums:
+            raise BaseError("min() needs arguments")
+        return min(nums)
     if name == "max":
-        return max(to_number(a) for a in args)
+        nums = [to_number(a) for a in args]
+        if not nums:
+            raise BaseError("max() needs arguments")
+        return max(nums)
     if name == "date":
         return _parse_date(args[0]) if args else None
     if name == "duration":
         return _parse_duration(args[0]) if args else None
     if name == "link":
-        target = args[0].target if isinstance(args[0], Link) else stringify(args[0])
+        target_arg = _arg(args, 0)
+        target = target_arg.target if isinstance(target_arg, Link) else stringify(target_arg)
         display = stringify(args[1]) if len(args) > 1 else ""
         return Link(target, display)
     if name == "list":
@@ -126,15 +134,15 @@ def call_method(recv, name, args):
 
 def _string_method(s, name, args):
     if name == "contains":
-        return _as_str(args[0]) in s
+        return _as_str(_arg(args, 0)) in s
     if name == "containsAny":
         return any(_as_str(a) in s for a in args)
     if name == "containsAll":
         return all(_as_str(a) in s for a in args)
     if name == "startsWith":
-        return s.startswith(_as_str(args[0]))
+        return s.startswith(_as_str(_arg(args, 0)))
     if name == "endsWith":
-        return s.endswith(_as_str(args[0]))
+        return s.endswith(_as_str(_arg(args, 0)))
     if name == "lower":
         return s.lower()
     if name == "title":
@@ -144,11 +152,16 @@ def _string_method(s, name, args):
     if name == "reverse":
         return s[::-1]
     if name == "repeat":
-        return s * int(to_number(args[0]))
+        return s * int(to_number(_arg(args, 0)))
     if name == "replace":
-        return s.replace(_as_str(args[0]), _as_str(args[1]))
+        return s.replace(_as_str(_arg(args, 0)), _as_str(_arg(args, 1)))
     if name == "split":
-        return s.split(_as_str(args[0])) if args else [s]
+        if not args:
+            return [s]
+        sep = _as_str(_arg(args, 0))
+        if sep == "":
+            raise BaseError("split separator is empty")
+        return s.split(sep)
     if name == "slice":
         start = int(to_number(args[0])) if args else 0
         end = int(to_number(args[1])) if len(args) > 1 else None
@@ -171,7 +184,10 @@ def _number_method(n, name, args):
         return int(r) if digits <= 0 else r
     if name == "toFixed":
         digits = int(to_number(args[0])) if args else 0
-        return f"{float(n):.{digits}f}"
+        try:
+            return f"{float(n):.{digits}f}"
+        except (ValueError, OverflowError):
+            raise BaseError(f"toFixed bad precision {digits}")
     raise BaseError(f"unknown number method .{name}()")
 
 
@@ -189,7 +205,7 @@ def _date_method(d, name, args):
 
 def _list_method(xs, name, args):
     if name == "contains":
-        return args[0] in xs
+        return _arg(args, 0) in xs
     if name == "containsAny":
         return any(a in xs for a in args)
     if name == "containsAll":
@@ -226,6 +242,7 @@ def _list_method(xs, name, args):
 
 def _link_method(link, name, args):
     if name == "linksTo":
-        target = args[0].target if isinstance(args[0], Link) else stringify(args[0])
+        target_arg = _arg(args, 0)
+        target = target_arg.target if isinstance(target_arg, Link) else stringify(target_arg)
         return link.target == target
     raise BaseError(f"unknown link method .{name}()")
