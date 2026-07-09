@@ -8,8 +8,10 @@ class UrlTests(unittest.TestCase):
         self.assertEqual(urls.note_output_path("Folder/My Note.md"), "Folder/My Note.html")
 
     def test_tag_output_path(self):
-        self.assertEqual(urls.tag_output_path("proj/site"), "_tags/proj-site.html")
+        self.assertEqual(urls.tag_output_path("proj/site"), "_tags/proj/site.html")
         self.assertEqual(urls.tag_output_path("Reading"), "_tags/reading.html")
+        # each segment is slugged independently
+        self.assertEqual(urls.tag_output_path("Net Ops/DNS"), "_tags/net-ops/dns.html")
 
     def test_rel_href_same_dir(self):
         self.assertEqual(urls.rel_href("a/one.html", "a/two space.html"), "two%20space.html")

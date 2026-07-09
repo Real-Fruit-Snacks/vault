@@ -36,7 +36,8 @@ def tag_slug(tag: str) -> str:
 
 
 def tag_output_path(tag: str) -> str:
-    return f"_tags/{tag_slug(tag)}.html"
+    slugged = "/".join(tag_slug(seg) for seg in tag.split("/"))
+    return f"_tags/{slugged}.html"
 
 
 def rel_href(from_output: str, to_output: str, fragment: str = "") -> str:
