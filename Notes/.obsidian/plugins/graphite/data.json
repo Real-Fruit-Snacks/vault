@@ -1,0 +1,33 @@
+{
+  "tasksFilePath": "graphite/tasks.md",
+  "dataFolderPath": "_graphite_files",
+  "defaultProject": "",
+  "icons": {
+    "search": "search",
+    "inbox": "inbox",
+    "today": "today",
+    "upcoming": "upcoming",
+    "filters": "filters",
+    "projects": "projects",
+    "activity": "activity",
+    "completed": "completed"
+  },
+  "projectColors": {},
+  "labelColors": {},
+  "labelRegistry": [
+    "abc"
+  ],
+  "projectRegistry": [],
+  "archivedProjects": [],
+  "hideDataFolderFromVault": true,
+  "sortMode": "smart",
+  "groupBy": "none",
+  "defaultOverdueRange": "last7",
+  "uiFont": "system",
+  "taskTitleFont": "system",
+  "taskDescriptionFont": "system",
+  "labelFont": "system",
+  "dailyNotesIntegrationEnabled": true,
+  "dailyNotesAutoInsertCompletedBlock": false,
+  "dailyNoteDateFormat": "YYYY-MM-DD"
+}

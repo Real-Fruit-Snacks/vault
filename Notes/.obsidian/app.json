@@ -2,6 +2,6 @@
   "promptDelete": false,
   "readableLineLength": false,
   "userIgnoreFilters": [
-    "_slate_files"
+    "_graphite_files"
   ]
 }

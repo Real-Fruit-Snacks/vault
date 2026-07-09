@@ -1,0 +1,5993 @@
+/* Design tokens are defined on `body` (not just `.graphite-root`) so every plugin
+   surface — the main view AND modals rendered outside the view — receives the
+   full, consistent set. All `--graphite-*` names are namespaced, so defining them
+   globally is safe and never affects non-plugin UI. Colors derive from the
+   active Obsidian theme, so the plugin adopts any theme (light, dark, custom)
+   automatically. */
+body {
+  --graphite-bg: var(--background-primary);
+  --graphite-surface: var(--background-secondary);
+  --graphite-sidebar-bg: var(--background-secondary);
+  --graphite-hover: var(--background-modifier-hover);
+  --graphite-border: var(--background-modifier-border);
+  --graphite-border-soft: var(--background-modifier-border);
+  --graphite-text: var(--text-normal);
+  --graphite-muted: var(--text-muted);
+  --graphite-faint: var(--text-faint);
+  --graphite-accent: var(--text-normal);
+  --graphite-accent-hover: var(--text-normal);
+  --graphite-on-accent: var(--background-primary);
+  --graphite-danger: var(--color-red);
+  --graphite-danger-hover: color-mix(in srgb, var(--color-red), #000 12%);
+  --graphite-danger-light: rgba(var(--color-red-rgb), 0.16);
+  --graphite-success: var(--color-green);
+  --graphite-success-hover: color-mix(in srgb, var(--color-green), #000 12%);
+  --graphite-on-success: var(--text-on-accent);
+  --graphite-chip-bg: var(--background-secondary);
+  --graphite-nav-hover-bg: var(--background-modifier-hover);
+  --graphite-nav-active-bg: color-mix(in srgb, var(--text-normal) 10%, transparent);
+  --graphite-nav-active-border: color-mix(in srgb, var(--text-normal) 12%, transparent);
+  --graphite-radius-sm: 4px;
+  --graphite-radius: 6px;
+  --graphite-radius-lg: 8px;
+  --graphite-radius-pill: 999px;
+  --graphite-spacing-1: 4px;
+  --graphite-spacing-2: 8px;
+  --graphite-spacing-3: 12px;
+  --graphite-spacing-4: 16px;
+  --graphite-transition: 120ms ease;
+  --graphite-button-height: 36px;
+  --graphite-chip-height: 32px;
+  --graphite-footer-height: 64px;
+  --graphite-card-padding: 12px;
+  --graphite-font-ui: var(--font-interface), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --graphite-font-task-title: var(--graphite-font-ui);
+  --graphite-font-task-description: var(--graphite-font-ui);
+  --graphite-font-label: var(--graphite-font-ui);
+  --graphite-mobile-safe-top: max(24px, env(safe-area-inset-top, 0px));
+  --graphite-mobile-bottom-toolbar: 88px;
+}
+
+.graphite-root {
+  color: var(--graphite-text);
+  font-family: var(--graphite-font-ui);
+  height: 100%;
+  line-height: 1.45;
+  position: relative;
+}
+
+.graphite-icon {
+  align-items: center;
+  color: currentColor;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: var(--graphite-icon-size, 16px);
+  justify-content: center;
+  line-height: 1;
+  width: var(--graphite-icon-size, 16px);
+}
+
+.graphite-icon svg {
+  display: block;
+  fill: none;
+  height: var(--graphite-icon-size, 16px);
+  stroke: currentColor;
+  stroke-width: var(--graphite-icon-stroke-width, 1.75);
+  width: var(--graphite-icon-size, 16px);
+}
+
+.graphite-shell {
+  background: var(--graphite-bg);
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.graphite-sidebar {
+  background: var(--graphite-sidebar-bg);
+  border-right: 1px solid var(--graphite-border-soft);
+  overflow: auto;
+  padding: 22px 14px;
+}
+
+.graphite-add-sidebar,
+.graphite-add-inline,
+.graphite-button,
+.graphite-nav-button,
+.graphite-project-button,
+.graphite-reschedule,
+.graphite-chip-button,
+.graphite-menu-item {
+  appearance: none;
+  border: 0;
+  box-shadow: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.graphite-add-sidebar {
+  align-items: center;
+  background: transparent;
+  border-radius: 6px;
+  display: flex;
+  font-size: 14px;
+  font-weight: 650;
+  gap: 10px;
+  min-height: 34px;
+  padding: 6px 8px;
+  text-align: left;
+  width: 100%;
+}
+
+.graphite-add-plus {
+  color: var(--graphite-muted);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.graphite-add-text {
+  color: var(--graphite-muted);
+}
+
+.graphite-add-sidebar:hover .graphite-add-text,
+.graphite-add-inline:hover .graphite-add-text,
+.graphite-add-sidebar:hover .graphite-add-plus,
+.graphite-add-inline:hover .graphite-add-plus {
+  color: var(--graphite-accent);
+}
+
+.graphite-add-sidebar:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-nav,
+.graphite-sidebar-section {
+  display: grid;
+  gap: 2px;
+  margin-top: 14px;
+}
+
+.graphite-nav-button,
+.graphite-project-button {
+  align-items: center;
+  background: transparent;
+  border-radius: 8px;
+  color: var(--graphite-text);
+  display: grid;
+  font-size: 14px;
+  gap: 10px;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  min-height: 34px;
+  padding: 6px 8px;
+  text-align: left;
+  transition:
+    background var(--graphite-transition),
+    box-shadow var(--graphite-transition),
+    color var(--graphite-transition);
+  width: 100%;
+}
+
+.graphite-project-button {
+  background: transparent;
+}
+
+button.graphite-nav-button,
+button.graphite-project-button {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.graphite-nav-button:hover,
+.graphite-nav-button:focus-visible,
+.graphite-project-button:hover,
+.graphite-project-button:focus-visible {
+  background: var(--graphite-nav-hover-bg);
+  color: var(--graphite-text);
+  outline: none;
+}
+
+.graphite-project-button:hover,
+.graphite-project-button:focus-visible {
+  background: color-mix(in srgb, var(--graphite-project-color, var(--graphite-muted)) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--graphite-project-color, var(--graphite-muted)) 16%, transparent);
+}
+
+.graphite-project-button.is-drop-available {
+  background: var(--graphite-project-bg, var(--graphite-hover));
+  outline: 1px dashed color-mix(in srgb, var(--graphite-project-color, var(--graphite-muted)) 50%, transparent);
+  outline-offset: 2px;
+}
+
+.graphite-project-button.is-drop-target {
+  background: var(--graphite-project-bg, var(--graphite-hover));
+  color: var(--graphite-text);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--graphite-project-color, var(--graphite-accent)) 45%, transparent),
+    inset 0 0 0 999px color-mix(in srgb, var(--graphite-project-color, var(--graphite-muted)) 14%, transparent);
+}
+
+.graphite-section.graphite-project-drop-zone.is-drop-available {
+  background: color-mix(in srgb, var(--graphite-accent) 3%, transparent);
+  outline: 1px dashed var(--graphite-muted);
+  outline-offset: 2px;
+}
+
+.graphite-section.graphite-project-drop-zone.is-drop-target {
+  background: color-mix(in srgb, var(--graphite-accent) 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--graphite-accent) 18%, transparent);
+  outline-color: var(--graphite-text);
+}
+
+.graphite-nav-button.is-active,
+.graphite-project-button.is-active {
+  background: var(--graphite-nav-active-bg);
+  box-shadow: inset 2px 0 0 var(--interactive-accent);
+  color: var(--graphite-text);
+  font-weight: 600;
+}
+
+button.graphite-nav-button.is-active,
+button.graphite-project-button.is-active {
+  background: var(--graphite-nav-active-bg);
+  box-shadow: inset 0 0 0 1px var(--graphite-nav-active-border);
+}
+
+button.graphite-project-button.is-active {
+  background: color-mix(in srgb, var(--graphite-project-color, var(--graphite-muted)) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--graphite-project-color, var(--graphite-muted)) 20%, transparent);
+}
+
+.graphite-nav-button.is-active:hover,
+.graphite-nav-button.is-active:focus-visible {
+  background: var(--graphite-nav-hover-bg);
+}
+
+.graphite-project-button.is-active:hover,
+.graphite-project-button.is-active:focus-visible {
+  background: color-mix(in srgb, var(--graphite-project-color, var(--graphite-muted)) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--graphite-project-color, var(--graphite-muted)) 20%, transparent);
+}
+
+.graphite-nav-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-nav-icon {
+  align-items: center;
+  display: inline-flex;
+  height: 18px;
+  justify-content: center;
+  line-height: 1;
+  text-align: center;
+  width: 26px;
+}
+
+.graphite-project-dot {
+  border-radius: 50%;
+  display: inline-block;
+  height: 8px;
+  width: 8px;
+}
+
+.graphite-sidebar-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 4px;
+}
+
+.graphite-sidebar-heading {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  padding: 16px 8px 6px;
+  text-transform: uppercase;
+}
+
+.graphite-sidebar-add-project {
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  padding: 0;
+  margin-top: 10px;
+  flex-shrink: 0;
+}
+
+.graphite-sidebar-add-project-label {
+  display: none;
+}
+
+.graphite-sidebar-add-project:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.graphite-count,
+.graphite-section-count {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  font-weight: 500;
+  justify-self: end;
+}
+
+.graphite-nav-button.is-active .graphite-count,
+.graphite-project-button.is-active .graphite-count {
+  color: var(--graphite-muted);
+}
+
+.graphite-main {
+  min-width: 0;
+  overflow: auto;
+  padding: 48px 56px;
+}
+
+.graphite-main > * {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 880px;
+}
+
+.graphite-main-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 26px;
+}
+
+.graphite-sorting {
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.graphite-sorting-button {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  gap: 6px;
+  height: 30px;
+  padding: 0 8px;
+}
+
+.graphite-sorting-button:hover,
+.graphite-sorting-button[aria-expanded="true"] {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-sorting-icon {
+  align-items: center;
+  display: inline-flex;
+  height: 15px;
+  justify-content: center;
+  width: 15px;
+}
+
+.graphite-sorting-icon svg {
+  height: 15px;
+  width: 15px;
+}
+
+.graphite-sorting-popover {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+  display: grid;
+  gap: 2px;
+  min-width: 210px;
+  padding: 6px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 90;
+}
+
+.graphite-sorting-title {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 8px 4px;
+}
+
+.graphite-sorting-divider {
+  border-top: 1px solid var(--graphite-border);
+  margin: 4px 0;
+}
+
+.graphite-task-group {
+  margin-top: 8px;
+}
+
+.graphite-task-group-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--graphite-muted);
+  padding: 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.graphite-sorting-option {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  font-size: 13px;
+  gap: 8px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  min-height: 32px;
+  padding: 0 8px;
+  text-align: left;
+}
+
+.graphite-sorting-option:hover,
+.graphite-sorting-option.is-active {
+  background: var(--graphite-hover);
+}
+
+.graphite-sorting-check {
+  color: var(--graphite-text);
+  font-size: 13px;
+  text-align: center;
+}
+
+.graphite-main h1 {
+  color: var(--graphite-text);
+  font-size: 28px;
+  font-weight: 750;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.graphite-subtitle {
+  color: var(--graphite-muted);
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.graphite-section {
+  border-radius: 8px;
+  margin-bottom: 34px;
+  transition: background 120ms ease, box-shadow 120ms ease;
+}
+
+.graphite-section.is-drop-target {
+  background: color-mix(in srgb, var(--graphite-accent) 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--graphite-accent) 18%, transparent);
+}
+
+.graphite-section.is-drop-available {
+  background: color-mix(in srgb, var(--graphite-accent) 3%, transparent);
+  outline: 1px dashed var(--graphite-muted);
+  outline-offset: 2px;
+}
+
+.graphite-section.is-drop-target {
+  background: color-mix(in srgb, var(--graphite-accent) 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--graphite-accent) 18%, transparent);
+  outline-color: var(--graphite-text);
+}
+
+.graphite-section-header {
+  align-items: center;
+  border-bottom: 1px solid var(--graphite-border-soft);
+  display: flex;
+  gap: 8px;
+  min-height: 38px;
+}
+
+.graphite-section-header h2 {
+  color: var(--graphite-text);
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.graphite-overdue-range-select {
+  appearance: none;
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  font: inherit;
+  font-size: 12px;
+  height: 28px;
+  margin-left: auto;
+  padding: 0 8px;
+}
+
+.graphite-overdue-range-select:hover,
+.graphite-overdue-range-select:focus {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-reschedule {
+  background: transparent;
+  border-radius: 6px;
+  color: var(--graphite-accent);
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: auto;
+  padding: 5px 8px;
+}
+
+.graphite-reschedule:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-task-list {
+  display: grid;
+}
+
+.graphite-task-item {
+  display: grid;
+}
+
+.graphite-task-row {
+  align-items: flex-start;
+  border-bottom: 1px solid var(--graphite-border);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 16px 20px minmax(0, 1fr) auto 24px;
+  min-height: 0;
+  padding: 12px 16px 12px 0;
+}
+
+.graphite-task-row:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-task-row.is-highlighted {
+  background: var(--graphite-hover);
+}
+
+.graphite-task-row.is-dragging {
+  opacity: 0.48;
+}
+
+.graphite-drag-preview {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  opacity: 0.96;
+  padding: 10px 12px;
+  pointer-events: none;
+}
+
+.graphite-drag-preview .graphite-task-delete {
+  display: none;
+}
+
+.graphite-drag-preview .graphite-task-actions {
+  display: none;
+}
+
+.graphite-drag-preview .graphite-task-drag-handle {
+  opacity: 1;
+}
+
+.graphite-root button.graphite-task-subtask-counter,
+.graphite-root button.graphite-task-subtask-counter:hover,
+.graphite-root button.graphite-task-subtask-counter:active,
+.graphite-root button.graphite-task-subtask-counter:focus-visible {
+  background: transparent;
+  background-color: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.graphite-task-drag-handle {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: none;
+  color: var(--graphite-faint);
+  cursor: grab;
+  font: inherit;
+  font-size: 14px;
+  height: 22px;
+  line-height: 1;
+  margin-top: 0;
+  opacity: 0;
+  padding: 0;
+  width: 16px;
+}
+
+.graphite-task-row:hover .graphite-task-drag-handle,
+.graphite-task-drag-handle:focus-visible {
+  opacity: 1;
+}
+
+.graphite-task-drag-handle:active {
+  cursor: grabbing;
+}
+
+.graphite-task-drag-handle.is-disabled {
+  cursor: default;
+  opacity: 0;
+}
+
+.graphite-task-checkbox {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--graphite-faint);
+  border-radius: 50%;
+  box-shadow: none;
+  height: 20px;
+  margin: 1px 0 0;
+  min-height: 20px;
+  padding: 0;
+  position: relative;
+  width: 20px;
+}
+
+.graphite-task-checkbox:hover {
+  border-color: var(--graphite-accent);
+}
+
+.graphite-task-checkbox.is-checked {
+  background: color-mix(in srgb, var(--graphite-priority-text, var(--graphite-accent)) 82%, white);
+  border-color: var(--graphite-priority-text, var(--graphite-accent));
+}
+
+.graphite-task-checkbox.priority-p1,
+.graphite-task-checkbox.priority-p1:hover {
+  border-color: var(--color-red);
+}
+
+.graphite-task-checkbox.priority-p2,
+.graphite-task-checkbox.priority-p2:hover {
+  border-color: var(--color-orange);
+}
+
+.graphite-task-checkbox.priority-p3,
+.graphite-task-checkbox.priority-p3:hover {
+  border-color: var(--color-blue);
+}
+
+.graphite-task-checkbox.priority-p4,
+.graphite-task-checkbox.priority-p4:hover {
+  border-color: var(--text-muted);
+}
+
+.graphite-task-checkbox.is-checked::after {
+  content: "";
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  display: block;
+  height: 7px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -55%) rotate(45deg);
+  width: 4px;
+}
+
+.graphite-task-content {
+  min-width: 0;
+}
+
+.graphite-task-title {
+  color: var(--graphite-text);
+  font-family: var(--graphite-font-task-title);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.graphite-task-row.is-completed .graphite-task-title {
+  color: var(--graphite-muted);
+  text-decoration: line-through;
+}
+
+.graphite-task-description {
+  color: var(--graphite-muted);
+  display: -webkit-box;
+  font-family: var(--graphite-font-task-description);
+  font-size: 13px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.35;
+  margin-top: 4px;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.graphite-task-project {
+  align-items: center;
+  border-radius: 999px;
+  color: var(--graphite-text);
+  display: inline-flex;
+  font-size: 13px;
+  gap: 6px;
+  line-height: 1.4;
+  margin-top: 2px;
+  max-width: 160px;
+  overflow: hidden;
+  padding: 2px 8px;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-task-subtask-preview {
+  display: grid;
+  margin-left: 48px;
+}
+
+.graphite-task-subtask-preview-row {
+  align-items: flex-start;
+  border-bottom: 1px solid var(--graphite-border);
+  cursor: pointer;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  padding: 11px 16px 11px 42px;
+}
+
+.graphite-task-subtask-preview-row:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-subtask-preview-checkbox {
+  margin-top: 1px;
+}
+
+.graphite-subtask-preview-content {
+  min-width: 0;
+}
+
+.graphite-subtask-preview-title {
+  color: var(--graphite-text);
+  font-size: 15px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.graphite-task-subtask-preview-row.is-completed .graphite-subtask-preview-title {
+  color: var(--graphite-muted);
+  text-decoration: line-through;
+}
+
+.graphite-subtask-preview-meta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.graphite-task-meta,
+.graphite-composer-chip-row,
+.graphite-composer-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.graphite-task-meta {
+  margin-top: 8px;
+}
+
+.graphite-task-date {
+  color: var(--graphite-muted);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.graphite-task-date.is-overdue {
+  color: var(--graphite-danger);
+}
+
+.graphite-task-deadline {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.graphite-task-deadline.is-overdue {
+  color: var(--graphite-danger);
+}
+
+.graphite-task-priority {
+  background: var(--graphite-priority-bg, transparent);
+  border: 1px solid var(--graphite-priority-border, var(--graphite-border));
+  border-radius: 999px;
+  color: var(--graphite-priority-text, var(--graphite-muted));
+  font-size: 12px;
+  line-height: 1.2;
+  padding: 1px 6px;
+}
+
+.graphite-task-label {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--graphite-border);
+  border-radius: 999px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  font-family: var(--graphite-font-label);
+  font-size: 12px;
+  line-height: 1.2;
+  padding: 1px 6px;
+  transition: opacity 0.1s;
+}
+
+.graphite-task-label:hover {
+  opacity: 0.75;
+}
+
+.graphite-task-attachments {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.graphite-priority-p1 {
+  --graphite-priority-text: var(--color-red);
+  --graphite-priority-bg: rgba(var(--color-red-rgb), 0.14);
+  --graphite-priority-border: var(--color-red);
+}
+
+.graphite-priority-p2 {
+  --graphite-priority-text: var(--color-orange);
+  --graphite-priority-bg: rgba(var(--color-orange-rgb), 0.14);
+  --graphite-priority-border: var(--color-orange);
+}
+
+.graphite-priority-p3 {
+  --graphite-priority-text: var(--color-blue);
+  --graphite-priority-bg: rgba(var(--color-blue-rgb), 0.14);
+  --graphite-priority-border: var(--color-blue);
+}
+
+.graphite-priority-p4 {
+  --graphite-priority-text: var(--text-muted);
+  --graphite-priority-bg: var(--background-modifier-hover);
+  --graphite-priority-border: var(--background-modifier-border);
+}
+
+.graphite-task-delete {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  font-size: 18px;
+  height: 28px;
+  line-height: 24px;
+  opacity: 0;
+  padding: 0;
+  transition: opacity 120ms ease;
+  width: 28px;
+}
+
+.graphite-task-row:hover .graphite-task-delete {
+  opacity: 1;
+}
+
+.graphite-task-delete:hover {
+  background: var(--graphite-danger-light);
+  color: var(--graphite-danger);
+}
+
+.graphite-task-actions {
+  align-items: center;
+  display: flex;
+  grid-column: 5;
+  justify-content: flex-end;
+  min-width: 28px;
+  position: relative;
+}
+
+.graphite-task-actions-button {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: none;
+  font: inherit;
+  font-size: 18px;
+  height: 28px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  width: 28px;
+}
+
+.graphite-task-actions-button:hover {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-task-action-menu {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 10px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16);
+  display: grid;
+  gap: 2px;
+  min-width: 170px;
+  padding: 6px;
+  position: fixed;
+  z-index: 100;
+}
+
+.graphite-task-action-menu-item {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: 13px;
+  gap: 8px;
+  height: 34px;
+  justify-content: flex-start;
+  padding: 0 10px;
+  position: relative;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.graphite-task-action-menu-item:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-task-action-date-input {
+  cursor: pointer;
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+}
+
+@media (hover: none) {
+  .graphite-task-actions-button {
+    display: inline-flex;
+  }
+
+  .graphite-task-actions .graphite-task-delete {
+    display: none;
+  }
+}
+
+.graphite-custom-project-wrap {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+}
+
+.graphite-custom-project-confirm {
+  align-items: center;
+  appearance: none;
+  background: var(--color-accent);
+  border: none;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--text-on-accent);
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 auto;
+  font: inherit;
+  height: 30px;
+  justify-content: center;
+  padding: 0 6px;
+  width: 30px;
+}
+
+.graphite-custom-project-confirm:hover {
+  opacity: 0.85;
+}
+
+.graphite-custom-project-cancel {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 auto;
+  font: inherit;
+  height: 30px;
+  justify-content: center;
+  padding: 0 6px;
+  width: 30px;
+}
+
+.graphite-custom-project-cancel:hover {
+  color: var(--text-normal);
+}
+
+.graphite-chip-input,
+.graphite-chip-select,
+.graphite-project-select,
+.graphite-composer-title,
+.graphite-composer-description,
+.graphite-custom-date-input {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  font: inherit;
+}
+
+.graphite-chip-input,
+.graphite-chip-select,
+.graphite-project-select,
+.graphite-custom-date-input {
+  font-size: 13px;
+  min-height: 30px;
+  padding: 4px 8px;
+}
+
+.graphite-add-area {
+  margin-top: 18px;
+}
+
+button.graphite-add-sidebar,
+button.graphite-add-inline {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.graphite-add-inline {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  font-size: 14px;
+  padding: 7px 8px;
+}
+
+.graphite-add-inline:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-composer {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 10px;
+  display: grid;
+  gap: 10px;
+  overflow: visible;
+  padding: 10px;
+  position: relative;
+}
+
+.graphite-composer-title,
+.graphite-composer-description {
+  border-color: transparent;
+  box-sizing: border-box;
+}
+
+.graphite-composer-title {
+  font-family: var(--graphite-font-task-title);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.35;
+  min-height: 34px;
+  overflow: hidden;
+  padding: 6px 12px;
+  resize: none;
+}
+
+.graphite-composer-title:focus,
+.graphite-composer-description:focus {
+  box-shadow: none;
+}
+
+.graphite-composer-description {
+  box-sizing: border-box;
+  color: var(--graphite-text);
+  font-family: var(--graphite-font-task-description);
+  font-size: 13px;
+  line-height: 1.45;
+  min-height: 44px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.graphite-composer-chip-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 0 0;
+}
+
+.graphite-composer-labels-wrap,
+.graphite-composer-deadline-wrap {
+  overflow: visible;
+  position: relative;
+}
+
+.graphite-composer-menu {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 10px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.14);
+  display: grid;
+  gap: 2px;
+  max-height: min(220px, calc(100vh - 48px));
+  max-width: 240px;
+  min-width: min(220px, calc(100vw - 24px));
+  overflow-y: auto;
+  padding: 6px;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  transform: translateX(var(--graphite-popover-shift-x, 0));
+  z-index: 1000;
+}
+
+.graphite-menu-item {
+  align-items: center;
+  background: transparent;
+  border-radius: 6px;
+  color: var(--graphite-text);
+  display: flex;
+  gap: 10px;
+  font: inherit;
+  font-size: 13px;
+  justify-content: flex-start;
+  min-height: 34px;
+  padding: 0 10px;
+  text-align: left;
+  width: 100%;
+}
+
+.graphite-menu-item:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-menu-icon {
+  align-items: center;
+  color: var(--graphite-muted);
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 15px;
+  justify-content: center;
+  width: 15px;
+}
+
+.graphite-menu-icon svg {
+  height: 15px;
+  width: 15px;
+}
+
+.graphite-composer-popover {
+  background: var(--graphite-chip-bg);
+  border: 1px solid var(--graphite-border);
+  border-radius: 10px;
+  display: grid;
+  gap: 8px;
+  max-height: min(320px, calc(100vh - 48px));
+  max-width: 280px;
+  min-width: min(240px, calc(100vw - 24px));
+  overflow-y: auto;
+  padding: 8px;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  transform: translateX(var(--graphite-popover-shift-x, 0));
+  z-index: 1000;
+}
+
+.graphite-composer-menu.is-align-right,
+.graphite-composer-popover.is-align-right {
+  left: auto;
+  right: 0;
+}
+
+.graphite-composer-menu.is-open-up,
+.graphite-composer-popover.is-open-up {
+  bottom: calc(100% + 8px);
+  top: auto;
+}
+
+.graphite-composer-menu.is-open-down,
+.graphite-composer-popover.is-open-down {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+
+.graphite-popover-title {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.graphite-selected-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.graphite-selected-label,
+.graphite-label-suggestion {
+  appearance: none;
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 999px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  font-family: var(--graphite-font-label);
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.graphite-detail-label-chip,
+.graphite-label-chip {
+  align-items: center;
+  color: var(--graphite-text);
+  display: inline-flex;
+  font-family: var(--graphite-font-label);
+  gap: 6px;
+}
+
+.graphite-label-chip {
+  background: var(--graphite-label-chip-bg, var(--graphite-chip-bg));
+  border: 1px solid var(--graphite-label-chip-color, var(--graphite-border));
+  border-radius: 999px;
+  color: var(--graphite-label-chip-color, var(--graphite-text));
+  font-size: 12px;
+  padding: 3px 6px 3px 8px;
+}
+
+.graphite-label-chip svg {
+  height: 11px;
+  width: 11px;
+}
+
+.graphite-label-chip-name {
+  line-height: 1;
+}
+
+.graphite-composer-label-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 4px 4px;
+}
+
+.graphite-label-chip .graphite-label-chip-remove,
+.graphite-detail-label-chip .graphite-label-chip-remove {
+  background: none;
+  box-shadow: none;
+}
+
+.graphite-label-chip-remove {
+  align-items: center;
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  margin-left: 2px;
+  opacity: 0;
+  outline: none;
+  padding: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease, color 120ms ease;
+}
+
+.graphite-label-chip-remove svg {
+  height: 10px;
+  width: 10px;
+}
+
+.graphite-detail-label-chip:hover .graphite-label-chip-remove,
+.graphite-detail-label-chip:focus-visible .graphite-label-chip-remove,
+.graphite-label-chip:hover .graphite-label-chip-remove {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* On touch devices there is no hover — always show the remove button */
+@media (hover: none) {
+  .graphite-label-chip .graphite-label-chip-remove {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.graphite-label-chip .graphite-label-chip-remove:hover,
+.graphite-detail-label-chip .graphite-label-chip-remove:hover,
+.graphite-label-chip-remove:hover {
+  background: none;
+  box-shadow: none;
+  color: var(--graphite-danger);
+}
+
+.graphite-label-suggestions {
+  display: grid;
+  gap: 4px;
+}
+
+.graphite-label-suggestion {
+  border-radius: 6px;
+  text-align: left;
+}
+
+.graphite-label-suggestion:hover,
+.graphite-selected-label:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-label-input,
+.graphite-deadline-input {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  font: inherit;
+  font-size: 13px;
+  min-height: 32px;
+  padding: 5px 8px;
+}
+
+.graphite-label-empty {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.graphite-chip-button {
+  align-items: center;
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  color: var(--graphite-muted);
+  display: inline-flex;
+  font-size: 13px;
+  gap: 6px;
+  height: 32px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
+.graphite-chip-button.is-icon-only {
+  padding: 0;
+  width: 32px;
+}
+
+.graphite-chip-icon {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 16px;
+  justify-content: center;
+  width: 16px;
+}
+
+.graphite-chip-icon svg {
+  height: 16px;
+  width: 16px;
+}
+
+.graphite-chip-label {
+  line-height: 1;
+}
+
+.graphite-chip-button:hover,
+.graphite-chip-button.is-active {
+  background: var(--graphite-hover);
+  border-color: var(--graphite-border);
+  color: var(--graphite-accent);
+}
+
+.graphite-date-chip.is-active,
+.graphite-date-chip.is-selected {
+  background: var(--graphite-hover);
+  border-color: var(--graphite-text);
+  color: var(--graphite-text);
+  font-weight: 650;
+}
+
+.graphite-date-picker-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.graphite-date-chip-clear {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  height: 20px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  width: 20px;
+}
+
+.graphite-date-chip-clear:hover {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-deadline-clear {
+  align-items: center;
+  border-radius: 50%;
+  color: var(--graphite-muted);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 14px;
+  height: 18px;
+  justify-content: center;
+  line-height: 1;
+  width: 18px;
+}
+
+.graphite-date-popover {
+  background: var(--graphite-chip-bg);
+  border: 1px solid var(--graphite-border);
+  border-radius: 10px;
+  display: grid;
+  gap: 6px;
+  left: 0;
+  max-width: min(320px, calc(100vw - 24px));
+  min-width: min(304px, calc(100vw - 24px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px;
+  position: absolute;
+  top: calc(100% + 8px);
+  z-index: 1000;
+}
+
+.graphite-date-popover.is-hidden {
+  display: none;
+}
+
+.graphite-date-popover.is-calendar-open {
+  max-height: none;
+  overflow-y: visible;
+}
+
+.graphite-date-popover.is-calendar-open > .graphite-popover-title,
+.graphite-date-popover.is-calendar-open > .graphite-date-divider,
+.graphite-date-popover.is-calendar-open > .graphite-repeat-header,
+.graphite-date-popover.is-calendar-open > .graphite-date-preset {
+  display: none;
+}
+
+.graphite-date-preset {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: flex;
+  font-size: 13px;
+  height: 32px;
+  padding: 0 10px;
+  text-align: left;
+  width: 100%;
+}
+
+.graphite-date-preset:hover {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-date-preset.is-active {
+  background: var(--graphite-hover);
+  border-color: var(--graphite-text);
+  color: var(--graphite-text);
+  font-weight: 600;
+}
+
+.graphite-date-custom-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+/* Calendar panel — rendered inline below the "Custom date…" trigger */
+.graphite-cal-wrap {
+  overflow-anchor: none;
+  width: 100%;
+}
+
+.graphite-cal-wrap:not(.is-hidden) {
+  min-height: 286px;
+}
+
+.graphite-date-popover:not(.is-calendar-open) .graphite-cal-wrap:not(.is-hidden) {
+  display: none;
+}
+
+.graphite-cal-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.graphite-cal-nav {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--graphite-text);
+  cursor: pointer;
+  font-size: 18px;
+  height: 28px;
+  line-height: 1;
+  padding: 0 8px;
+}
+
+.graphite-cal-nav:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-cal-title {
+  color: var(--graphite-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.graphite-cal-grid {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.graphite-cal-day-hdr {
+  color: var(--graphite-muted);
+  font-size: 11px;
+  padding: 2px 0 4px;
+  text-align: center;
+}
+
+.graphite-cal-day {
+  align-items: center;
+  aspect-ratio: 1;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: flex;
+  font-size: 13px;
+  justify-content: center;
+  padding: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.graphite-cal-day:not(.is-empty):hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-cal-day.is-today {
+  color: var(--graphite-accent);
+  font-weight: 600;
+}
+
+.graphite-cal-day.is-selected {
+  background: var(--graphite-accent);
+  color: white;
+}
+
+.graphite-cal-day.is-empty {
+  cursor: default;
+  pointer-events: none;
+}
+
+@media (hover: none) {
+  .graphite-cal-day {
+    min-height: 36px;
+  }
+}
+
+/* Used in AddTaskComposer for a standalone visible date input */
+.graphite-date-custom-input {
+  -webkit-appearance: auto;
+  appearance: auto;
+  background: var(--graphite-bg);
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  min-height: 36px;
+  padding: 0 10px;
+  touch-action: manipulation;
+  width: 100%;
+}
+
+.graphite-date-picker-inline {
+  display: block;
+}
+
+.graphite-date-btn-row {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.graphite-date-popover-inline {
+  box-sizing: border-box;
+  margin-top: 8px;
+  max-width: 100%;
+  min-width: 0;
+  position: static;
+  width: 100%;
+}
+
+.graphite-date-popover-inline.is-hidden {
+  display: none;
+}
+
+.graphite-repeat-chip-wrap {
+  align-items: center;
+  display: flex;
+  flex: 0 1 auto;
+  gap: 4px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.graphite-repeat-chip-wrap:empty {
+  display: none;
+}
+
+.graphite-repeat-chip {
+  flex: 0 1 auto;
+  justify-content: flex-start;
+  max-width: min(150px, 100%);
+  min-width: 0;
+}
+
+.graphite-repeat-chip .graphite-chip-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-date-divider {
+  border-top: 1px solid var(--graphite-border);
+  margin: 2px 0;
+}
+
+.graphite-repeat-header {
+  align-items: center;
+  color: var(--graphite-muted);
+  display: flex;
+  font-size: 11px;
+  font-weight: 600;
+  gap: 4px;
+  letter-spacing: 0.04em;
+  padding: 2px 0;
+  text-transform: uppercase;
+}
+
+.graphite-repeat-header .graphite-chip-icon {
+  height: 12px;
+  width: 12px;
+}
+
+.graphite-repeat-hint {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+.graphite-date-preset.is-disabled {
+  color: var(--graphite-muted);
+  cursor: default;
+  opacity: 0.5;
+}
+
+.graphite-detail-repeat-row {
+  margin-top: 6px;
+  width: 100%;
+}
+
+.graphite-task-repeat-icon {
+  display: inline-flex;
+  height: 11px;
+  margin-left: 3px;
+  opacity: 0.7;
+  vertical-align: middle;
+  width: 11px;
+}
+
+.graphite-task-repeat-icon svg {
+  height: 11px;
+  width: 11px;
+}
+
+.graphite-detail-date-btn {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 13px;
+  gap: 6px;
+  height: 32px;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 10px;
+}
+
+.graphite-repeat-active-btn {
+  flex: 0 1 auto;
+  justify-content: flex-start;
+  max-width: min(220px, 100%);
+}
+
+.graphite-repeat-active-btn .graphite-repeat-chip-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-detail-repeat-row .graphite-date-chip-clear {
+  flex: 0 0 auto;
+}
+
+.graphite-detail-date-btn.is-active {
+  border-color: var(--graphite-text);
+  color: var(--graphite-text);
+  font-weight: 600;
+}
+
+.graphite-detail-date-btn:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-chip-select-wrap {
+  align-items: center;
+  background: var(--graphite-priority-bg, var(--graphite-surface));
+  border: 1px solid var(--graphite-priority-border, var(--graphite-border));
+  border-radius: 6px;
+  color: var(--graphite-priority-text, var(--graphite-muted));
+  cursor: pointer;
+  display: inline-flex;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  position: relative;
+}
+
+.graphite-chip-select-wrap:not(.has-priority) {
+  background: var(--graphite-surface);
+  border-color: var(--graphite-border);
+  color: var(--graphite-muted);
+}
+
+.graphite-chip-select-wrap:hover {
+  background: var(--graphite-hover);
+  color: var(--graphite-accent);
+}
+
+.graphite-chip-select-wrap.has-priority:hover {
+  background: var(--graphite-priority-bg, var(--graphite-hover));
+  box-shadow: inset 0 0 0 999px rgba(55, 53, 47, 0.035);
+  color: var(--graphite-priority-text, var(--graphite-accent));
+}
+
+.graphite-chip-select-wrap > .graphite-chip-select {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 13px;
+  height: 100%;
+  inset: 0;
+  line-height: 1;
+  min-height: 0;
+  opacity: 0;
+  outline: none;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.graphite-chip-select-wrap > .graphite-chip-select:hover,
+.graphite-chip-select-wrap > .graphite-chip-select:focus,
+.graphite-chip-select-wrap > .graphite-chip-select:focus-visible {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: inherit;
+  outline: none;
+}
+
+.graphite-priority-indicator {
+  background: var(--graphite-priority-text, var(--graphite-muted));
+  border-radius: 999px;
+  display: inline-block;
+  flex: 0 0 auto;
+  height: 8px;
+  width: 8px;
+}
+
+.graphite-priority-display {
+  color: inherit;
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.graphite-priority-select-wrap {
+  align-items: center;
+  background: var(--graphite-priority-bg, var(--graphite-surface));
+  border: 1px solid var(--graphite-priority-border, var(--graphite-border));
+  border-radius: 6px;
+  color: var(--graphite-priority-text, var(--graphite-text));
+  cursor: pointer;
+  display: inline-flex;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 8px;
+  position: relative;
+}
+
+.graphite-priority-select-wrap:not(.has-priority) {
+  background: var(--graphite-surface);
+  border-color: var(--graphite-border);
+  color: var(--graphite-muted);
+}
+
+.graphite-detail-priority-wrap {
+  width: 100%;
+}
+
+.graphite-priority-select-wrap > .graphite-priority-select {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: inherit;
+  height: 100%;
+  inset: 0;
+  min-height: 0;
+  opacity: 0;
+  outline: none;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.graphite-priority-select-wrap > .graphite-priority-select:hover,
+.graphite-priority-select-wrap > .graphite-priority-select:focus,
+.graphite-priority-select-wrap > .graphite-priority-select:focus-visible {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: inherit;
+  outline: none;
+}
+
+.graphite-composer-footer {
+  align-items: center;
+  border-top: 1px solid var(--graphite-border-soft);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin: 4px -10px -10px;
+  padding: 8px 10px;
+}
+
+.graphite-composer-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.graphite-composer-attachment {
+  align-items: center;
+  background: var(--graphite-chip-bg);
+  border: 1px solid var(--graphite-border);
+  border-radius: 8px;
+  display: inline-grid;
+  font-size: 12px;
+  gap: 6px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  max-width: 260px;
+  min-height: 32px;
+  padding: 4px 6px;
+}
+
+.graphite-composer-attachment-icon {
+  line-height: 1;
+}
+
+.graphite-composer-attachment-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-composer-attachment-remove,
+.graphite-attachment-remove {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  padding: 4px;
+}
+
+.graphite-composer-attachment-remove:hover,
+.graphite-attachment-remove:hover {
+  background: var(--graphite-hover);
+  color: var(--graphite-danger);
+}
+
+.graphite-composer-project {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  overflow: visible;
+  position: relative;
+}
+
+.graphite-project-picker {
+  align-items: center;
+  appearance: none;
+  background: var(--graphite-surface);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  gap: 8px;
+  min-height: 36px;
+  max-width: 240px;
+  padding: 0 10px;
+}
+
+.graphite-project-picker:focus-within {
+  box-shadow: 0 0 0 1px var(--graphite-faint);
+}
+
+.graphite-composer-project-dot {
+  flex: 0 0 auto;
+}
+
+.graphite-detail-project-picker {
+  max-width: none;
+  width: 100%;
+}
+
+.graphite-detail-project-dot {
+  flex: 0 0 auto;
+}
+
+.graphite-detail-project-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-composer-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.graphite-detail-project-picker .graphite-detail-select {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  min-height: 36px;
+  padding: 0;
+}
+
+.graphite-location-picker {
+  max-width: 220px;
+}
+
+.graphite-project-trigger-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-project-menu {
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  display: grid;
+  gap: 0;
+  max-height: min(320px, calc(100vh - 48px));
+  max-width: min(280px, calc(100vw - 36px));
+  min-width: min(220px, calc(100vw - 24px));
+  overflow-y: auto;
+  padding: 6px;
+  position: fixed;
+  width: max-content;
+  z-index: 9999;
+}
+
+.graphite-project-option {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--text-normal);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  font-size: 13px;
+  gap: 8px;
+  grid-template-columns: 16px auto minmax(0, 1fr);
+  min-height: 30px;
+  padding: 0 8px;
+  text-align: left;
+  width: 100%;
+}
+
+.graphite-project-option:not(.has-project) {
+  grid-template-columns: 16px minmax(0, 1fr);
+}
+
+.graphite-project-option:hover,
+.graphite-project-option.is-selected {
+  background: var(--background-modifier-hover);
+}
+
+.graphite-project-option-check {
+  color: var(--text-normal);
+  font-size: 12px;
+  line-height: 1;
+  text-align: center;
+}
+
+.graphite-project-option-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-project-section-label {
+  border-top: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 5px 4px 2px;
+  padding: 6px 4px 1px;
+  text-transform: uppercase;
+}
+
+.graphite-project-actions-wrap {
+  margin-left: auto;
+  position: relative;
+}
+
+.graphite-project-actions-button {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 16px;
+  height: 28px;
+  justify-content: center;
+  padding: 0 8px;
+}
+
+.graphite-project-actions-button:hover {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-project-option.is-destructive {
+  color: var(--color-red, #e05252);
+}
+
+.graphite-project-option.is-destructive:hover {
+  background: color-mix(in srgb, var(--color-red, #e05252) 10%, transparent);
+}
+
+.graphite-label-option {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Shared themed dropdown (GraphiteDropdown) — replaces native <select>. */
+.graphite-dropdown-trigger {
+  align-items: center;
+  appearance: none;
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: 13px;
+  gap: 8px;
+  min-height: 32px;
+  padding: 5px 8px;
+  text-align: left;
+  width: auto;
+}
+
+.graphite-dropdown-trigger:hover {
+  border-color: var(--graphite-muted);
+}
+
+.graphite-overdue-range-trigger {
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.graphite-repeat-freq-trigger {
+  flex: 1 1 auto;
+}
+
+.graphite-dropdown-dot {
+  border-radius: 50%;
+  flex: 0 0 auto;
+  height: 10px;
+  width: 10px;
+}
+
+.graphite-dropdown-trigger-label {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-dropdown-caret {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--graphite-muted);
+  flex: 0 0 auto;
+  height: 0;
+  margin-left: auto;
+  width: 0;
+}
+
+.graphite-dropdown-menu {
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  display: grid;
+  gap: 0;
+  max-height: min(320px, calc(100vh - 48px));
+  max-width: min(280px, calc(100vw - 36px));
+  min-width: min(200px, calc(100vw - 24px));
+  overflow-y: auto;
+  padding: 6px;
+  position: fixed;
+  width: max-content;
+  z-index: 9999;
+}
+
+.graphite-dropdown-option {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--text-normal);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  font-size: 13px;
+  gap: 8px;
+  grid-template-columns: 16px auto minmax(0, 1fr);
+  min-height: 30px;
+  padding: 0 8px;
+  text-align: left;
+  width: 100%;
+}
+
+.graphite-dropdown-option:hover,
+.graphite-dropdown-option:focus-visible,
+.graphite-dropdown-option.is-selected {
+  background: var(--background-modifier-hover);
+  outline: none;
+}
+
+.graphite-dropdown-option-check {
+  color: var(--text-normal);
+  font-size: 12px;
+  line-height: 1;
+  text-align: center;
+}
+
+.graphite-dropdown-option-dot {
+  border-radius: 50%;
+  height: 10px;
+  width: 10px;
+}
+
+.graphite-dropdown-option-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-dropdown-section {
+  border-top: 1px solid var(--background-modifier-border);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 5px 4px 2px;
+  padding: 6px 4px 1px;
+  text-transform: uppercase;
+}
+
+.graphite-archived-badge {
+  background: var(--graphite-hover);
+  border-radius: 4px;
+  color: var(--graphite-muted);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  text-transform: uppercase;
+}
+
+.graphite-restore-button {
+  font-size: 12px;
+  height: 26px;
+  padding: 0 10px;
+}
+
+.graphite-archived-button {
+  color: var(--graphite-muted);
+  font-style: italic;
+}
+
+.graphite-label-prompt-input {
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  font: inherit;
+  font-size: 14px;
+  height: 36px;
+  margin-bottom: 16px;
+  outline: none;
+  padding: 0 10px;
+  width: 100%;
+}
+
+.graphite-label-prompt-input:focus {
+  border-color: var(--graphite-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--graphite-accent) 20%, transparent);
+}
+
+.graphite-label-prompt-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.graphite-modal-error {
+  color: var(--color-red, #e05252);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.graphite-modal-desc {
+  color: var(--graphite-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.graphite-quick-add-modal {
+  --graphite-surface: var(--background-primary);
+  --graphite-hover: var(--background-modifier-hover);
+  --graphite-border: var(--background-modifier-border);
+  --graphite-text: var(--text-normal);
+  --graphite-muted: var(--text-muted);
+  --graphite-accent: var(--text-normal);
+  --graphite-accent-hover: var(--text-normal);
+  --graphite-on-accent: var(--background-primary);
+  min-width: min(420px, calc(100vw - 48px));
+}
+
+.graphite-quick-add-modal h2 {
+  color: var(--graphite-text);
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+
+.graphite-quick-add-desc {
+  color: var(--graphite-muted);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0 0 14px;
+}
+
+.graphite-quick-add-input {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 8px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  font: inherit;
+  font-size: 15px;
+  height: 40px;
+  margin: 0 0 14px;
+  outline: none;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.graphite-quick-add-input:focus {
+  border-color: var(--graphite-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--graphite-accent) 16%, transparent);
+}
+
+.graphite-quick-add-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.graphite-project-create-modal {
+  min-width: min(420px, calc(100vw - 48px));
+}
+
+.graphite-project-create-appearance {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.graphite-project-create-preview {
+  min-width: 0;
+}
+
+.graphite-project-create-preview-chip {
+  align-items: center;
+  background: var(--graphite-project-bg, var(--graphite-hover));
+  border: 1px solid color-mix(in srgb, var(--graphite-project-color, var(--graphite-muted)) 18%, transparent);
+  border-radius: 999px;
+  color: var(--graphite-text);
+  display: inline-flex;
+  gap: 8px;
+  justify-self: start;
+  max-width: 100%;
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.graphite-project-create-preview-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-project-create-color-control {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.graphite-project-color-auto,
+.graphite-project-color-custom,
+.graphite-project-color-random {
+  align-items: center;
+  appearance: none;
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 999px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  height: 34px;
+  position: relative;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+}
+
+.graphite-project-color-auto:hover,
+.graphite-project-color-custom:hover,
+.graphite-project-color-random:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-project-color-auto.is-selected,
+.graphite-project-color-custom.is-selected {
+  border-color: var(--graphite-text);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--graphite-text) 12%, transparent);
+}
+
+.graphite-project-color-dot {
+  border-radius: 999px;
+  display: block;
+  height: 10px;
+  width: 10px;
+}
+
+.graphite-project-color-random {
+  color: var(--graphite-muted);
+  padding: 0;
+  width: 34px;
+}
+
+.graphite-project-color-random svg {
+  height: 15px;
+  width: 15px;
+}
+
+.graphite-project-color-custom-dot {
+  background: var(--graphite-custom-color, var(--graphite-muted));
+  border-radius: 999px;
+  display: block;
+  height: 18px;
+  width: 18px;
+}
+
+.graphite-project-color-custom input[type="color"] {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  cursor: pointer;
+  height: 100%;
+  inset: 0;
+  opacity: 0;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.graphite-project-color-custom input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.graphite-project-color-custom input[type="color"]::-webkit-color-swatch {
+  border: 1px solid var(--graphite-border);
+  border-radius: 999px;
+}
+
+.graphite-button-destructive {
+  background: var(--color-red, #e05252);
+  color: #fff;
+}
+
+.graphite-button-destructive:hover {
+  background: color-mix(in srgb, var(--color-red, #e05252) 85%, black);
+}
+
+.graphite-detail-project-create {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.graphite-detail-project-create-input {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  font: inherit;
+  font-size: 13px;
+  min-height: 32px;
+  min-width: 0;
+  padding: 0 8px;
+}
+
+.graphite-detail-project-create-button,
+.graphite-detail-project-cancel-button {
+  appearance: none;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  min-height: 32px;
+  padding: 0 8px;
+}
+
+.graphite-detail-project-create-button {
+  background: var(--graphite-accent);
+  color: white;
+}
+
+.graphite-detail-project-cancel-button {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-button,
+.graphite-ui-button {
+  background: var(--graphite-hover);
+  border: 0;
+  border-radius: var(--graphite-radius);
+  box-shadow: none;
+  color: var(--graphite-text);
+  font-size: 13px;
+  font-weight: 600;
+  min-height: var(--graphite-button-height);
+  padding: 0 12px;
+  transition: background var(--graphite-transition), color var(--graphite-transition), opacity var(--graphite-transition);
+}
+
+.graphite-button:hover,
+.graphite-ui-button:hover {
+  background: var(--graphite-border);
+}
+
+.graphite-button-primary,
+.graphite-ui-button-primary {
+  background: var(--graphite-success);
+  color: var(--graphite-on-success);
+}
+
+.graphite-root button.graphite-button.graphite-button-primary,
+.graphite-root button.graphite-button.graphite-button-primary:hover,
+.graphite-root button.graphite-button.graphite-button-primary:focus-visible,
+.graphite-root button.graphite-button.graphite-button-primary:active,
+.graphite-root button.graphite-ui-button.graphite-ui-button-primary,
+.graphite-root button.graphite-ui-button.graphite-ui-button-primary:hover,
+.graphite-root button.graphite-ui-button.graphite-ui-button-primary:focus-visible,
+.graphite-root button.graphite-ui-button.graphite-ui-button-primary:active {
+  background: var(--graphite-success);
+  border-color: transparent;
+  color: var(--graphite-on-success);
+}
+
+.graphite-root button.graphite-button.graphite-button-primary:hover,
+.graphite-root button.graphite-button.graphite-button-primary:focus-visible,
+.graphite-root button.graphite-ui-button.graphite-ui-button-primary:hover,
+.graphite-root button.graphite-ui-button.graphite-ui-button-primary:focus-visible {
+  background: var(--graphite-success-hover);
+}
+
+.graphite-root button.graphite-button.graphite-button-primary:disabled,
+.graphite-root button.graphite-ui-button.graphite-ui-button-primary:disabled {
+  background: var(--graphite-success);
+  color: var(--graphite-on-success);
+  opacity: 0.72;
+}
+
+.graphite-button-danger,
+.graphite-ui-button-danger {
+  background: transparent;
+  color: var(--graphite-danger);
+  border-color: var(--graphite-danger);
+}
+
+.graphite-button-danger:hover,
+.graphite-ui-button-danger:hover {
+  background: var(--graphite-danger);
+  color: #fff;
+}
+
+/* Destructive (solid red) — used for Delete actions. */
+.graphite-button-destructive,
+.graphite-ui-button-destructive,
+.graphite-root button.graphite-button.graphite-button-destructive,
+.graphite-root button.graphite-ui-button.graphite-ui-button-destructive {
+  background: var(--graphite-danger);
+  border-color: transparent;
+  color: #fff;
+}
+
+.graphite-root button.graphite-button.graphite-button-destructive:hover,
+.graphite-root button.graphite-button.graphite-button-destructive:focus-visible,
+.graphite-root button.graphite-ui-button.graphite-ui-button-destructive:hover,
+.graphite-root button.graphite-ui-button.graphite-ui-button-destructive:focus-visible {
+  background: var(--graphite-danger-hover);
+  color: #fff;
+}
+
+/* Plugin buttons inside Obsidian modals sit outside .graphite-root, so the
+   .graphite-root-scoped variant rules above don't reach them and Obsidian's own
+   `.modal button` styling would win. Re-assert the variant colors here at a
+   specificity that beats it, so e.g. a delete confirmation's button reads red. */
+.modal .graphite-button-primary,
+.modal .graphite-ui-button-primary {
+  background: var(--graphite-success);
+  border-color: transparent;
+  color: var(--graphite-on-success);
+}
+
+.modal .graphite-button-primary:hover,
+.modal .graphite-ui-button-primary:hover,
+.modal .graphite-button-primary:focus-visible,
+.modal .graphite-ui-button-primary:focus-visible {
+  background: var(--graphite-success-hover);
+}
+
+.modal .graphite-button-destructive,
+.modal .graphite-ui-button-destructive {
+  background: var(--graphite-danger);
+  border-color: transparent;
+  color: #fff;
+}
+
+.modal .graphite-button-destructive:hover,
+.modal .graphite-ui-button-destructive:hover,
+.modal .graphite-button-destructive:focus-visible,
+.modal .graphite-ui-button-destructive:focus-visible {
+  background: var(--graphite-danger-hover);
+  color: #fff;
+}
+
+.modal .graphite-button-danger,
+.modal .graphite-ui-button-danger {
+  background: transparent;
+  color: var(--graphite-danger);
+  border-color: var(--graphite-danger);
+}
+
+.modal .graphite-button-danger:hover,
+.modal .graphite-ui-button-danger:hover {
+  background: var(--graphite-danger);
+  color: #fff;
+}
+
+/* GraphiteUI primitives */
+.graphite-ui-button {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  justify-content: center;
+  min-width: 0;
+}
+
+.graphite-ui-button-sm {
+  font-size: 12px;
+  min-height: 30px;
+  padding: 0 10px;
+}
+
+.graphite-ui-button-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-ui-button-ghost {
+  background: transparent;
+  color: var(--graphite-muted);
+}
+
+.graphite-ui-button-ghost:hover {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-ui-icon-button {
+  aspect-ratio: 1;
+  padding: 0;
+  width: var(--graphite-button-height);
+}
+
+.graphite-ui-icon,
+.graphite-ui-icon svg {
+  display: inline-flex;
+  height: 16px;
+  width: 16px;
+}
+
+.graphite-ui-chip {
+  align-items: center;
+  background: var(--graphite-chip-bg);
+  border: 1px solid transparent;
+  border-radius: var(--graphite-radius-pill);
+  color: var(--graphite-text);
+  display: inline-flex;
+  font-size: 12px;
+  gap: 6px;
+  min-height: var(--graphite-chip-height);
+  min-width: 0;
+  padding: 0 8px;
+}
+
+.graphite-ui-chip-outline {
+  background: transparent;
+  border-color: var(--graphite-border);
+}
+
+.graphite-ui-chip-muted {
+  color: var(--graphite-muted);
+}
+
+.graphite-ui-chip-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-ui-input {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: var(--graphite-radius);
+  box-shadow: none;
+  color: var(--graphite-text);
+  font: inherit;
+  min-height: 32px;
+  min-width: 0;
+  padding: 0 10px;
+}
+
+.graphite-ui-card {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: var(--graphite-radius-lg);
+  padding: var(--graphite-card-padding);
+}
+
+.graphite-ui-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.graphite-ui-bottom-bar {
+  align-items: center;
+  background: var(--graphite-surface);
+  border-top: 1px solid var(--graphite-border);
+  display: flex;
+  gap: var(--graphite-spacing-2);
+  min-height: var(--graphite-footer-height);
+  padding: var(--graphite-spacing-3);
+}
+
+/* Custom repeat modal — inherits the unified theme tokens from .graphite-root. */
+.graphite-custom-repeat-modal .modal-content {
+  max-height: min(720px, calc(100dvh - 96px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 20px 24px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.graphite-repeat-section-title {
+  color: var(--graphite-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin: 16px 0 8px;
+  text-transform: uppercase;
+}
+
+.graphite-repeat-section-title:first-child {
+  margin-top: 0;
+}
+
+.graphite-repeat-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.graphite-repeat-radio-row {
+  align-items: center;
+  border-radius: 6px;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  gap: 10px;
+  padding: 6px 8px;
+}
+
+.graphite-repeat-radio-row:hover {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-repeat-radio-row.is-checked {
+  color: var(--graphite-text);
+}
+
+.graphite-repeat-radio-dot {
+  border: 2px solid var(--graphite-border);
+  border-radius: 50%;
+  flex-shrink: 0;
+  height: 16px;
+  width: 16px;
+}
+
+.graphite-repeat-radio-dot.is-active {
+  background: var(--graphite-accent);
+  border-color: var(--graphite-accent);
+  box-shadow: inset 0 0 0 3px var(--graphite-surface);
+}
+
+.graphite-repeat-ends-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.graphite-repeat-ends-date,
+.graphite-repeat-ends-count {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  color: var(--graphite-text);
+  font-size: 13px;
+  height: 30px;
+  padding: 0 8px;
+}
+
+.graphite-repeat-ends-count {
+  width: 60px;
+}
+
+.graphite-repeat-ends-label {
+  color: var(--graphite-muted);
+  font-size: 13px;
+}
+
+.graphite-repeat-every-row {
+  align-items: stretch;
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  box-sizing: border-box;
+  display: flex;
+  gap: 0;
+  max-width: 100%;
+  overflow: hidden;
+  width: min(220px, 100%);
+}
+
+.graphite-repeat-interval-input {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--graphite-border);
+  border-radius: 0;
+  box-sizing: border-box;
+  color: var(--graphite-text);
+  flex: 0 0 70px;
+  font-size: 14px;
+  height: 36px;
+  line-height: 36px;
+  margin: 0;
+  min-width: 0;
+  padding: 0 10px;
+  width: 70px;
+}
+
+.graphite-repeat-freq-select {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-sizing: border-box;
+  color: var(--graphite-text);
+  flex: 1 1 auto;
+  font-size: 14px;
+  height: 36px;
+  line-height: 36px;
+  margin: 0;
+  min-width: 0;
+  padding: 0 10px;
+  width: auto;
+}
+
+.graphite-repeat-preview {
+  align-items: center;
+  background: var(--graphite-hover);
+  border-radius: 8px;
+  color: var(--graphite-text);
+  display: flex;
+  font-size: 13px;
+  font-weight: 500;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 8px 12px;
+}
+
+.graphite-repeat-day-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.graphite-repeat-day-btn {
+  appearance: none;
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  color: var(--graphite-text);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 36px;
+  padding: 5px 6px;
+  text-align: center;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.graphite-repeat-day-btn:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-repeat-day-btn.is-active {
+  background: var(--graphite-accent);
+  border-color: var(--graphite-accent);
+  color: var(--graphite-on-accent);
+}
+
+.graphite-repeat-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.graphite-task-subtask-counter {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 11px;
+  gap: 3px;
+  line-height: 1.2;
+  padding: 0;
+}
+
+.graphite-task-subtask-counter:hover,
+.graphite-task-subtask-counter.is-expanded {
+  background: transparent;
+  box-shadow: none;
+  color: var(--graphite-text);
+}
+
+.graphite-task-subtask-counter .graphite-chip-icon {
+  height: 11px;
+  width: 11px;
+}
+
+.graphite-task-last-completed {
+  align-items: center;
+  color: var(--graphite-muted);
+  display: inline-flex;
+  font-size: 11px;
+  gap: 3px;
+}
+
+.graphite-task-last-completed .graphite-chip-icon {
+  height: 11px;
+  width: 11px;
+}
+
+.graphite-empty {
+  color: var(--graphite-muted);
+  font-size: 13px;
+  padding: 18px 0;
+}
+
+.graphite-empty-small {
+  padding: 12px 0;
+}
+
+.graphite-filter-section {
+  margin-bottom: 30px;
+}
+
+.graphite-filter-section h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.graphite-filter-list {
+  border-top: 1px solid var(--graphite-border);
+  display: grid;
+  margin-top: 8px;
+}
+
+.graphite-filter-row,
+.graphite-label-row {
+  appearance: none;
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--graphite-border);
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  min-height: 48px;
+  padding: 0 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.graphite-filter-row:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-filter-row-with-actions {
+  grid-template-columns: minmax(0, 1fr) auto;
+  overflow: visible;
+  padding: 0;
+}
+
+.graphite-filter-row-main,
+button.graphite-filter-row-main {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  min-height: 48px;
+  min-width: 0;
+  padding: 0 0 0 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.graphite-filter-row-main:hover,
+button.graphite-filter-row-main:hover,
+button.graphite-filter-row-main:focus-visible {
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+.graphite-label-actions-button,
+button.graphite-label-actions-button {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  margin: 0 8px;
+  padding: 0;
+  width: 32px;
+}
+
+.graphite-label-actions-button:hover,
+button.graphite-label-actions-button:hover,
+.graphite-label-actions-button:focus-visible,
+button.graphite-label-actions-button:focus-visible {
+  background: var(--graphite-hover);
+  box-shadow: none;
+  color: var(--graphite-text);
+  outline: none;
+}
+
+.graphite-filter-dot {
+  align-items: center;
+  border-radius: 999px;
+  color: var(--graphite-muted);
+  display: inline-flex;
+  font-size: 12px;
+  height: 18px;
+  justify-content: center;
+  width: 18px;
+}
+
+.graphite-label-dot {
+  height: 10px;
+  width: 10px;
+}
+
+.graphite-filter-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-row-count {
+  color: var(--graphite-muted);
+  font-size: 13px;
+  min-width: 24px;
+  text-align: right;
+}
+
+.graphite-labels-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 32px;
+}
+
+.graphite-label-add,
+.graphite-back-button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-accent);
+  cursor: pointer;
+  font: inherit;
+  min-height: 28px;
+  min-width: 28px;
+  padding: 4px 8px;
+}
+
+.graphite-label-add:hover,
+.graphite-back-button:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-back-button {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  margin: 8px 0;
+}
+
+.graphite-activity {
+  display: grid;
+  gap: 18px;
+}
+
+.graphite-activity-empty {
+  color: var(--graphite-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 22px 0;
+}
+
+.graphite-activity-dashboard {
+  background: var(--graphite-sidebar-bg);
+  border: 1px solid var(--graphite-border);
+  border-radius: 14px;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.graphite-activity-dashboard-top {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.graphite-activity-tab,
+.graphite-activity-range {
+  border-radius: 7px;
+  color: var(--graphite-muted);
+  font-size: 13px;
+  line-height: 1.2;
+  padding: 5px 8px;
+}
+
+.graphite-activity-tab.is-active {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-activity-summary {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.graphite-activity-card {
+  background: color-mix(in srgb, var(--graphite-hover) 82%, var(--graphite-surface));
+  border: 0;
+  border-radius: 8px;
+  min-width: 0;
+  min-height: 54px;
+  padding: 8px 9px;
+}
+
+.graphite-activity-card-count {
+  color: var(--graphite-text);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.graphite-activity-card-label {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  line-height: 1.3;
+  margin-top: 5px;
+}
+
+.graphite-activity-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.graphite-activity-panel-header,
+.graphite-activity-feed-header {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.graphite-activity-panel-header h2,
+.graphite-activity-feed-header h2 {
+  color: var(--graphite-text);
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.graphite-activity-panel-header span {
+  color: var(--graphite-muted);
+  font-size: 12px;
+}
+
+.graphite-activity-heatmap-scroll {
+  max-width: 100%;
+  overflow: visible;
+  padding: 2px 2px 4px;
+}
+
+.graphite-activity-heatmap {
+  display: grid;
+  gap: 3px;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  min-width: 0;
+  width: 100%;
+}
+
+.graphite-activity-day {
+  appearance: none;
+  aspect-ratio: 1 / 1;
+  background: var(--background-modifier-hover);
+  border: 0;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px var(--background-modifier-border);
+  cursor: pointer;
+  height: auto;
+  min-width: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.graphite-activity-day.level-0 {
+  background: var(--background-modifier-hover);
+}
+
+.graphite-activity-day.level-1 {
+  background: rgba(var(--color-green-rgb), 0.25);
+}
+
+.graphite-activity-day.level-2 {
+  background: rgba(var(--color-green-rgb), 0.45);
+}
+
+.graphite-activity-day.level-3 {
+  background: rgba(var(--color-green-rgb), 0.65);
+}
+
+.graphite-activity-day.level-4 {
+  background: rgba(var(--color-green-rgb), 0.9);
+}
+
+.graphite-activity-day.is-selected {
+  outline: 2px solid var(--graphite-text);
+  outline-offset: 1px;
+}
+
+.graphite-activity-feed {
+  display: grid;
+  gap: 10px;
+}
+
+.graphite-activity-list {
+  border-top: 1px solid var(--graphite-border);
+  display: grid;
+}
+
+.graphite-activity-row {
+  background: transparent;
+  border-bottom: 1px solid var(--graphite-border);
+  border-radius: 0;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: grid;
+  gap: 6px;
+  padding: 12px 0;
+}
+
+.graphite-activity-row:hover,
+.graphite-activity-row:focus-visible {
+  background: var(--graphite-hover);
+}
+
+.graphite-activity-row-title {
+  font-size: 14px;
+  line-height: 1.4;
+  min-width: 0;
+}
+
+.graphite-activity-task-title {
+  font-weight: 600;
+}
+
+.graphite-activity-row-meta {
+  align-items: center;
+  color: var(--graphite-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 6px;
+}
+
+.graphite-activity-project-chip,
+.graphite-activity-priority,
+.graphite-activity-label {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  gap: 5px;
+  line-height: 1.2;
+  padding: 2px 7px;
+}
+
+.graphite-activity-project-chip {
+  color: var(--graphite-text);
+}
+
+.graphite-activity-priority {
+  background: var(--graphite-priority-bg, transparent);
+  border: 1px solid var(--graphite-priority-border, var(--graphite-border));
+  color: var(--graphite-priority-text, var(--graphite-muted));
+}
+
+.graphite-activity-label {
+  border: 1px solid var(--graphite-border);
+  color: var(--graphite-muted);
+}
+
+.graphite-daily-note {
+  display: grid;
+  gap: 14px;
+}
+
+.graphite-daily-note-panel {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 12px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.graphite-daily-note-header {
+  align-items: baseline;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.graphite-daily-note-header h2 {
+  color: var(--graphite-text);
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.graphite-daily-note-header span,
+.graphite-daily-note-source {
+  color: var(--graphite-muted);
+  font-size: 12px;
+}
+
+.graphite-daily-note-source {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-daily-codeblock {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 12px;
+  display: grid;
+  gap: 10px;
+  margin: 0.75em 0;
+  padding: 12px;
+}
+
+.graphite-daily-codeblock-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.graphite-daily-codeblock-title {
+  color: var(--graphite-text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.graphite-daily-codeblock-subtitle {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.graphite-daily-codeblock-open {
+  align-items: center;
+  appearance: none;
+  background: var(--graphite-hover);
+  border: 0;
+  border-radius: 7px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 600;
+  height: 30px;
+  padding: 0 10px;
+}
+
+.graphite-daily-codeblock-open:hover,
+.graphite-daily-codeblock-open:focus-visible {
+  background: var(--background-modifier-hover);
+}
+
+.graphite-daily-codeblock-list {
+  border-top: 1px solid var(--graphite-border);
+  display: grid;
+}
+
+.graphite-daily-codeblock-row {
+  border-bottom: 1px solid var(--graphite-border);
+  display: grid;
+  gap: 6px;
+  padding: 9px 0;
+}
+
+.graphite-daily-codeblock-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.graphite-daily-codeblock-task-title {
+  color: var(--graphite-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.graphite-daily-codeblock-meta {
+  align-items: center;
+  color: var(--graphite-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 6px;
+}
+
+.graphite-daily-codeblock-chip {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--graphite-text);
+  display: inline-flex;
+  gap: 5px;
+  line-height: 1.2;
+  padding: 2px 7px;
+}
+
+.graphite-daily-codeblock-label {
+  color: var(--graphite-muted);
+}
+
+.graphite-search-backdrop {
+  align-items: flex-start;
+  backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.24);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding-top: 12vh;
+  position: absolute;
+  z-index: 1000;
+}
+
+.graphite-search-modal {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 12px;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.22);
+  max-height: min(640px, 76vh);
+  overflow: hidden;
+  width: min(640px, calc(100vw - 48px));
+}
+
+input.graphite-search-input {
+  appearance: none;
+  background: var(--graphite-surface);
+  border: 0;
+  border-bottom: 1px solid var(--graphite-border);
+  border-radius: 0;
+  box-shadow: none;
+  box-sizing: border-box;
+  color: var(--graphite-text);
+  font-size: 18px;
+  height: 52px;
+  line-height: 52px;
+  outline: none;
+  padding: 0 18px;
+  width: 100%;
+}
+
+input.graphite-search-input:focus {
+  border-bottom-color: var(--graphite-border);
+  box-shadow: none;
+  outline: none;
+}
+
+.graphite-search-results {
+  max-height: calc(min(640px, 76vh) - 52px);
+  overflow: auto;
+  padding: 0;
+}
+
+.graphite-search-empty {
+  color: var(--graphite-muted);
+  font-size: 13px;
+  padding: 18px;
+}
+
+button.graphite-search-result {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid var(--graphite-border);
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: block;
+  min-height: 56px;
+  padding: 12px 16px;
+  text-align: left;
+  white-space: normal;
+  width: 100%;
+}
+
+button.graphite-search-result:hover,
+button.graphite-search-result.is-selected {
+  background: var(--graphite-hover);
+}
+
+.graphite-search-title {
+  color: var(--graphite-text);
+  font-family: var(--graphite-font-task-title);
+  font-size: 14px;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-search-description {
+  color: var(--graphite-muted);
+  font-family: var(--graphite-font-task-description);
+  font-size: 12px;
+  line-height: 1.35;
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-search-meta {
+  color: var(--graphite-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 8px;
+  line-height: 1.35;
+  margin-top: 5px;
+  min-height: 16px;
+}
+
+.graphite-settings-textarea {
+  min-width: 260px;
+}
+
+.modal.graphite-modal-detail {
+  max-width: min(1100px, calc(100vw - 48px));
+  width: min(1100px, calc(100vw - 48px));
+}
+
+.modal.graphite-modal-detail .modal-close-button,
+.graphite-image-preview-modal .modal-close-button,
+.graphite-image-lightbox-modal .modal-close-button {
+  display: none;
+}
+
+.graphite-image-preview-open .graphite-detail-close {
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.graphite-detail-mobile-header {
+  display: none;
+}
+
+.graphite-detail-mobile-back {
+  appearance: none;
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 22px;
+  height: 40px;
+  justify-content: center;
+  padding: 0;
+  width: 40px;
+}
+
+.graphite-detail-mobile-back:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-detail-mobile-title {
+  color: var(--graphite-text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.graphite-detail-modal {
+  display: grid;
+  gap: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+  max-height: calc(100vh - 64px);
+  min-height: min(80vh, 760px);
+  overflow: hidden;
+}
+
+.graphite-detail-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.graphite-detail-main {
+  border-right: 1px solid var(--graphite-border);
+  min-height: 0;
+  overflow: auto;
+  padding: 28px;
+}
+
+.graphite-detail-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  overflow: auto;
+  padding: 28px 22px;
+}
+
+.graphite-detail-side h3 {
+  font-size: 14px;
+  margin: 0 0 4px;
+}
+
+.graphite-detail-close {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 22px;
+  height: 32px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  width: 32px;
+}
+
+.graphite-detail-close:hover,
+.graphite-detail-close:focus-visible {
+  background: var(--graphite-danger-light);
+  color: var(--graphite-danger);
+}
+
+.graphite-detail-title-row {
+  align-items: flex-start;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 24px minmax(0, 1fr);
+}
+
+.graphite-detail-checkbox {
+  margin-top: 6px;
+}
+
+.graphite-detail-title {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: var(--graphite-text);
+  font-family: var(--graphite-font-task-title);
+  font-size: 24px;
+  font-weight: 650;
+  line-height: 1.25;
+  outline: none;
+  width: 100%;
+}
+
+.graphite-detail-description {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: var(--graphite-text);
+  font-family: var(--graphite-font-task-description);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 18px;
+  min-height: 180px;
+  outline: none;
+  resize: vertical;
+  width: 100%;
+}
+
+.graphite-description-toolbar {
+  align-items: center;
+  background: rgba(28, 28, 28, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24);
+  display: inline-flex;
+  gap: 2px;
+  max-width: calc(100vw - 20px);
+  overflow-x: auto;
+  padding: 4px;
+  position: fixed;
+  z-index: 10010;
+  -webkit-overflow-scrolling: touch;
+}
+
+.graphite-description-toolbar.is-hidden {
+  display: none;
+}
+
+.graphite-description-toolbar button {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 700;
+  height: 28px;
+  justify-content: center;
+  line-height: 1;
+  min-width: 28px;
+  padding: 0 8px;
+}
+
+.graphite-description-toolbar button:hover,
+.graphite-description-toolbar button:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  outline: none;
+}
+
+.graphite-detail-description-rendered {
+  color: var(--graphite-text);
+  cursor: text;
+  font-family: var(--graphite-font-task-description);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 18px;
+  min-height: 180px;
+  white-space: normal;
+  width: 100%;
+  word-break: break-word;
+}
+
+.graphite-detail-description-rendered > :first-child {
+  margin-top: 0;
+}
+
+.graphite-detail-description-rendered > :last-child {
+  margin-bottom: 0;
+}
+
+.graphite-detail-description-content > :first-child {
+  margin-top: 0;
+}
+
+.graphite-detail-description-content > :last-child {
+  margin-bottom: 0;
+}
+
+.graphite-detail-description-rendered p,
+.graphite-detail-description-rendered ul,
+.graphite-detail-description-rendered ol,
+.graphite-detail-description-rendered blockquote,
+.graphite-detail-description-rendered pre {
+  margin-bottom: 0.75em;
+}
+
+.graphite-detail-description-rendered ul,
+.graphite-detail-description-rendered ol {
+  padding-inline-start: 1.4em;
+}
+
+.graphite-detail-description-rendered li {
+  margin: 0.2em 0;
+}
+
+.graphite-detail-description-rendered code {
+  background: var(--background-modifier-hover);
+  border-radius: 4px;
+  font-size: 0.92em;
+  padding: 0.1em 0.3em;
+}
+
+.graphite-detail-description-rendered pre {
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  overflow: auto;
+  padding: 10px 12px;
+}
+
+.graphite-detail-description-rendered pre code {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+}
+
+.graphite-detail-description-fallback {
+  background: transparent;
+  border: 0;
+  color: var(--graphite-text);
+  font-family: var(--graphite-font-task-description);
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+}
+
+.graphite-detail-description-rendered.is-empty::before {
+  color: var(--graphite-muted);
+  content: "Description";
+  pointer-events: none;
+}
+
+.graphite-detail-description-rendered a.external-link {
+  color: var(--link-color, var(--interactive-accent));
+  text-decoration: underline;
+}
+
+.graphite-detail-field {
+  display: grid;
+  gap: 6px;
+}
+
+.graphite-detail-label {
+  color: var(--graphite-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.graphite-detail-input {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  font: inherit;
+  font-size: 13px;
+  min-height: 32px;
+  padding: 5px 8px;
+  width: 100%;
+}
+
+.graphite-detail-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.graphite-detail-delete {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-danger);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  justify-self: start;
+  padding: 7px 8px;
+  text-align: left;
+}
+
+.graphite-detail-delete:hover {
+  background: var(--graphite-danger-light);
+  text-decoration: none;
+}
+
+.graphite-attachments-section {
+  border-top: 1px solid var(--graphite-border);
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 18px;
+}
+
+.graphite-attachments-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.graphite-attachments-header h3 {
+  color: var(--graphite-text);
+  font-size: 14px;
+  margin: 0;
+}
+
+.graphite-attachments-list {
+  display: grid;
+  gap: 8px;
+}
+
+.graphite-attachments-empty {
+  color: var(--graphite-muted);
+  font-size: 13px;
+}
+
+.graphite-attachment-image-grid {
+  display: grid;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.graphite-attachment-image-grid.is-single {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
+}
+
+.graphite-attachment-image-grid.is-grid {
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+}
+
+.graphite-image-attachment-card {
+  appearance: none;
+  background: var(--graphite-hover);
+  border: 1px solid var(--graphite-border);
+  border-radius: 10px;
+  box-sizing: border-box;
+  box-shadow: none;
+  cursor: zoom-in;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+  text-align: left;
+}
+
+.graphite-attachment-image-grid.is-single .graphite-image-attachment-card {
+  display: inline-block;
+  line-height: 0;
+  max-height: 260px;
+  max-width: 480px;
+  min-width: 72px;
+  width: fit-content;
+}
+
+.graphite-attachment-image-grid.is-grid .graphite-image-attachment-card {
+  aspect-ratio: 1 / 1;
+}
+
+.graphite-image-attachment-img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.graphite-attachment-image-grid.is-single .graphite-image-attachment-img {
+  height: auto;
+  max-height: 260px;
+  max-width: min(480px, 100%);
+  object-fit: contain;
+  width: auto;
+}
+
+.graphite-image-attachment-card:focus-visible {
+  box-shadow: 0 0 0 2px var(--graphite-faint);
+  outline: none;
+}
+
+.graphite-image-attachment-actions,
+.graphite-attachment-card-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  max-width: calc(100% - 16px);
+  opacity: 0.72;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 2;
+  transition: opacity 120ms ease;
+}
+
+.graphite-image-attachment-card:hover .graphite-image-attachment-actions,
+.graphite-image-attachment-card:hover .graphite-attachment-card-actions {
+  opacity: 1;
+}
+
+.graphite-image-attachment-action {
+  align-items: center;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 28px;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  width: 28px;
+}
+
+.theme-dark .graphite-image-attachment-action {
+  background: rgba(0, 0, 0, 0.58);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--graphite-text);
+}
+
+.graphite-image-attachment-action svg {
+  height: 15px;
+  width: 15px;
+}
+
+.graphite-image-attachment-action:hover {
+  background: var(--graphite-surface);
+}
+
+.graphite-image-attachment-name {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+  bottom: 0;
+  color: white;
+  font-size: 12px;
+  left: 0;
+  line-height: 1.3;
+  overflow: hidden;
+  padding: 22px 8px 7px;
+  position: absolute;
+  right: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-attachment-item {
+  appearance: none;
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--graphite-border);
+  border-radius: 8px;
+  box-shadow: none;
+  color: var(--graphite-text);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 10px;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  min-height: 44px;
+  padding: 5px 8px;
+  text-align: left;
+  width: 100%;
+}
+
+.graphite-attachment-item:hover {
+  background: var(--graphite-hover);
+}
+
+.graphite-attachment-thumb,
+.graphite-attachment-file-icon {
+  border-radius: 6px;
+  height: 30px;
+  width: 30px;
+}
+
+.graphite-attachment-thumb {
+  object-fit: cover;
+}
+
+.graphite-attachment-file-icon {
+  align-items: center;
+  background: var(--graphite-chip-bg);
+  display: flex;
+  font-size: 14px;
+  justify-content: center;
+}
+
+.graphite-attachment-text {
+  min-width: 0;
+}
+
+.graphite-attachment-name {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphite-attachment-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+}
+
+.graphite-attachment-action {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  width: 28px;
+}
+
+.graphite-attachment-action svg {
+  height: 15px;
+  width: 15px;
+}
+
+.graphite-attachment-action:hover {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-attachment-remove:hover {
+  color: var(--graphite-danger);
+}
+
+.graphite-add-attachment-inline {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  gap: 6px;
+  height: 32px;
+  justify-self: start;
+  padding: 0 8px;
+}
+
+.graphite-add-attachment-inline:hover {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-image-lightbox-backdrop {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.58);
+  box-sizing: border-box;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 32px;
+  position: fixed;
+  z-index: 10000;
+}
+
+.graphite-image-lightbox-modal {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  display: inline-flex;
+  justify-content: center;
+  margin: 0;
+  max-height: 88vh;
+  max-width: 92vw;
+  padding: 0;
+  width: auto;
+  z-index: 10001;
+}
+
+.graphite-image-lightbox-content {
+  align-items: center;
+  background: transparent;
+  display: inline-flex;
+  justify-content: center;
+  padding: 0;
+}
+
+.graphite-image-lightbox-shell {
+  align-items: center;
+  background: transparent;
+  display: inline-flex;
+  justify-content: center;
+  max-height: 88vh;
+  max-width: 92vw;
+  position: relative;
+}
+
+.graphite-image-lightbox-img {
+  border-radius: 10px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+  display: block;
+  height: auto;
+  max-height: 88vh;
+  max-width: 92vw;
+  object-fit: contain;
+  width: auto;
+}
+
+.graphite-image-lightbox-close {
+  align-items: center;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  color: #222;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 26px;
+  height: 38px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 38px;
+  z-index: 2;
+}
+
+.graphite-image-lightbox-close:hover {
+  background: white;
+}
+
+.theme-dark .graphite-image-lightbox-close {
+  background: rgba(20, 20, 20, 0.88);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: white;
+}
+
+.graphite-image-preview-backdrop {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.78);
+  display: flex;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.graphite-image-preview-modal {
+  background: transparent;
+  box-shadow: none;
+  margin: 0;
+  max-height: 88vh;
+  max-width: 92vw;
+  padding: 0;
+  width: fit-content;
+  z-index: 10000;
+}
+
+.graphite-image-preview-content {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.graphite-image-preview-img {
+  border-radius: 8px;
+  display: block;
+  max-height: 88vh;
+  max-width: 92vw;
+  object-fit: contain;
+}
+
+.graphite-image-preview-close {
+  appearance: none;
+  background: rgba(0, 0, 0, 0.62);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+  color: white;
+  cursor: pointer;
+  font-size: 22px;
+  height: 34px;
+  line-height: 30px;
+  padding: 0;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 34px;
+}
+
+.graphite-detail-footer {
+  align-items: center;
+  background: var(--graphite-surface);
+  border-top: 1px solid var(--graphite-border);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 14px 18px;
+}
+
+.graphite-detail-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.graphite-mobile-quick-add-button,
+.graphite-mobile-quick-add-screen {
+  display: none;
+}
+
+.graphite-mobile-quick-add-button {
+  align-items: center;
+  appearance: none;
+  background: var(--interactive-accent, var(--graphite-accent));
+  border: 0;
+  border-radius: 999px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+  color: var(--text-on-accent, #ffffff);
+  cursor: pointer;
+  height: 56px;
+  justify-content: center;
+  padding: 0;
+  position: fixed;
+  right: 18px;
+  width: 56px;
+  z-index: 850;
+}
+
+.graphite-mobile-quick-add-button:hover,
+.graphite-mobile-quick-add-button:focus-visible {
+  background: var(--interactive-accent-hover, var(--interactive-accent, var(--graphite-accent-hover)));
+  color: var(--text-on-accent, #ffffff);
+  outline: none;
+}
+
+.graphite-mobile-quick-add-button svg {
+  height: 26px;
+  width: 26px;
+}
+
+.graphite-mobile-quick-add-screen {
+  background: var(--graphite-bg);
+  color: var(--graphite-text);
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  inset: 0;
+  overflow: hidden;
+  position: fixed;
+  width: 100vw;
+  z-index: 900;
+}
+
+.graphite-mobile-quick-add-screen-header {
+  align-items: center;
+  display: grid;
+  background: var(--graphite-bg);
+  border-bottom: 1px solid var(--graphite-border-soft);
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  min-height: calc(56px + var(--graphite-mobile-safe-top));
+  padding: calc(8px + var(--graphite-mobile-safe-top)) 10px 8px;
+}
+
+.graphite-mobile-quick-add-back,
+.graphite-mobile-quick-add-close {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+  color: var(--graphite-muted);
+  cursor: pointer;
+  display: inline-flex;
+  height: 40px;
+  justify-content: center;
+  padding: 0;
+  width: 40px;
+}
+
+.graphite-mobile-quick-add-back:hover,
+.graphite-mobile-quick-add-back:focus-visible,
+.graphite-mobile-quick-add-close:hover,
+.graphite-mobile-quick-add-close:focus-visible {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+  outline: none;
+}
+
+.graphite-mobile-quick-add-title {
+  color: var(--graphite-text);
+  font-size: 16px;
+  font-weight: 650;
+  min-width: 0;
+  text-align: center;
+}
+
+.graphite-mobile-quick-add-close {
+  justify-self: end;
+}
+
+.graphite-mobile-quick-add-body {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 16px 16px 0;
+  scroll-padding-bottom: calc(160px + var(--graphite-mobile-bottom-toolbar) + env(safe-area-inset-bottom, 0px));
+  -webkit-overflow-scrolling: touch;
+}
+
+.graphite-root.is-mobile .graphite-add-area {
+  display: none;
+}
+
+.graphite-root.is-mobile .graphite-activity {
+  gap: 16px;
+}
+
+.graphite-root.is-mobile .graphite-activity-dashboard {
+  border-radius: 12px;
+  gap: 11px;
+  padding: 14px;
+}
+
+.graphite-root.is-mobile .graphite-activity-dashboard-top {
+  align-items: center;
+}
+
+.graphite-root.is-mobile .graphite-activity-summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.graphite-root.is-mobile .graphite-activity-card {
+  padding: 11px;
+}
+
+.graphite-root.is-mobile .graphite-activity-card-count {
+  font-size: 20px;
+}
+
+.graphite-root.is-mobile .graphite-activity-heatmap-scroll {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.graphite-root.is-mobile .graphite-activity-day {
+  height: auto;
+  width: 100%;
+}
+
+.graphite-root.is-mobile .graphite-activity-heatmap {
+  gap: 2px;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-button {
+  bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  display: inline-flex;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen {
+  display: grid;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-composer {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  gap: 12px;
+  min-height: 100%;
+  padding: 0;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-composer-title {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 16px;
+  line-height: 1.35;
+  min-height: 34px;
+  outline: none;
+  padding: 4px 6px;
+  resize: none;
+  width: 100%;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-composer-title:focus {
+  border: 0;
+  box-shadow: none;
+  outline: none;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-composer-description {
+  background: var(--graphite-hover);
+  border-color: transparent;
+  border-radius: 10px;
+  min-height: clamp(168px, 32dvh, 300px);
+  padding: 10px 12px;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-composer-chip-row {
+  gap: 7px;
+  max-height: none;
+  overflow: visible;
+  padding: 2px 0;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-composer-labels-wrap,
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-composer-deadline-wrap {
+  display: inline-flex;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-chip-button,
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-chip-select-wrap,
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-project-picker,
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-button {
+  min-height: 42px;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-repeat-chip-wrap {
+  flex: 1 1 min(260px, 100%);
+  max-width: 100%;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-repeat-chip {
+  max-width: 100%;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-composer-footer {
+  background: var(--graphite-bg);
+  border-top: 1px solid var(--graphite-border-soft);
+  bottom: 0;
+  margin: auto -16px 0;
+  padding: 10px 16px calc(12px + var(--graphite-mobile-bottom-toolbar) + env(safe-area-inset-bottom, 0px));
+  position: sticky;
+  z-index: 1;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-date-popover.is-calendar-open {
+  bottom: auto;
+  left: 12px;
+  max-height: calc(100dvh - var(--graphite-mobile-safe-top) - var(--graphite-mobile-bottom-toolbar) - 108px);
+  max-width: none;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: fixed;
+  right: 12px;
+  top: calc(var(--graphite-mobile-safe-top) + 72px);
+  transform: none;
+  width: auto;
+  z-index: 1200;
+}
+
+.graphite-root.is-mobile .graphite-mobile-quick-add-screen .graphite-date-popover.is-calendar-open .graphite-cal-wrap {
+  max-width: 100%;
+}
+
+@media (max-width: 700px) {
+  .graphite-root {
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .graphite-root *,
+  .graphite-root *::before,
+  .graphite-root *::after {
+    box-sizing: border-box;
+  }
+
+  .graphite-shell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .graphite-sidebar {
+    align-items: center;
+    border-bottom: 1px solid var(--graphite-border-soft);
+    border-right: 0;
+    display: flex;
+    gap: 8px;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: calc(8px + var(--graphite-mobile-safe-top)) 10px 8px;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .graphite-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .graphite-nav,
+  .graphite-sidebar-section {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 6px;
+    margin-top: 0;
+  }
+
+  .graphite-sidebar-heading {
+    display: none;
+  }
+
+  .graphite-add-sidebar,
+  .graphite-nav-button,
+  .graphite-project-button {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 6px;
+    grid-template-columns: none;
+    min-height: 40px;
+    padding: 8px 10px;
+    width: auto;
+  }
+
+  .graphite-add-sidebar {
+    font-weight: 650;
+  }
+
+  .graphite-count {
+    margin-left: 2px;
+  }
+
+  .graphite-main {
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 20px 14px calc(96px + env(safe-area-inset-bottom, 0px));
+    scroll-padding-bottom: calc(260px + env(safe-area-inset-bottom, 0px));
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .graphite-main > * {
+    max-width: none;
+    width: 100%;
+  }
+
+  .graphite-main-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .graphite-main h1 {
+    font-size: 24px;
+  }
+
+  .graphite-sorting-popover {
+    max-width: calc(100vw - 28px);
+    min-width: min(210px, calc(100vw - 28px));
+    right: 0;
+  }
+
+  .graphite-section {
+    margin-bottom: 26px;
+  }
+
+  .graphite-section-header {
+    align-items: center;
+    flex-wrap: wrap;
+    min-height: 42px;
+  }
+
+  .graphite-overdue-range-select {
+    min-height: 36px;
+  }
+
+  .graphite-task-row {
+    gap: 10px;
+    grid-template-columns: 24px minmax(0, 1fr) 28px;
+    padding: 13px 0;
+  }
+
+  .graphite-task-actions {
+    align-self: center;
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .graphite-task-delete {
+    align-self: center;
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .graphite-task-drag-handle {
+    display: none;
+  }
+
+  .graphite-task-checkbox {
+    height: 24px;
+    min-height: 24px;
+    width: 24px;
+  }
+
+  .graphite-task-checkbox.is-checked::after {
+    transform: translate(-50%, -62%) rotate(45deg);
+  }
+
+  .graphite-task-content {
+    grid-column: 2;
+  }
+
+  .graphite-task-title {
+    font-size: 15px;
+  }
+
+  .graphite-task-project {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 0;
+    max-width: 100%;
+  }
+
+  .graphite-task-subtask-preview {
+    margin-left: 0;
+  }
+
+  .graphite-task-subtask-preview-row {
+    gap: 10px;
+    grid-template-columns: 24px minmax(0, 1fr);
+    padding: 12px 0 12px 34px;
+  }
+
+  .graphite-subtask-preview-checkbox {
+    height: 24px;
+    min-height: 24px;
+    width: 24px;
+  }
+
+  .graphite-task-project span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .graphite-add-inline {
+    min-height: 40px;
+  }
+
+  .graphite-composer {
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  .graphite-composer-title,
+  .graphite-composer-description,
+  .graphite-chip-input,
+  .graphite-chip-select,
+  .graphite-project-select,
+  .graphite-custom-date-input,
+  .graphite-label-input,
+  .graphite-deadline-input,
+  .graphite-detail-input,
+  .graphite-detail-title,
+  .graphite-detail-description,
+  .graphite-detail-description-rendered {
+    font-size: 16px;
+  }
+
+  .graphite-chip-button,
+  .graphite-chip-select-wrap,
+  .graphite-project-picker,
+  .graphite-button,
+  .graphite-add-attachment-inline {
+    min-height: 40px;
+  }
+
+  .graphite-label-chip {
+    font-size: 11px;
+    padding: 2px 5px 2px 6px;
+  }
+
+  .graphite-label-chip svg {
+    height: 10px;
+    width: 10px;
+  }
+
+  .graphite-label-chip-remove svg {
+    height: 9px;
+    width: 9px;
+  }
+
+  .graphite-composer-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .graphite-composer-project,
+  .graphite-composer-actions {
+    width: 100%;
+  }
+
+  .graphite-composer-actions {
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+
+  .graphite-project-picker,
+  .graphite-composer .graphite-project-select {
+    max-width: 100%;
+  }
+
+  .graphite-composer-menu,
+  .graphite-composer-popover,
+  .graphite-project-menu {
+    max-width: calc(100vw - 36px);
+    min-width: min(240px, calc(100vw - 36px));
+  }
+
+  .graphite-composer-menu {
+    max-width: min(220px, calc(100vw - 36px));
+    min-width: min(184px, calc(100vw - 36px));
+  }
+
+  .graphite-date-popover {
+    max-width: calc(100vw - 36px);
+    min-width: min(304px, calc(100vw - 36px));
+  }
+
+  .graphite-custom-repeat-modal {
+    max-height: calc(100dvh - 24px);
+    max-width: calc(100vw - 24px);
+  }
+
+  .graphite-custom-repeat-modal .modal-content {
+    max-height: calc(100dvh - 112px);
+    padding: 16px 18px 18px;
+  }
+
+  .graphite-repeat-every-row {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .graphite-repeat-interval-input {
+    flex: 0 0 76px;
+    height: 40px;
+    line-height: 40px;
+    min-height: 40px;
+    width: 76px;
+  }
+
+  .graphite-repeat-freq-select {
+    flex: 1 1 auto;
+    height: 40px;
+    line-height: 40px;
+    min-height: 40px;
+    min-width: 0;
+    width: auto;
+  }
+
+  .graphite-repeat-day-row {
+    display: grid;
+    gap: 6px;
+    grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
+    margin-bottom: 8px;
+    max-width: 100%;
+  }
+
+  .graphite-repeat-day-btn {
+    min-height: 40px;
+    min-width: 0;
+    padding: 7px 6px;
+  }
+
+  .graphite-composer-popover,
+  .graphite-label-input {
+    scroll-margin-bottom: calc(260px + env(safe-area-inset-bottom, 0px));
+    scroll-margin-top: calc(72px + var(--graphite-mobile-safe-top));
+  }
+
+  .graphite-search-backdrop {
+    padding-top: 8vh;
+  }
+
+  .graphite-search-modal {
+    max-height: min(620px, 82vh);
+    width: calc(100vw - 24px);
+  }
+
+  .modal-container.graphite-modal-detail-container {
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
+  }
+
+  .modal.graphite-modal-detail {
+    border-radius: 0;
+    height: 100dvh;
+    margin: 0;
+    max-height: none;
+    max-width: none;
+    width: 100vw;
+  }
+
+  .graphite-detail-modal {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: 100dvh;
+    max-height: none;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .graphite-detail-mobile-header {
+    align-items: center;
+    background: var(--graphite-surface);
+    border-bottom: 1px solid var(--graphite-border);
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+    min-height: 52px;
+    padding: calc(8px + var(--graphite-mobile-safe-top)) 14px 8px;
+  }
+
+  .graphite-detail-shell {
+    display: block;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-bottom: 160px;
+    scroll-padding-bottom: 180px;
+    scroll-padding-top: 80px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .graphite-detail-input {
+    scroll-margin-bottom: 180px;
+    scroll-margin-top: 80px;
+  }
+
+  .graphite-detail-main,
+  .graphite-detail-side {
+    border-right: 0;
+    min-width: 0;
+    overflow: visible;
+    padding: 18px 16px;
+  }
+
+  .graphite-detail-main {
+    padding-top: 18px;
+  }
+
+  .graphite-detail-side {
+    border-top: 1px solid var(--graphite-border);
+    gap: 12px;
+    padding-top: 18px;
+  }
+
+  .graphite-detail-side h3,
+  .graphite-detail-close {
+    display: none;
+  }
+
+  .graphite-detail-title-row {
+    gap: 10px;
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+
+  .graphite-detail-title {
+    font-size: 21px;
+    padding-right: 4px;
+  }
+
+  .graphite-detail-description,
+  .graphite-detail-description-rendered {
+    min-height: 180px;
+  }
+
+  .graphite-detail-project-create {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .graphite-detail-project-create-button,
+  .graphite-detail-project-cancel-button {
+    min-height: 40px;
+  }
+
+  .graphite-detail-labels {
+    max-width: 100%;
+  }
+
+  .graphite-attachment-image-grid {
+    max-width: 100%;
+  }
+
+  .graphite-attachment-image-grid.is-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .graphite-attachment-image-grid.is-single .graphite-image-attachment-card {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .graphite-attachment-image-grid.is-single .graphite-image-attachment-img {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .graphite-attachment-item {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+  }
+
+  .graphite-detail-footer {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Complete permanently: own full-width row at top */
+  .graphite-detail-complete-perm {
+    flex: 0 0 100%;
+    order: 0;
+  }
+
+  /* Delete task and actions share the bottom row */
+  .graphite-detail-delete {
+    flex: 0 0 auto;
+    order: 1;
+  }
+
+  .graphite-detail-actions {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    order: 1;
+  }
+
+  .graphite-detail-delete,
+  .graphite-detail-footer .graphite-button {
+    min-height: 40px;
+  }
+
+  .graphite-image-lightbox-backdrop {
+    padding: 16px;
+  }
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-custom-repeat-modal {
+  max-height: calc(100dvh - 24px);
+  max-width: calc(100vw - 24px);
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-custom-repeat-modal .modal-content {
+  max-height: calc(100dvh - 112px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 16px 18px 18px;
+  -webkit-overflow-scrolling: touch;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-repeat-every-row {
+  max-width: 100%;
+  width: 100%;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-repeat-interval-input {
+  flex: 0 0 76px;
+  height: 40px;
+  line-height: 40px;
+  min-height: 40px;
+  width: 76px;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-repeat-freq-select {
+  flex: 1 1 auto;
+  height: 40px;
+  line-height: 40px;
+  min-height: 40px;
+  min-width: 0;
+  width: auto;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-repeat-day-row {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
+  margin-bottom: 8px;
+  max-width: 100%;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-repeat-day-btn {
+  min-height: 40px;
+  min-width: 0;
+  padding: 7px 6px;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root {
+  min-width: 0;
+  overflow: hidden;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-shell {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-sidebar {
+  align-items: center;
+  border-bottom: 1px solid var(--graphite-border-soft);
+  border-right: 0;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: calc(8px + var(--graphite-mobile-safe-top)) 10px 8px;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-nav,
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-sidebar-section {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+  margin-top: 0;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-sidebar-heading {
+  display: none;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-sidebar-heading-row {
+  display: contents;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-sidebar-add-project {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  justify-content: center;
+  margin-top: 0;
+  min-height: 40px;
+  order: 999;
+  padding: 0 10px;
+  width: auto;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-sidebar-add-project-label {
+  display: inline;
+  font-size: 0.85em;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-add-sidebar,
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-nav-button,
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-project-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  grid-template-columns: none;
+  min-height: 40px;
+  width: auto;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-main {
+  overflow-x: hidden;
+  padding: 20px 14px calc(96px + env(safe-area-inset-bottom, 0px));
+  scroll-padding-bottom: calc(260px + env(safe-area-inset-bottom, 0px));
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-root .graphite-main > * {
+  max-width: none;
+  width: 100%;
+}
+
+:where(.is-mobile, .mod-mobile) .modal-container.graphite-modal-detail-container {
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+}
+
+:where(.is-mobile, .mod-mobile) .modal.graphite-modal-detail {
+  border-radius: 0;
+  height: 100dvh;
+  margin: 0;
+  max-height: none;
+  max-width: none;
+  width: 100vw;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-modal {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100dvh;
+  max-height: none;
+  min-height: 0;
+  padding: 0;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-mobile-header {
+  align-items: center;
+  background: var(--graphite-surface);
+  border-bottom: 1px solid var(--graphite-border);
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  min-height: 52px;
+  padding: calc(8px + var(--graphite-mobile-safe-top)) 14px 8px;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-shell {
+  display: block;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: 160px;
+  scroll-padding-bottom: 180px;
+  scroll-padding-top: 80px;
+  -webkit-overflow-scrolling: touch;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-input {
+  scroll-margin-bottom: 180px;
+  scroll-margin-top: 80px;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-main,
+:where(.is-mobile, .mod-mobile) .graphite-detail-side {
+  border-right: 0;
+  overflow: visible;
+  padding: 18px 16px;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-main {
+  padding-top: 18px;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-side {
+  border-top: 1px solid var(--graphite-border);
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-side h3,
+:where(.is-mobile, .mod-mobile) .graphite-detail-close {
+  display: none;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-footer {
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-complete-perm {
+  flex: 0 0 100%;
+  order: 0;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-delete {
+  flex: 0 0 auto;
+  order: 1;
+}
+
+:where(.is-mobile, .mod-mobile) .graphite-detail-actions {
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  order: 1;
+}
+
+.is-hidden {
+  display: none;
+}
+
+/* Wikilink autocomplete dropdown */
+.graphite-wikilink-dropdown {
+  position: fixed;
+  z-index: 9999;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.graphite-wikilink-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: var(--font-ui-small);
+}
+
+.graphite-wikilink-item:hover,
+.graphite-wikilink-item.is-active {
+  background: var(--background-modifier-hover);
+}
+
+.graphite-wikilink-item-name {
+  color: var(--text-normal);
+}
+
+.graphite-wikilink-item-folder {
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+
+/* ── Sub-tasks ─────────────────────────────────────────────────── */
+
+.graphite-subtasks-section {
+  margin-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 12px;
+}
+
+.graphite-subtasks-title {
+  color: var(--graphite-text);
+  font-size: 14px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.graphite-subtasks-count {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.graphite-subtasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.graphite-subtask-row {
+  align-items: flex-start;
+  border-bottom: 1px solid var(--background-modifier-border);
+  display: flex;
+  gap: 8px;
+  padding: 8px 0;
+  position: relative;
+}
+
+.graphite-subtask-row:first-child {
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.graphite-subtask-checkbox {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.graphite-subtask-drag-handle {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  box-shadow: none;
+  color: var(--text-faint);
+  cursor: grab;
+  display: inline-flex;
+  flex: 0 0 20px;
+  font: inherit;
+  font-size: 13px;
+  height: 24px;
+  justify-content: center;
+  line-height: 1;
+  margin-top: 1px;
+  opacity: 0;
+  padding: 0;
+  touch-action: none;
+  transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease;
+}
+
+.graphite-subtask-row:hover .graphite-subtask-drag-handle,
+.graphite-subtask-drag-handle:focus-visible {
+  opacity: 1;
+}
+
+.graphite-subtask-drag-handle:hover {
+  background: var(--graphite-hover);
+  color: var(--graphite-text);
+}
+
+.graphite-subtask-drag-handle:active {
+  cursor: grabbing;
+}
+
+.graphite-subtask-row.is-dragging {
+  opacity: 0.5;
+}
+
+.graphite-subtask-row.is-drop-before::before,
+.graphite-subtask-row.is-drop-after::after {
+  background: var(--graphite-accent);
+  border-radius: 999px;
+  content: "";
+  height: 2px;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  z-index: 2;
+}
+
+.graphite-subtask-row.is-drop-before::before {
+  top: -1px;
+}
+
+.graphite-subtask-row.is-drop-after::after {
+  bottom: -1px;
+}
+
+.graphite-subtask-drag-preview {
+  background: var(--graphite-surface);
+  border: 1px solid var(--graphite-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+  opacity: 0.96;
+  padding: 8px 10px;
+  pointer-events: none;
+}
+
+.graphite-subtask-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.graphite-subtask-title-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+@media (pointer: coarse) {
+  .graphite-subtask-title-line {
+    flex-wrap: nowrap;
+  }
+}
+
+.graphite-subtask-title {
+  cursor: pointer;
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+  line-height: 1.4;
+}
+
+.graphite-subtask-title:hover {
+  color: var(--text-accent);
+}
+
+.graphite-subtask-title.is-completed {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.graphite-subtask-delete {
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 1em;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.1s, color 0.1s;
+  user-select: none;
+  flex-shrink: 0;
+  margin-left: 6px;
+  padding: 2px 6px;
+}
+
+.graphite-subtask-row:hover .graphite-subtask-delete {
+  opacity: 1;
+}
+
+.graphite-subtask-delete:hover {
+  color: var(--text-error);
+}
+
+/* Always visible on mobile/touch */
+@media (pointer: coarse) {
+  .graphite-subtask-drag-handle {
+    height: 32px;
+    opacity: 0.5;
+    width: 28px;
+  }
+
+  .graphite-subtask-delete {
+    opacity: 0.5;
+    margin-left: auto;
+    padding: 4px 10px;
+    font-size: 1.1em;
+  }
+}
+
+
+.graphite-subtask-due {
+  font-size: 0.8em;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.graphite-subtask-add-row {
+  margin-top: 4px;
+}
+
+.graphite-detail-modal .graphite-subtask-add-btn {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.graphite-subtask-add-btn {
+  background: none;
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  padding: 4px 0;
+  border-radius: 0;
+}
+
+.graphite-subtask-add-btn:hover {
+  color: var(--text-accent);
+}
+
+.graphite-detail-modal .graphite-subtask-input {
+  border-radius: 6px;
+}
+
+.graphite-subtask-input {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 6px;
+  margin-bottom: 0;
+  display: block;
+}
+
+.graphite-subtask-btn-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.graphite-subtask-chips {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0 6px;
+  flex-wrap: wrap;
+}
+
+.graphite-detail-modal .graphite-subtask-chip {
+  display: inline-flex;
+  padding: 0 10px;
+  height: 28px;
+  min-height: unset;
+  max-height: 28px;
+  font-size: 12px;
+}
+
+.graphite-subtask-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  height: 28px;
+  min-height: unset;
+  max-height: 28px;
+  line-height: 28px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--graphite-border);
+  background: var(--graphite-surface);
+  cursor: pointer;
+  color: var(--graphite-muted);
+  box-shadow: none;
+  white-space: nowrap;
+}
+
+.graphite-subtask-chip:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.graphite-subtask-chip.is-active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: transparent;
+}
+
+.graphite-subtask-chip.is-open {
+  background: var(--background-modifier-hover);
+}
+
+.graphite-subtask-expand-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+  align-items: center;
+}
+
+.graphite-subtask-expand-panel.is-hidden {
+  display: none;
+}
+
+.graphite-detail-modal .graphite-subtask-preset {
+  min-height: unset;
+}
+
+.graphite-subtask-preset {
+  padding: 0 10px;
+  height: 28px;
+  min-height: unset;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--background-modifier-border);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+  box-shadow: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+.graphite-subtask-preset:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.graphite-subtask-preset.is-active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.graphite-subtask-preset-date {
+  padding: 2px 6px;
+  font-size: var(--font-ui-small);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  max-width: 36px;
+}
+
+.graphite-subtask-meta {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.graphite-subtask-priority {
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.graphite-subtask-chip-clear {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+  font-size: 1em;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.graphite-subtask-chip-clear:hover {
+  opacity: 1;
+}
+
+/* ── Sub-task context bar ─────────────────────────────────────── */
+
+.graphite-subtask-context-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-left: 3px solid var(--background-modifier-border);
+  background: var(--background-secondary);
+  border-radius: 0 4px 4px 0;
+}
+
+.graphite-subtask-context-arrow {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+.graphite-subtask-context-label {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+.graphite-detail-modal .graphite-subtask-context-parent,
+.graphite-subtask-context-parent {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-accent);
+  font-size: var(--font-ui-small);
+  font-weight: 500;
+  text-align: left;
+}
+
+.graphite-subtask-context-parent:hover {
+  text-decoration: underline;
+}
+
+/* ── Parent field in side panel ───────────────────────────────── */
+
+.graphite-detail-modal .graphite-subtask-parent-field,
+.graphite-subtask-parent-field {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-accent);
+  font-size: var(--font-ui-small);
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.graphite-subtask-parent-field:hover {
+  text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------ *
+ * Terminal Workbench identity: "manifest" labels + focus ring        *
+ * Structural labels use monospace as a UI voice — small, uppercase,  *
+ * tracked, muted. Content (task titles, descriptions, project/label  *
+ * names) and the main view title stay in the interface font.         *
+ * Colors remain theme-driven.                                        *
+ * ------------------------------------------------------------------ */
+.graphite-detail-label,
+.graphite-section-header h2,
+.graphite-attachments-header h3,
+.graphite-filter-section h2,
+.graphite-activity-panel-header,
+.graphite-activity-feed-header,
+.graphite-daily-note-header,
+.graphite-daily-codeblock-header,
+.graphite-daily-codeblock-title {
+  color: var(--graphite-muted);
+  font-family: var(--font-monospace);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+/* Field labels sit closest to inputs — the quietest manifest step. */
+.graphite-detail-label {
+  font-size: 10.5px;
+}
+
+/* Align the dropdown section label with the manifest idiom. */
+.graphite-dropdown-section {
+  font-family: var(--font-monospace);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+}
+
+/* Accent focus ring — signal carried by color, no glassy effects. */
+.graphite-root :focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
