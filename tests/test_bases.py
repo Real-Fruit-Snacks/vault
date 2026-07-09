@@ -290,13 +290,6 @@ class RenderTests(unittest.TestCase):
         self.assertIn('class="internal-link"', self.html)
         self.assertNotIn("Link(target=", self.html)
 
-    def test_formula_column_empty_with_parse_warning(self):
-        self.assertIn("<th>pp</th>", self.html)
-        # the "pp" formula's expression ("1 +") never parses, so parse_base
-        # must warn about it, and every formula.pp cell renders empty.
-        self.assertTrue(any("formula" in w.lower() and "pp" in w for w in self.warnings))
-        self.assertIn("<td></td>", self.html)
-
     def test_tabs_and_hidden_views(self):
         self.assertIn('class="base-tabs"', self.html)
         self.assertIn('data-view="Queue"', self.html)
@@ -372,6 +365,31 @@ class RenderNewFeaturesTests(VaultCase):
         html = bases.render_base(base, vault, LinkResolver(vault), "B.html", [])
         self.assertIn("base-list", html)
         self.assertIn("A", html)
+
+    def test_formula_column_empty_with_parse_warning(self):
+        from ssg.links import LinkResolver
+        vault = scan_vault(self.make_vault({"A.md": "---\nprice: 5\n---\nx"}), SiteConfig())
+        warnings = []
+        base = bases.parse_base(
+            'formulas:\n  bad: "1 +"\n'
+            "views:\n  - type: table\n    name: V\n    order: [formula.bad]\n",
+            "B.base", warnings)
+        # an unparseable formula warns at parse time
+        self.assertTrue(any("bad" in w for w in warnings), warnings)
+        html = bases.render_base(base, vault, LinkResolver(vault), "B.html", [])
+        # the single formula column renders an empty cell (no value leaked)
+        self.assertIn("<tbody><tr><td></td></tr></tbody>", html)
+
+    def test_list_chip_escaped_once(self):
+        from ssg.links import LinkResolver
+        vault = scan_vault(self.make_vault(
+            {"A.md": "---\ngenre: [\"A & B\"]\n---\nx"}), SiteConfig())
+        base = bases.parse_base(
+            "views:\n  - type: table\n    name: V\n    order: [file.name, genre]\n",
+            "B.base", [])
+        html = bases.render_base(base, vault, LinkResolver(vault), "B.html", [])
+        self.assertIn("A &amp; B", html)          # escaped once
+        self.assertNotIn("A &amp;amp; B", html)    # not double-escaped
 
 
 class BaseEmbedTests(unittest.TestCase):

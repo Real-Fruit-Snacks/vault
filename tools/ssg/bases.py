@@ -353,8 +353,10 @@ def _cell_html(value, prop, resolver, output_path, from_path):
             if prop in ("tags", "file.tags"):
                 href = urls.rel_href(output_path, urls.tag_output_path(str(item)))
                 chips.append(_chip(f"#{item}", href))
+            elif isinstance(item, Link):
+                chips.append(_chip(item.display or item.target))
             else:
-                chips.append(_chip(html_mod.escape(str(item)) if not isinstance(item, Link) else (item.display or item.target)))
+                chips.append(_chip(item))
         return f'<span class="base-chips">{"".join(chips)}</span>'
     if isinstance(value, float):
         return html_mod.escape(("%g" % value))
@@ -381,12 +383,6 @@ def _col_label(base, col):
     return col
 
 
-def _cell_value(col, ctx):
-    if col == "file.name":
-        return ("__name__", None)
-    return ("__value__", ctx.value(col))
-
-
 def _row_cells(base, cols, path, ctx, vault, resolver, output_path):
     cells = []
     for col in cols:
@@ -397,9 +393,6 @@ def _row_cells(base, cols, path, ctx, vault, resolver, output_path):
         else:
             cells.append(f"<td>{_cell_html(ctx.value(col), col, resolver, output_path, path)}</td>")
     return "".join(cells)
-
-
-_AGGS = {"count", "sum", "average", "avg", "min", "max", "empty", "nonempty", "unique"}
 
 
 def _summarize(agg, values):
