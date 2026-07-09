@@ -61,6 +61,19 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(be.parse('file.hasTag("book")'),
                          be.Method(be.Ref("file"), "hasTag", [be.Lit("book")]))
 
+    def test_namespaced_field_chain(self):
+        self.assertEqual(be.parse("file.tags.length"),
+                         be.Field(be.Ref("file.tags"), "length"))
+        self.assertEqual(be.parse("note.age.year"),
+                         be.Field(be.Ref("note.age"), "year"))
+        # a genuine call still wins over field-extension
+        self.assertEqual(be.parse('file.tags.contains("x")'),
+                         be.Method(be.Ref("file.tags"), "contains", [be.Lit("x")]))
+
+    def test_string_escapes_preserve_non_ascii(self):
+        self.assertEqual(be.parse('"a\\tb"'), be.Lit("a\tb"))
+        self.assertEqual(be.parse('"café\\tx"'), be.Lit("café\tx"))
+
     def test_syntax_error_returns_none(self):
         self.assertIsNone(be.parse("1 +"))
         self.assertIsNone(be.parse("(1 + 2"))

@@ -131,7 +131,7 @@ class _Parser:
             if self.peek()[1] == "(":
                 args = self.parse_args()
                 node = Method(node, name, args)
-            elif isinstance(node, Ref) and node.name.split(".")[0] in _NAMESPACE_ROOTS:
+            elif isinstance(node, Ref) and node.name in _NAMESPACE_ROOTS:
                 # extend a dotted ref: file.name, note.age, formula.ppu
                 node = Ref(node.name + "." + name)
             else:
@@ -168,9 +168,24 @@ class _Parser:
         raise _ParseError(f"unexpected {val!r}")
 
 
+_ESCAPES = {"n": "\n", "t": "\t", "r": "\r", '"': '"', "'": "'", "\\": "\\"}
+
+
 def _unquote(tok):
     body = tok[1:-1]
-    return body.encode().decode("unicode_escape") if "\\" in body else body
+    if "\\" not in body:
+        return body
+    out, i = [], 0
+    while i < len(body):
+        c = body[i]
+        if c == "\\" and i + 1 < len(body):
+            nxt = body[i + 1]
+            out.append(_ESCAPES.get(nxt, nxt))
+            i += 2
+        else:
+            out.append(c)
+            i += 1
+    return "".join(out)
 
 
 def parse(text):
