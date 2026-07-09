@@ -3,6 +3,9 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from . import basefuncs
+from .basevalue import BaseError, binary, compare, truthy
+
 
 # ---- AST -------------------------------------------------------------------
 
@@ -201,3 +204,77 @@ def parse(text):
         return node
     except _ParseError:
         return None
+
+
+def evaluate(node, ctx):
+    """Evaluate an AST against ctx; return None on any evaluation error.
+
+    This is the per-expression graceful-degradation boundary: it catches not
+    just BaseError but the ordinary exceptions an unguarded library edge can
+    raise (bad args, wrong types), so no base expression can ever crash a
+    build. It deliberately does NOT catch KeyboardInterrupt/SystemExit."""
+    try:
+        return _eval(node, ctx)
+    except (BaseError, ValueError, TypeError, IndexError, KeyError,
+            AttributeError, ArithmeticError, OverflowError):
+        return None
+
+
+def _eval(node, ctx):
+    if node is None:
+        return None
+    if isinstance(node, Lit):
+        return node.value
+    if isinstance(node, Ref):
+        return ctx.resolve(node.name)
+    if isinstance(node, Unary):
+        if node.op == "!":
+            return not truthy(_eval(node.node, ctx))
+        return binary("-", 0, _eval(node.node, ctx))  # unary minus
+    if isinstance(node, Binary):
+        if node.op == "&&":
+            return truthy(_eval(node.left, ctx)) and truthy(_eval(node.right, ctx))
+        if node.op == "||":
+            return truthy(_eval(node.left, ctx)) or truthy(_eval(node.right, ctx))
+        left, right = _eval(node.left, ctx), _eval(node.right, ctx)
+        if node.op in ("==", "!=", ">", "<", ">=", "<="):
+            return compare(node.op, left, right)
+        return binary(node.op, left, right)
+    if isinstance(node, Call):
+        args = [_eval(a, ctx) for a in node.args]
+        return basefuncs.call_global(node.name, args, ctx.build_now)
+    if isinstance(node, Method):
+        # file.hasTag(...) etc.: check the ctx file hook BEFORE evaluating the
+        # receiver, since Ref("file") is not itself a value (would raise).
+        fm = getattr(ctx, "file_method", None)
+        if fm is not None and _is_file_ref(node.recv):
+            handled, result = fm(node.name, [_eval(a, ctx) for a in node.args])
+            if handled:
+                return result
+        recv = _eval(node.recv, ctx)
+        args = [_eval(a, ctx) for a in node.args]
+        return basefuncs.call_method(recv, node.name, args)
+    if isinstance(node, Field):
+        recv = _eval(node.recv, ctx)
+        return basefuncs.get_field(recv, node.name)
+    raise BaseError("unknown node")
+
+
+def _is_file_ref(node):
+    return isinstance(node, Ref) and node.name == "file"
+
+
+def compile(text):
+    """Parse once; return callable(ctx) -> value, or None if it doesn't parse."""
+    node = parse(text)
+    if node is None:
+        return None
+    return lambda ctx: evaluate(node, ctx)
+
+
+def as_predicate(text):
+    """Return callable(ctx) -> bool (truthiness), or None if it doesn't parse."""
+    node = parse(text)
+    if node is None:
+        return None
+    return lambda ctx: truthy(evaluate(node, ctx))
