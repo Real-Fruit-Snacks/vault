@@ -432,21 +432,66 @@ def note_header(note: Note, output_path: str, updated: str = "") -> str:
             f"{meta}</header>")
 
 
-def tag_page_content(tag: str, note_paths, vault: Vault, output_path: str) -> str:
-    items = "".join(
-        f'<li><a href="{urls.rel_href(output_path, urls.note_output_path(p))}">'
-        f"{html_mod.escape(vault.notes[p].title)}</a></li>"
-        for p in sorted(note_paths, key=str.lower))
-    return (f'<h1><span class="manifest-label">tag</span> #{html_mod.escape(tag)}</h1>'
-            f'<ul class="note-list">{items}</ul>')
+def _note_row(path: str, vault: Vault, output_path: str) -> str:
+    """A note entry: title + muted folder path, no date. Mirrors the homepage
+    'recently updated' row (minus the date) so tag pages share its styling."""
+    href = urls.rel_href(output_path, urls.note_output_path(path))
+    title = vault.notes[path].title
+    folder = path.rsplit("/", 1)[0] if "/" in path else ""
+    crumb = (f'<span class="home-recent-path">{html_mod.escape(folder)}</span>'
+             if folder else "")
+    return (f'<li><a class="home-recent-link" href="{href}">'
+            f'<span class="home-recent-title">{html_mod.escape(title)}</span>'
+            f"{crumb}</a></li>")
 
 
-def tags_index_content(tag_map: dict, output_path: str) -> str:
-    items = "".join(
-        f'<li><a class="tag" href="{urls.rel_href(output_path, urls.tag_output_path(t))}">'
-        f'#{html_mod.escape(t)}</a> <span class="manifest-label">{len(paths)}</span></li>'
-        for t, paths in sorted(tag_map.items(), key=lambda kv: kv[0].lower()))
-    return f'<h1>Tags</h1><ul class="note-list">{items}</ul>'
+def tag_page_content(node, vault: Vault, output_path: str) -> str:
+    n = len(node.notes)
+    count = (f'<div class="tag-count manifest-label">'
+             f'{n} note{"" if n == 1 else "s"}</div>')
+    children = ""
+    if node.children:
+        chips = "".join(
+            f'<a class="tag" href="{urls.rel_href(output_path, urls.tag_output_path(c.path))}">'
+            f'#{html_mod.escape(c.path)}'
+            f'<span class="home-count">{len(c.notes)}</span></a>'
+            for c in node.children)
+        children = (f'<section class="tag-children-block">'
+                    f'<span class="manifest-label section-head">sub-tags</span>'
+                    f'<div class="tag-children">{chips}</div></section>')
+    rows = "".join(
+        _note_row(p, vault, output_path)
+        for p in sorted(node.notes, key=lambda p: vault.notes[p].title.lower()))
+    return (f'<h1><span class="manifest-label">tag</span> '
+            f'#{html_mod.escape(node.path)}</h1>'
+            f'{count}{children}'
+            f'<ul class="home-recent tag-notes">{rows}</ul>')
+
+
+def _tag_tree_descendants(node, output_path: str) -> str:
+    """Flatten a node's descendants (all levels) into full-path chips."""
+    chips = []
+    for child in node.children:
+        chips.append(
+            f'<a class="tag" href="{urls.rel_href(output_path, urls.tag_output_path(child.path))}">'
+            f'#{html_mod.escape(child.path)}'
+            f'<span class="home-count">{len(child.notes)}</span></a>')
+        chips.append(_tag_tree_descendants(child, output_path))
+    return "".join(chips)
+
+
+def tags_index_content(roots, output_path: str) -> str:
+    sections = []
+    for root in roots:
+        head = (f'<a class="manifest-label section-head" '
+                f'href="{urls.rel_href(output_path, urls.tag_output_path(root.path))}">'
+                f'{html_mod.escape(root.name)}'
+                f'<span class="home-count">{len(root.notes)}</span></a>')
+        descendants = _tag_tree_descendants(root, output_path)
+        body = (f'<div class="tag-tree-children">{descendants}</div>'
+                if descendants else "")
+        sections.append(f'<section class="tag-tree">{head}{body}</section>')
+    return f'<h1>Tags</h1>{"".join(sections)}'
 
 
 def home_hero(config) -> str:
@@ -458,7 +503,7 @@ def home_hero(config) -> str:
             f'<h1 class="home-hero-title">{title}</h1>{desc}</header>')
 
 
-def home_sections(vault: Vault, dates: dict, tag_map: dict, tools,
+def home_sections(vault: Vault, dates: dict, tag_roots, tools,
                   output_path: str, home_note=None, canvases=(), bases=()) -> str:
     """Build-time homepage sections: recently updated notes, tag chips, tools.
 
@@ -490,10 +535,10 @@ def home_sections(vault: Vault, dates: dict, tag_map: dict, tools,
                 f'<span class="home-date">{html_mod.escape(d)}</span></li>')
         sections.append(_home_section(
             "recently updated", "", f'<ul class="home-recent">{"".join(rows)}</ul>', output_path))
-    if tag_map:
+    if tag_roots:
         sections.append(_home_section(
             "tags", "_tags/index.html",
-            f'<div class="home-tags">{_tag_chips(tag_map, output_path)}</div>', output_path))
+            f'<div class="home-tags">{_tag_chips(tag_roots, output_path)}</div>', output_path))
     if tools:
         items = []
         for title, tool_output, icon in tools:
@@ -517,11 +562,11 @@ def _home_section(label: str, index_path: str, body: str, output_path: str) -> s
     return f'<section class="home-section">{head}{body}</section>'
 
 
-def _tag_chips(tag_map: dict, output_path: str) -> str:
+def _tag_chips(roots, output_path: str) -> str:
     return "".join(
-        f'<a class="tag" href="{urls.rel_href(output_path, urls.tag_output_path(t))}">'
-        f'#{html_mod.escape(t)}<span class="home-count">{len(paths)}</span></a>'
-        for t, paths in sorted(tag_map.items(), key=lambda kv: kv[0].lower()))
+        f'<a class="tag" href="{urls.rel_href(output_path, urls.tag_output_path(r.path))}">'
+        f'#{html_mod.escape(r.path)}<span class="home-count">{len(r.notes)}</span></a>'
+        for r in roots)
 
 
 def _notes_index_item(p: str, vault: Vault, output_path: str) -> str:
@@ -539,7 +584,7 @@ def _notes_index_item(p: str, vault: Vault, output_path: str) -> str:
     return f'<li><a href="{href}">{html_mod.escape(vault.notes[p].title)}</a></li>'
 
 
-def notes_index_content(vault: Vault, tag_map: dict, output_path: str, home_note=None,
+def notes_index_content(vault: Vault, tag_roots, output_path: str, home_note=None,
                         canvases=(), bases=()) -> str:
     """The notes screen: every folder with its notes, then the tag cloud."""
     groups: dict = {}
@@ -558,10 +603,10 @@ def notes_index_content(vault: Vault, tag_map: dict, output_path: str, home_note
             f'<section class="notes-folder">'
             f'<span class="manifest-label section-head folder-head">{label}</span>'
             f'<ul class="note-list">{items}</ul></section>')
-    if tag_map:
+    if tag_roots:
         sections.append(
             f'<section class="notes-folder">'
             f'<a class="manifest-label section-head" '
             f'href="{urls.rel_href(output_path, "_tags/index.html")}">tags</a>'
-            f'<div class="home-tags">{_tag_chips(tag_map, output_path)}</div></section>')
+            f'<div class="home-tags">{_tag_chips(tag_roots, output_path)}</div></section>')
     return f"<h1>Notes</h1>{''.join(sections)}"

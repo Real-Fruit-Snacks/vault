@@ -729,6 +729,19 @@ a.section-head:hover { color: var(--twb-accent); text-decoration: none; }
   mask: var(--icon-folder) no-repeat center / contain;
 }
 
+/* --- tag pages --- */
+.tag-count { margin: 2px 0 18px; }
+.tag-children-block { margin: 0 0 26px; }
+.tag-children,
+.tag-tree-children { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-children { margin-top: 8px; }
+.tag-notes { margin-top: 4px; }
+.tag-tree { margin-top: 24px; }
+.tag-tree-children {
+  padding: 12px 0 4px 14px; margin-left: 2px;
+  border-left: 1px solid var(--twb-border);
+}
+
 /* --- canvas pages --- */
 #canvas-view {
   position: relative; overflow: hidden; touch-action: none;

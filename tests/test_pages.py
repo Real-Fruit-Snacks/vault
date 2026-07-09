@@ -1,6 +1,7 @@
 import unittest
 
 from ssg import pages
+from ssg import tags
 from ssg.config import SiteConfig
 from ssg.vault import scan_vault
 from tests.helpers import VaultCase
@@ -275,12 +276,37 @@ class ChromeTests(VaultCase):
         self.assertIn("updated 2026-07-05", header)
         self.assertNotIn("note-updated", pages.note_header(vault.notes["A.md"], "A.html"))
 
-    def test_tag_page_and_index(self):
+    def test_tag_page_leaf(self):
         vault = scan_vault(self.make_vault({"A.md": "#alpha", "B.md": "#alpha"}), SiteConfig())
-        content = pages.tag_page_content("alpha", {"A.md", "B.md"}, vault, "_tags/alpha.html")
+        roots = tags.build_tag_tree({"alpha": {"A.md", "B.md"}})
+        content = pages.tag_page_content(roots[0], vault, "_tags/alpha.html")
+        self.assertIn("#alpha", content)
+        self.assertIn("2 notes", content)
         self.assertIn('href="../A.html"', content)
-        index = pages.tags_index_content({"alpha": {"A.md", "B.md"}}, "_tags/index.html")
-        self.assertIn("#alpha", index)
+        self.assertIn("home-recent-title", content)   # title + folder row styling
+        self.assertNotIn("sub-tags", content)          # leaf has no children block
+
+    def test_tag_page_parent_has_subtags(self):
+        vault = scan_vault(
+            self.make_vault({"A.md": "#net/vpn", "B.md": "#net/dns"}), SiteConfig())
+        roots = tags.build_tag_tree({"net/vpn": {"A.md"}, "net/dns": {"B.md"}})
+        net = roots[0]
+        content = pages.tag_page_content(net, vault, "_tags/net.html")
+        self.assertIn("#net", content)
+        self.assertIn("2 notes", content)              # aggregated count
+        self.assertIn("sub-tags", content)
+        self.assertIn('href="net/dns.html"', content)  # child link, relative to _tags/net.html
+        self.assertIn("#net/dns", content)             # full-path child chip
+
+    def test_tags_index_grouped_tree(self):
+        roots = tags.build_tag_tree(
+            {"net": {"A.md"}, "net/vpn": {"B.md"}, "git": {"C.md"}})
+        index = pages.tags_index_content(roots, "_tags/index.html")
+        self.assertIn("<h1>Tags</h1>", index)
+        self.assertIn('class="tag-tree"', index)
+        self.assertIn(">git<", index)                  # root header label
+        self.assertIn("#net/vpn", index)               # descendant chip, full path
+        self.assertIn('href="net/vpn.html"', index)    # relative to _tags/index.html
 
 
 if __name__ == "__main__":
