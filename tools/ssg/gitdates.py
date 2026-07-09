@@ -31,3 +31,28 @@ def note_dates(vault_root: Path) -> dict:
         elif line and current:
             dates.setdefault(line.strip(), current)
     return dates
+
+
+def note_dates_first(vault_root: Path) -> dict:
+    """Map vault-relative posix paths to the ISO date (YYYY-MM-DD) of their
+    FIRST (earliest) commit. Returns {} on any failure (same contract as
+    note_dates)."""
+    try:
+        proc = subprocess.run(
+            ["git", "-c", "core.quotepath=false", "log", "--reverse", "--relative",
+             "--format=%x00%cs", "--name-only"],
+            cwd=str(vault_root), capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=60)
+    except (OSError, subprocess.TimeoutExpired):
+        return {}
+    if proc.returncode != 0:
+        return {}
+    dates, current = {}, None
+    for line in proc.stdout.splitlines():
+        if line.startswith("\x00"):
+            current = line[1:].strip()
+            if not _DATE_RE.match(current):
+                current = None
+        elif line and current:
+            dates.setdefault(line.strip(), current)   # first (earliest) wins
+    return dates

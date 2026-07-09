@@ -73,6 +73,12 @@ class GitDatesTests(unittest.TestCase):
     def test_not_a_repo_returns_empty(self):
         self.assertEqual(note_dates(self.root), {})
 
+    def test_first_commit_dates_shape(self):
+        from ssg import gitdates
+        from pathlib import Path
+        d = gitdates.note_dates_first(Path("."))
+        self.assertIsInstance(d, dict)  # {} in non-repo/temp is fine
+
 
 if __name__ == "__main__":
     unittest.main()

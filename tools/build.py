@@ -147,6 +147,24 @@ def main(argv=None) -> int:
     # (which is day-granular and reflects when you committed, not edited).
     # `orders` carries a finer sort key so same-day notes order correctly.
     dates, date_orders = updated.resolve(vault, gitdates.note_dates(vault_root))
+
+    import datetime as _dt
+    _first = gitdates.note_dates_first(vault_root)
+    _last = gitdates.note_dates(vault_root)
+
+    def _to_date(s):
+        try:
+            return _dt.date.fromisoformat(s)
+        except (ValueError, TypeError):
+            return None
+
+    base_filedata = {
+        "ctime": {p: d for p, d in ((p, _to_date(s)) for p, s in _first.items()) if d},
+        "mtime": {p: d for p, d in ((p, _to_date(s)) for p, s in _last.items()) if d},
+        "size": {p: len(vault.notes[p].body.encode("utf-8")) for p in vault.notes},
+    }
+    base_build_now = _dt.datetime.now()
+
     resolver = LinkResolver(vault)
     backlinks = build_backlinks(vault, resolver)
     renderer = NoteRenderer(vault, resolver)
@@ -188,7 +206,8 @@ def main(argv=None) -> int:
     base_paths = sorted(bases)
     renderer.base_provider = lambda rel, view_name, out_path: (
         basesmod.render_base(bases[rel], vault, resolver, out_path, vault.warnings,
-                             view=view_name or None, embed=True)
+                             view=view_name or None, embed=True,
+                             filedata=base_filedata, build_now=base_build_now)
         if rel in bases else None)
 
     if out.exists():
@@ -343,7 +362,8 @@ def main(argv=None) -> int:
 
     for rel in base_paths:
         out_path = urls.base_output_path(rel)
-        body = basesmod.render_base(bases[rel], vault, resolver, out_path, vault.warnings)
+        body = basesmod.render_base(bases[rel], vault, resolver, out_path, vault.warnings,
+                                    filedata=base_filedata, build_now=base_build_now)
         write(out / out_path, pages.render_page(
             config=config, output_path=out_path, page_title=bases[rel].title,
             content_html=(f'<header class="note-header"><h1>'

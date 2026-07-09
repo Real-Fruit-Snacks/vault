@@ -83,8 +83,8 @@ class BuildTests(unittest.TestCase):
         js = self.read("search-index.js")
         self.assertTrue(js.startswith("window.TWB_SEARCH_INDEX="))
         self.assertIn("Site Plan", js)
-        # the boot splash reads this exact note count (fixture has 6 published)
-        self.assertIn("window.TWB_NOTE_COUNT=6;", js)
+        # the boot splash reads this exact note count (fixture has 8 published)
+        self.assertIn("window.TWB_NOTE_COUNT=8;", js)
 
     def test_search_index_includes_typed_tool_entries(self):
         js = self.read("search-index.js")
@@ -189,7 +189,8 @@ class BuildTests(unittest.TestCase):
         payload = json.loads(js[len("window.TWB_GRAPH="):-1])
         nodes = [n["url"] for n in payload["nodes"]]
         self.assertEqual(nodes,
-                         ["Daily/Log.html", "Home.html", "Library/Book A.html",
+                         ["Catalog/Gizmo.html", "Catalog/Widget.html",
+                          "Daily/Log.html", "Home.html", "Library/Book A.html",
                           "Library/Book B.html", "Library/Shelf.html",
                           "Projects/Site Plan.html"])
         home_i, log_i, plan_i = nodes.index("Home.html"), nodes.index("Daily/Log.html"), \
@@ -300,6 +301,12 @@ class BuildTests(unittest.TestCase):
     def test_bases_asset_shipped(self):
         self.assertTrue((self.out / "site-assets" / "bases.js").is_file())
 
+    def test_demo_base_renders_formula_group_summary(self):
+        html = self.read("Bases/Catalog.html")
+        self.assertIn("base-table", html)
+        self.assertIn("base-group-head", html)   # grouped by status
+        self.assertIn("base-summary", html)       # a summary footer
+
     def test_config_title_and_banner_applied(self):
         html = self.read("Home.html")
         self.assertIn("<title>Fixture Home · Fixture Vault</title>", html)
@@ -356,11 +363,11 @@ class BuildTests(unittest.TestCase):
         self.assertIn("<updated>", xml)
 
     def test_note_prev_next_nav(self):
-        # Daily/Log is first in the reading order: a "next" link, no "previous".
-        log = self.read("Daily/Log.html")
-        self.assertIn('class="note-nav"', log)
-        self.assertIn("note-nav-gap", log)
-        self.assertIn("note-nav-next", log)
+        # Catalog/Gizmo is first in the reading order: a "next" link, no "previous".
+        gizmo = self.read("Catalog/Gizmo.html")
+        self.assertIn('class="note-nav"', gizmo)
+        self.assertIn("note-nav-gap", gizmo)
+        self.assertIn("note-nav-next", gizmo)
         # the home note is out of the chain, so index.html has no prev/next
         self.assertNotIn('class="note-nav"', self.read("index.html"))
 

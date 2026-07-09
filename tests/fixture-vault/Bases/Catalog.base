@@ -1,0 +1,23 @@
+filters: file.hasTag("gadget")
+formulas:
+  total: "(price * qty)"
+  label: 'status.title() + ": " + file.basename'
+properties:
+  formula.total:
+    displayName: "Line total"
+views:
+  - type: table
+    name: Catalog
+    order: [file.name, status, price, qty, formula.total]
+    sort:
+      - property: price
+        direction: DESC
+    groupBy:
+      property: status
+      direction: ASC
+    summaries:
+      price: Average
+      formula.total: Sum
+  - type: list
+    name: Quick list
+    order: [file.name, formula.label]

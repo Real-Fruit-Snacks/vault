@@ -8,7 +8,7 @@ whose name starts with `_` (e.g. `_drafts/`), which is treated as private and
 never published. Wikilinks, embeds, callouts,
 task lists, Mermaid diagrams, tags, backlinks, and client-side search all
 work. Obsidian canvases (`.canvas`) publish as read-only pan-and-zoom pages,
-and Obsidian bases (`.base`) publish as build-time table and card views.
+and Obsidian bases (`.base`) publish as build-time table, card, and list views with formulas, filters, grouping, and summaries.
 
 The site ships with an optional toolbox of utilities (encoders, calculators,
 reference tables, command builders) under `Tools`.
