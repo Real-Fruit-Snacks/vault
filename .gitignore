@@ -4,6 +4,9 @@ __pycache__/
 _vendor_dl/
 .claude/
 .superpowers/
+# Internal design/planning docs (superpowers specs & plans) — kept local only,
+# never published. Ignored so the Obsidian auto-backup plugin can't re-add them.
+docs/
 
 # Obsidian per-machine UI state and caches (change constantly; noise for sync)
 Notes/.obsidian/workspace.json
