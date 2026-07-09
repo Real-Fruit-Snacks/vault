@@ -46,6 +46,34 @@ class CtxTests(VaultCase):
         self.assertEqual(ctx.resolve("formula.double"), 8)
         self.assertIsNone(ctx.resolve("formula.loop"))  # cycle -> null
 
+    def test_file_method_dispatch_via_expr(self):
+        from ssg import baseexpr
+        ctx = self.ctx({
+            "Folder/A.md": "---\ntags: [book]\n---\nsee [[B]]",
+            "Folder/B.md": "x",
+        }, "Folder/A.md")
+        self.assertTrue(baseexpr.evaluate(baseexpr.parse('file.inFolder("Folder")'), ctx))
+        self.assertFalse(baseexpr.evaluate(baseexpr.parse('file.inFolder("Other")'), ctx))
+        self.assertTrue(baseexpr.evaluate(baseexpr.parse('file.hasLink("B")'), ctx))
+        self.assertFalse(baseexpr.evaluate(baseexpr.parse('file.hasLink("Nope")'), ctx))
+        self.assertTrue(baseexpr.evaluate(baseexpr.parse('file.hasProperty("tags")'), ctx))
+        self.assertFalse(baseexpr.evaluate(baseexpr.parse('file.hasProperty("nope")'), ctx))
+
+    def test_file_aslink_returns_link(self):
+        from ssg.basevalue import Link
+        ctx = self.ctx({"A.md": "x"}, "A.md")
+        handled, val = ctx.file_method("asLink", ["Display Text"])
+        self.assertTrue(handled)
+        self.assertIsInstance(val, Link)
+        self.assertEqual(val.display, "Display Text")
+
+    def test_hastag_hierarchical_match(self):
+        from ssg import baseexpr
+        ctx = self.ctx({"A.md": "---\ntags: [book/scifi]\n---\nx"}, "A.md")
+        self.assertTrue(baseexpr.evaluate(baseexpr.parse('file.hasTag("book/scifi")'), ctx))
+        # parent-tag query also matches the more specific child tag
+        self.assertTrue(baseexpr.evaluate(baseexpr.parse('file.hasTag("book")'), ctx))
+
 
 class EvaluateTests(VaultCase):
     def _eval(self, files, base_yaml):

@@ -3,12 +3,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ssg import urls
+from ssg import bases, urls
 from ssg.bases import parse_base, BaseView, NoteCtx, evaluate, render_base
-from ssg.config import load_config
+from ssg.config import load_config, SiteConfig
 from ssg.links import LinkResolver
 from ssg.obsidian import NoteRenderer
 from ssg.vault import scan_vault
+from tests.helpers import VaultCase
 
 
 def make_vault(files):
@@ -244,6 +245,8 @@ RENDER_LIB["Attachments/diagram.png"] = "png"
 
 RENDER_YAML = """\
 filters: file.hasTag("book")
+formulas:
+  pp: "1 +"
 properties:
   status:
     displayName: Status
@@ -282,16 +285,17 @@ class RenderTests(unittest.TestCase):
         self.assertLess(self.html.find("Library/B.html"), self.html.find("Library/A.html"))
 
     def test_wikilink_cell_resolves(self):
-        # NoteCtx now resolves wikilink-shaped property values to Link
-        # objects (engine value type); rendering an internal-link anchor
-        # for Link cells is Task 6's job, not implemented here yet.
-        self.assertIn("Link(target=", self.html)
+        # NoteCtx resolves wikilink-shaped property values to Link objects;
+        # _cell_html renders those as an internal-link anchor.
+        self.assertIn('class="internal-link"', self.html)
+        self.assertNotIn("Link(target=", self.html)
 
     def test_formula_column_empty_with_parse_warning(self):
         self.assertIn("<th>pp</th>", self.html)
-        self.assertTrue(any("formula" in w.lower() for w in self.warnings) or True)
-        # formula.* cells render empty
-        self.assertNotIn("formula.pp</td>", self.html)
+        # the "pp" formula's expression ("1 +") never parses, so parse_base
+        # must warn about it, and every formula.pp cell renders empty.
+        self.assertTrue(any("formula" in w.lower() and "pp" in w for w in self.warnings))
+        self.assertIn("<td></td>", self.html)
 
     def test_tabs_and_hidden_views(self):
         self.assertIn('class="base-tabs"', self.html)
@@ -302,9 +306,10 @@ class RenderTests(unittest.TestCase):
 
     def test_cards_view_and_image(self):
         self.assertIn('class="base-cards"', self.html)
-        # cover is a wikilink-shaped property, so NoteCtx now hands back a
-        # Link object; resolving it to a cover <img> is Task 6's job.
-        self.assertNotIn('src="../Attachments/diagram.png"', self.html)
+        # cover is a wikilink-shaped property (NoteCtx hands back a Link);
+        # _resolve_image must resolve it to the cover <img> src.
+        self.assertIn('<img src=', self.html)
+        self.assertIn('src="../Attachments/diagram.png"', self.html)
 
     def test_embed_mode(self):
         html = render_base(self.base, self.vault, self.resolver,
@@ -330,6 +335,43 @@ class RenderTests(unittest.TestCase):
         html = render_base(base, vault, LinkResolver(vault), "B.html", w)
         self.assertNotIn("<script>alert(1)</script>", html)
         self.assertIn("&lt;script&gt;", html)
+
+
+class RenderNewFeaturesTests(VaultCase):
+    def test_formula_cell_renders_value(self):
+        from ssg.links import LinkResolver
+        vault = scan_vault(self.make_vault({"A.md": "---\nprice: 3\n---\nx"}), SiteConfig())
+        base = bases.parse_base(
+            "formulas:\n  dbl: price * 2\n"
+            "views:\n  - type: table\n    name: V\n    order: [file.name, formula.dbl]\n",
+            "B.base", [])
+        html = bases.render_base(base, vault, LinkResolver(vault), "B.html", [])
+        self.assertIn("<td>6</td>", html)
+
+    def test_group_headers_and_summary(self):
+        from ssg.links import LinkResolver
+        vault = scan_vault(self.make_vault({
+            "A.md": "---\nstatus: done\nprice: 2\n---\nx",
+            "B.md": "---\nstatus: done\nprice: 3\n---\nx",
+            "C.md": "---\nstatus: todo\nprice: 5\n---\nx"}), SiteConfig())
+        base = bases.parse_base(
+            "views:\n  - type: table\n    name: V\n    order: [file.name, price]\n"
+            "    groupBy: {property: status, direction: ASC}\n"
+            "    summaries: {price: Sum}\n", "B.base", [])
+        html = bases.render_base(base, vault, LinkResolver(vault), "B.html", [])
+        self.assertIn("base-group-head", html)
+        self.assertIn("done", html)
+        self.assertIn("base-summary", html)
+        self.assertIn("10", html)  # overall Sum of prices 2+3+5
+
+    def test_list_view(self):
+        from ssg.links import LinkResolver
+        vault = scan_vault(self.make_vault({"A.md": "---\nprice: 3\n---\nx"}), SiteConfig())
+        base = bases.parse_base(
+            "views:\n  - type: list\n    name: V\n    order: [file.name, price]\n", "B.base", [])
+        html = bases.render_base(base, vault, LinkResolver(vault), "B.html", [])
+        self.assertIn("base-list", html)
+        self.assertIn("A", html)
 
 
 class BaseEmbedTests(unittest.TestCase):

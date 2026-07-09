@@ -336,6 +336,17 @@ def _cell_html(value, prop, resolver, output_path, from_path):
     if isinstance(value, bool):
         cls = "base-bool" if value else "base-bool base-no"
         return f'<span class="{cls}">{"✓" if value else "✗"}</span>'
+    if isinstance(value, Link):
+        resolved = resolver.resolve_note(value.target, from_path)
+        label = html_mod.escape(value.display or value.target)
+        if resolved is None:
+            return f'<span class="broken-link">{label}</span>'
+        href = urls.rel_href(output_path, urls.page_output_path(resolved))
+        return f'<a class="internal-link" href="{href}">{label}</a>'
+    if isinstance(value, datetime.datetime):
+        return html_mod.escape(value.strftime("%Y-%m-%d %H:%M"))
+    if isinstance(value, datetime.date):
+        return html_mod.escape(value.isoformat())
     if isinstance(value, list):
         chips = []
         for item in value:
@@ -343,14 +354,15 @@ def _cell_html(value, prop, resolver, output_path, from_path):
                 href = urls.rel_href(output_path, urls.tag_output_path(str(item)))
                 chips.append(_chip(f"#{item}", href))
             else:
-                chips.append(_chip(item))
+                chips.append(_chip(html_mod.escape(str(item)) if not isinstance(item, Link) else (item.display or item.target)))
         return f'<span class="base-chips">{"".join(chips)}</span>'
+    if isinstance(value, float):
+        return html_mod.escape(("%g" % value))
     if isinstance(value, str):
         m = _WIKILINK_VAL_RE.match(value.strip())
         if m:
-            target, alias = m.group(1).strip(), (m.group(2) or "").strip()
-            resolved = resolver.resolve_note(target, from_path)
-            label = html_mod.escape(alias or target)
+            resolved = resolver.resolve_note(m.group(1).strip(), from_path)
+            label = html_mod.escape((m.group(2) or m.group(1)).strip())
             if resolved is None:
                 return f'<span class="broken-link">{label}</span>'
             href = urls.rel_href(output_path, urls.page_output_path(resolved))
@@ -369,6 +381,12 @@ def _col_label(base, col):
     return col
 
 
+def _cell_value(col, ctx):
+    if col == "file.name":
+        return ("__name__", None)
+    return ("__value__", ctx.value(col))
+
+
 def _row_cells(base, cols, path, ctx, vault, resolver, output_path):
     cells = []
     for col in cols:
@@ -376,58 +394,151 @@ def _row_cells(base, cols, path, ctx, vault, resolver, output_path):
             href = urls.rel_href(output_path, urls.note_output_path(path))
             cells.append(f'<td><a href="{href}">'
                          f"{html_mod.escape(vault.notes[path].title)}</a></td>")
-        elif col.startswith("formula."):
-            cells.append("<td></td>")
         else:
-            cells.append(
-                f"<td>{_cell_html(ctx.value(col), col, resolver, output_path, path)}</td>")
+            cells.append(f"<td>{_cell_html(ctx.value(col), col, resolver, output_path, path)}</td>")
     return "".join(cells)
 
 
-def _table_html(base, view, matches, vault, resolver, output_path):
+_AGGS = {"count", "sum", "average", "avg", "min", "max", "empty", "nonempty", "unique"}
+
+
+def _summarize(agg, values):
+    agg = agg.strip().lower()
+    nums = [v for v in values if isinstance(v, (int, float)) and not isinstance(v, bool)]
+    present = [v for v in values if v is not None and not (isinstance(v, str) and v == "")]
+    if agg == "count":
+        return str(len(values))
+    if agg == "empty":
+        return str(len(values) - len(present))
+    if agg == "nonempty":
+        return str(len(present))
+    if agg == "unique":
+        return str(len({stringify_cell(v) for v in present}))
+    if agg == "sum":
+        return _fmt_num(sum(nums)) if nums else ""
+    if agg in ("average", "avg"):
+        return _fmt_num(sum(nums) / len(nums)) if nums else ""
+    if agg == "min":
+        return _fmt_num(min(nums)) if nums else ""
+    if agg == "max":
+        return _fmt_num(max(nums)) if nums else ""
+    return ""  # unknown aggregation -> blank (graceful)
+
+
+def _fmt_num(n):
+    return ("%g" % n)
+
+
+def stringify_cell(v):
+    from .basevalue import stringify
+    return stringify(v)
+
+
+def _summary_row(base, cols, view, paths, ctxs):
+    if not view.summaries:
+        return ""
+    agg_by_col = {c: a for c, a in view.summaries}
+    tds = []
+    for col in cols:
+        agg = agg_by_col.get(col)
+        if agg is None:
+            tds.append("<td></td>")
+        else:
+            vals = [ctxs[p].value(col) for p in paths]
+            tds.append(f'<td>{html_mod.escape(_summarize(agg, vals))}</td>')
+    return f'<tr class="base-summary">{"".join(tds)}</tr>'
+
+
+def _group_matches(view, matches, ctxs):
+    """Return [(group_value_str, [paths])] honoring group direction; None-group last."""
+    if not view.group_by:
+        return [(None, matches)]
+    prop, direction = view.group_by
+    groups = {}
+    order = []
+    for p in matches:
+        key = ctxs[p].value(prop)
+        label = "" if key is None else stringify_cell(key)
+        if label not in groups:
+            groups[label] = []
+            order.append(label)
+    for p in matches:
+        key = ctxs[p].value(prop)
+        groups["" if key is None else stringify_cell(key)].append(p)
+    labels = [x for x in order if x != ""]
+    labels.sort(reverse=(direction == "DESC"))
+    if "" in groups:
+        labels.append("")
+    return [(lbl, groups[lbl]) for lbl in labels]
+
+
+def _table_html(base, view, matches, vault, resolver, output_path, ctxs):
     cols = view.order or ["file.name"]
     heads = "".join(f"<th>{html_mod.escape(_col_label(base, c))}</th>" for c in cols)
-    rows = []
-    for path in matches:
-        ctx = NoteCtx(path, vault.notes[path], resolver)
-        rows.append(f"<tr>{_row_cells(base, cols, path, ctx, vault, resolver, output_path)}</tr>")
+    body = []
+    for label, paths in _group_matches(view, matches, ctxs):
+        if label is not None and view.group_by:
+            body.append(f'<tr class="base-group-head"><td colspan="{len(cols)}">'
+                        f'{html_mod.escape(label) or "—"}</td></tr>')
+        for p in paths:
+            body.append(f"<tr>{_row_cells(base, cols, p, ctxs[p], vault, resolver, output_path)}</tr>")
+        if view.group_by and view.summaries:
+            body.append(_summary_row(base, cols, view, paths, ctxs))
+    footer = _summary_row(base, cols, view, matches, ctxs) if view.summaries else ""
     return (f'<p class="base-count manifest-label">{len(matches)} notes</p>'
             f'<div class="base-table-wrap"><table class="base-table">'
-            f"<thead><tr>{heads}</tr></thead><tbody>{''.join(rows)}</tbody></table></div>")
+            f"<thead><tr>{heads}</tr></thead><tbody>{''.join(body)}</tbody>"
+            f"{('<tfoot>' + footer + '</tfoot>') if footer else ''}</table></div>")
+
+
+def _list_html(base, view, matches, vault, resolver, output_path, ctxs):
+    cols = [c for c in (view.order or []) if c != "file.name"]
+    items = []
+    for label, paths in _group_matches(view, matches, ctxs):
+        if label is not None and view.group_by:
+            items.append(f'<li class="base-group-head">{html_mod.escape(label) or "—"}</li>')
+        for p in paths:
+            href = urls.rel_href(output_path, urls.note_output_path(p))
+            title = f'<a href="{href}">{html_mod.escape(vault.notes[p].title)}</a>'
+            meta = "".join(
+                f'<span class="base-list-meta">{_cell_html(ctxs[p].value(c), c, resolver, output_path, p)}</span>'
+                for c in cols)
+            items.append(f'<li class="base-list-item">{title}{meta}</li>')
+    return (f'<p class="base-count manifest-label">{len(matches)} notes</p>'
+            f'<ul class="base-list">{"".join(items)}</ul>')
 
 
 def _resolve_image(raw, resolver, from_path):
-    if not isinstance(raw, str) or not raw.strip():
+    if isinstance(raw, Link):
+        target = raw.target
+    elif isinstance(raw, str) and raw.strip():
+        m = _IMG_VAL_RE.match(raw.strip())
+        target = m.group(1).strip() if m else raw.strip()
+    else:
         return None
-    m = _IMG_VAL_RE.match(raw.strip())
-    target = m.group(1).strip() if m else raw.strip()
     if _URL_RE.match(target):
         return None
     return resolver.resolve_asset(target, from_path)
 
 
-def _cards_html(base, view, matches, vault, resolver, output_path, warnings):
+def _cards_html(base, view, matches, vault, resolver, output_path, warnings, ctxs):
     cards = []
     warned_img = False
-    # The image property renders as the cover; repeating it as a text row
-    # would show the raw asset link (usually broken) under its own picture.
-    props = [c for c in view.order
-             if c != "file.name" and not c.startswith("formula.") and c != view.image]
+    props = [c for c in view.order if c != "file.name" and c != view.image]
     for path in matches:
-        ctx = NoteCtx(path, vault.notes[path], resolver)
+        ctx = ctxs[path]
         img = ""
         if view.image:
             raw = ctx.value(view.image)
             src = _resolve_image(raw, resolver, path)
             if src:
-                img = (f'<img src="{urls.rel_href(output_path, src)}" alt="" '
-                       f'loading="lazy">')
+                img = f'<img src="{urls.rel_href(output_path, src)}" alt="" loading="lazy">'
             elif raw and not warned_img:
                 warned_img = True
                 warnings.append(f"{base.path}: cards image {raw!r} could not be resolved")
         href = urls.rel_href(output_path, urls.note_output_path(path))
-        title = f'<a class="base-card-title" href="{href}">' \
-                f"{html_mod.escape(vault.notes[path].title)}</a>"
+        title = (f'<a class="base-card-title" href="{href}">'
+                 f"{html_mod.escape(vault.notes[path].title)}</a>")
         rows = "".join(
             f'<div class="base-card-prop"><span class="manifest-label">'
             f"{html_mod.escape(_col_label(base, c))}</span>"
@@ -439,7 +550,8 @@ def _cards_html(base, view, matches, vault, resolver, output_path, warnings):
             f'<div class="base-cards">{"".join(cards)}</div>')
 
 
-def render_base(base, vault, resolver, output_path, warnings, view=None, embed=False):
+def render_base(base, vault, resolver, output_path, warnings, view=None,
+                embed=False, filedata=None, build_now=None):
     views = base.views
     if view:
         chosen = [v for v in views if v.name == view]
@@ -458,24 +570,25 @@ def render_base(base, vault, resolver, output_path, warnings, view=None, embed=F
         return f'<div class="{"base-embed" if embed else "base-block"}">{head}{inner}</div>'
     sections = []
     for i, v in enumerate(views):
-        matches = evaluate(base, v, vault, resolver, warnings)
+        matches = evaluate(base, v, vault, resolver, warnings, filedata=filedata, build_now=build_now)
+        ctxs = {p: make_ctx(p, vault, resolver, filedata or {}, base.formulas, build_now)
+                for p in matches}
         if v.type == "table":
-            body = _table_html(base, v, matches, vault, resolver, output_path)
+            body = _table_html(base, v, matches, vault, resolver, output_path, ctxs)
+        elif v.type == "list":
+            body = _list_html(base, v, matches, vault, resolver, output_path, ctxs)
         else:
-            body = _cards_html(base, v, matches, vault, resolver, output_path, warnings)
+            body = _cards_html(base, v, matches, vault, resolver, output_path, warnings, ctxs)
         hidden = " hidden" if (not embed and i > 0) else ""
         name_attr = html_mod.escape(v.name, quote=True)
-        sections.append(f'<section class="base-view"{hidden} '
-                        f'data-view="{name_attr}">{body}</section>')
+        sections.append(f'<section class="base-view"{hidden} data-view="{name_attr}">{body}</section>')
     tabs = script = ""
     if not embed and len(views) > 1:
         btns = "".join(
             f'<button type="button" class="base-tab{" active" if i == 0 else ""}" '
-            f'data-view="{html_mod.escape(v.name, quote=True)}">'
-            f"{html_mod.escape(v.name)}</button>"
+            f'data-view="{html_mod.escape(v.name, quote=True)}">{html_mod.escape(v.name)}</button>'
             for i, v in enumerate(views))
         tabs = f'<div class="base-tabs">{btns}</div>'
-        script = (f'<script defer src="{urls.root_prefix(output_path)}'
-                  f'site-assets/bases.js"></script>')
+        script = (f'<script defer src="{urls.root_prefix(output_path)}site-assets/bases.js"></script>')
     cls = "base-embed" if embed else "base-block"
     return f'<div class="{cls}">{head}{tabs}{"".join(sections)}</div>{script}'
