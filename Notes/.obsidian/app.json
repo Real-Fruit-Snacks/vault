@@ -3,5 +3,7 @@
   "readableLineLength": false,
   "userIgnoreFilters": [
     "_graphite_files"
-  ]
+  ],
+  "newLinkFormat": "absolute",
+  "trashOption": "local"
 }
