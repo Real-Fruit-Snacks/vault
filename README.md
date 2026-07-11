@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img alt="Vault — publish an Obsidian vault as a fast static website" src="docs/assets/banner.svg" width="760" />
+  <img alt="Vault — publish an Obsidian vault as a fast static website" src=".github/assets/banner.svg" width="760" />
 
 </div>
 

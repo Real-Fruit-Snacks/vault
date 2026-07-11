@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-label="Vault — publish an Obsidian vault as a fast static website">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#090c0d"/>
+      <stop offset="1" stop-color="#0e1214"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="420" fill="url(#bg)"/>
+
+  <g font-family="'Cascadia Code','JetBrains Mono',Consolas,'DejaVu Sans Mono',monospace" text-anchor="middle">
+    <text x="600" y="104" font-size="19" font-weight="700" letter-spacing="5" fill="#879994"><tspan fill="#63f2ab">&#10095;</tspan>&#160;OBSIDIAN VAULT PUBLISHER</text>
+    <text x="600" y="204" font-size="88" font-weight="700" letter-spacing="3"><tspan fill="#dce4df">VAU</tspan><tspan fill="#63f2ab">LT</tspan></text>
+    <line x1="330" y1="240" x2="870" y2="240" stroke="#2a363d" stroke-width="2"/>
+    <text x="600" y="286" font-size="19" font-weight="600" letter-spacing="5" fill="#879994">PUBLISH AN OBSIDIAN VAULT AS A FAST STATIC WEBSITE</text>
+  </g>
+
+  <!-- pipeline row: vault -> build -> site -->
+  <g font-family="'Cascadia Code','JetBrains Mono',Consolas,monospace" font-size="13" text-anchor="middle">
+    <rect x="360" y="318" width="130" height="34" rx="8" fill="#13191c" stroke="#2a363d" stroke-width="1.5"/>
+    <text x="425" y="340" fill="#b4c3bd">Notes/*.md</text>
+    <text x="524" y="340" fill="#63736f">&#8594;</text>
+    <g transform="translate(634,288) scale(1.9)">
+      <path d="M2 16 V7 Q2 1 8 1 Q14 1 14 7 V16 L12 14.4 L10 16 L8 14.4 L6 16 L4 14.4 Z" fill="#63f2ab"/>
+      <rect x="5" y="6" width="2" height="3" fill="#0e1214"/>
+      <rect x="9" y="6" width="2" height="3" fill="#0e1214"/>
+    </g>
+    <rect x="556" y="318" width="120" height="34" rx="8" fill="#13191c" stroke="#63f2ab" stroke-opacity="0.55" stroke-width="1.5"/>
+    <text x="616" y="340" fill="#63f2ab">build.py</text>
+    <text x="710" y="340" fill="#63736f">&#8594;</text>
+    <rect x="742" y="318" width="120" height="34" rx="8" fill="#13191c" stroke="#2a363d" stroke-width="1.5"/>
+    <text x="802" y="340" fill="#b4c3bd">public/</text>
+  </g>
+
+  <text x="600" y="396" text-anchor="middle" font-family="'Cascadia Code','JetBrains Mono',Consolas,monospace" font-size="16" fill="#63736f"><tspan fill="#63f2ab" font-weight="700">&#10095;</tspan> python tools/build.py<tspan fill="#63f2ab">&#9612;</tspan></text>
+</svg>
